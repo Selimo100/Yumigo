@@ -13,6 +13,8 @@ const mockRecipes = [
     rating: 4.8,
     reviews: 124,
     author: 'Chef Mario',
+    allergies: ['gluten', 'dairy'],
+    categories: ['salty', 'hot'],
   },
   {
     id: 2,
@@ -22,9 +24,10 @@ const mockRecipes = [
     rating: 4.6,
     reviews: 89,
     author: 'FoodieQueen',
+    allergies: ['gluten'],
+    categories: ['salty'],
   },
 ];
-
 export default function HomeScreen() {
   const { theme } = useTheme();
   const styles = createStyles(theme);

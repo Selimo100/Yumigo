@@ -20,6 +20,8 @@ const categoryData = {
         rating: 4.8,
         reviews: 124,
         author: 'Chef Mario',
+        allergies: ['gluten', 'dairy'],
+        categories: ['salty', 'hot'],
       },
       {
         id: 4,
@@ -29,6 +31,8 @@ const categoryData = {
         rating: 4.7,
         reviews: 89,
         author: 'SeafoodLover',
+        allergies: ['shellfish'],
+        categories: ['salty', 'hot'],
       },
       {
         id: 5,
@@ -38,6 +42,8 @@ const categoryData = {
         rating: 4.5,
         reviews: 156,
         author: 'BreakfastKing',
+        allergies: ['gluten'],
+        categories: ['salty'],
       }
     ]
   },
@@ -55,6 +61,8 @@ const categoryData = {
         rating: 4.9,
         reviews: 203,
         author: 'BakeQueen',
+        allergies: ['gluten', 'dairy'],
+        categories: ['sweet'],
       },
       {
         id: 7,
@@ -64,86 +72,11 @@ const categoryData = {
         rating: 4.6,
         reviews: 78,
         author: 'HealthyEats',
+        allergies: ['dairy'],
+        categories: ['sweet', 'cold'],
       }
     ]
   },
-  sour: {
-    name: 'Sour',
-    emoji: '🍋',
-    color: '#7ED321',
-    description: 'Tangy and zesty flavor combinations',
-    recipes: [
-      {
-        id: 8,
-        title: 'Lemon Garlic Chicken',
-        image: 'https://via.placeholder.com/300x200',
-        time: '18 min',
-        rating: 4.7,
-        reviews: 145,
-        author: 'CitrusChef',
-      }
-    ]
-  },
-  spicy: {
-    name: 'Spicy',
-    emoji: '🌶️',
-    color: '#D0021B',
-    description: 'Fiery hot recipes for spice lovers',
-    recipes: [
-      {
-        id: 9,
-        title: 'Spicy Thai Noodles',
-        image: 'https://via.placeholder.com/300x200',
-        time: '14 min',
-        rating: 4.8,
-        reviews: 167,
-        author: 'SpiceKing',
-      },
-      {
-        id: 10,
-        title: 'Jalapeño Poppers',
-        image: 'https://via.placeholder.com/300x200',
-        time: '16 min',
-        rating: 4.4,
-        reviews: 92,
-        author: 'HotStuff',
-      }
-    ]
-  },
-  cold: {
-    name: 'Cold',
-    emoji: '🧊',
-    color: '#50E3C2',
-    description: 'Refreshing cold dishes and drinks',
-    recipes: [
-      {
-        id: 11,
-        title: 'Iced Coffee Smoothie',
-        image: 'https://via.placeholder.com/300x200',
-        time: '3 min',
-        rating: 4.5,
-        reviews: 134,
-        author: 'CoffeeLover',
-      }
-    ]
-  },
-  hot: {
-    name: 'Hot',
-    emoji: '🔥',
-    color: '#F8E71C',
-    description: 'Warm and comforting hot meals',
-    recipes: [
-      {
-        id: 12,
-        title: 'Spicy Ramen Bowl',
-        image: 'https://via.placeholder.com/300x200',
-        time: '12 min',
-        rating: 4.9,
-        reviews: 189,
-        author: 'RamenMaster',
-      }
-    ]
-  }
 };
 
 export default function CategoryScreen() {

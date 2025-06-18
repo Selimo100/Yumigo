@@ -13,6 +13,8 @@ const mockFavorites = [
     rating: 4.7,
     reviews: 67,
     author: 'QuickChef',
+    allergies: ['soy'],
+    categories: ['spicy', 'hot'],
   },
 ];
 

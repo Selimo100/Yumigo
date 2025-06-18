@@ -9,6 +9,25 @@ import { CommentInput } from '../../components/CommentInput';
 import { CommentsSection } from '../../components/CommentsSection';
 import { RatingModal } from '../../components/RatingModal';
 
+// Tag configurations
+const allergyConfig = {
+  gluten: { label: 'Gluten', color: '#FF6B6B', icon: '🌾' },
+  dairy: { label: 'Dairy', color: '#4ECDC4', icon: '🥛' },
+  nuts: { label: 'Nuts', color: '#45B7D1', icon: '🥜' },
+  shellfish: { label: 'Shellfish', color: '#96CEB4', icon: '🦐' },
+  eggs: { label: 'Eggs', color: '#FF6F00', icon: '🥚' },
+  soy: { label: 'Soy', color: '#DDA0DD', icon: '🫛' },
+};
+
+const categoryConfig = {
+  salty: { label: 'Salty', color: '#4A90E2', emoji: '🧂' },
+  sweet: { label: 'Sweet', color: '#F5A623', emoji: '🍯' },
+  sour: { label: 'Sour', color: '#7ED321', emoji: '🍋' },
+  spicy: { label: 'Spicy', color: '#D0021B', emoji: '🌶️' },
+  cold: { label: 'Cold', color: '#50E3C2', emoji: '🧊' },
+  hot: { label: 'Hot', color: '#FF6F00', emoji: '🔥' },
+};
+
 const mockRecipeDetails = {
   1: {
     id: 1,
@@ -18,6 +37,8 @@ const mockRecipeDetails = {
     rating: 4.8,
     reviews: 124,
     author: 'Chef Mario',
+    allergies: ['gluten', 'dairy', 'eggs'],
+    categories: ['salty', 'hot'],
     description: 'A classic Italian pasta dish made with eggs, cheese, and pancetta. Perfect for a quick dinner that feels luxurious.',
     ingredients: [
       '400g spaghetti',
@@ -66,6 +87,8 @@ const mockRecipeDetails = {
     rating: 4.6,
     reviews: 89,
     author: 'FoodieQueen',
+    allergies: ['gluten', 'eggs'],
+    categories: ['salty'],
     description: 'Elevated avocado toast with perfectly seasoned avocado, cherry tomatoes, and a poached egg on top.',
     ingredients: [
       '2 slices sourdough bread',
@@ -183,8 +206,26 @@ export default function RecipeDetailScreen() {
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 120 }} // Extra padding for comment input
       >
-        {/* Recipe Image */}
-        <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
+        {/* Recipe Image with Category Tags */}
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
+          
+          {/* Category Tags on Image */}
+          {recipe.categories && recipe.categories.length > 0 && (
+            <View style={styles.imageTags}>
+              {recipe.categories.slice(0, 3).map((category) => {
+                const config = categoryConfig[category];
+                if (!config) return null;
+                return (
+                  <View key={category} style={[styles.categoryTag, { backgroundColor: config.color }]}>
+                    <Text style={styles.categoryEmoji}>{config.emoji}</Text>
+                    <Text style={styles.categoryText}>{config.label}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </View>
 
         {/* Recipe Info */}
         <View style={styles.content}>
@@ -204,6 +245,29 @@ export default function RecipeDetailScreen() {
           </View>
 
           <Text style={styles.author}>by {recipe.author}</Text>
+
+          {/* Allergy Information */}
+          {recipe.allergies && recipe.allergies.length > 0 && (
+            <View style={styles.allergySection}>
+              <View style={styles.allergyHeader}>
+                <Ionicons name="warning-outline" size={18} color="#FF6B6B" />
+                <Text style={styles.allergyTitle}>Allergen Information</Text>
+              </View>
+              <View style={styles.allergyTags}>
+                {recipe.allergies.map((allergy) => {
+                  const config = allergyConfig[allergy];
+                  if (!config) return null;
+                  return (
+                    <View key={allergy} style={[styles.allergyTag, { borderColor: config.color, backgroundColor: config.color + '15' }]}>
+                      <Text style={styles.allergyIcon}>{config.icon}</Text>
+                      <Text style={[styles.allergyText, { color: config.color }]}>{config.label}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          )}
+
           <Text style={styles.description}>{recipe.description}</Text>
 
           {/* Action Buttons */}
@@ -327,10 +391,40 @@ const createStyles = (theme) => StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
+  imageContainer: {
+    position: 'relative',
+  },
   recipeImage: {
     width: '100%',
     height: 300,
     backgroundColor: theme.colors.surface,
+  },
+  imageTags: {
+    position: 'absolute',
+    top: 80,
+    right: 20,
+    gap: 8,
+  },
+  categoryTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  categoryEmoji: {
+    fontSize: 14,
+  },
+  categoryText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
   content: {
     padding: 20,
@@ -375,6 +469,79 @@ const createStyles = (theme) => StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
     marginBottom: 20,
+  },
+  allergySection: {
+    backgroundColor: '#FF6B6B10',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FF6B6B30',
+    marginBottom: 20,
+  },
+  allergyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  allergyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FF6B6B',
+  },
+  allergyTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  allergyTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 6,
+  },
+  allergyIcon: {
+    fontSize: 14,
+  },
+  allergyText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  categorySection: {
+    backgroundColor: theme.colors.surface,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.colors.text,
+    marginBottom: 12,
+  },
+  categoryTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  categoryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 6,
+  },
+  categoryPillEmoji: {
+    fontSize: 16,
+  },
+  categoryPillText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   description: {
     fontSize: 16,
