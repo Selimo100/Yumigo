@@ -38,7 +38,6 @@ export default function ExploreScreen() {
             >
               <Text style={styles.cravingEmoji}>{craving.emoji}</Text>
               <Text style={styles.cravingLabel}>{craving.label}</Text>
-              <View style={[styles.colorDot, { backgroundColor: craving.color }]} />
             </TouchableOpacity>
           ))}
         </View>
