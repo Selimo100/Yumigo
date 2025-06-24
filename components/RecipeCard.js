@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTheme } from '../contexts/ThemeContext';
+import { ALLERGENS, CATEGORIES } from '../utils/constants';
 
 // Mock comment counts for recipes
 const mockCommentCounts = {
@@ -17,24 +18,24 @@ const mockCommentCounts = {
   10: 6
 };
 
-// Tag configurations
-const allergyConfig = {
-  gluten: { label: 'Gluten', color: '#FF6B6B', icon: '🌾' },
-  dairy: { label: 'Dairy', color: '#4ECDC4', icon: '🥛' },
-  nuts: { label: 'Nuts', color: '#45B7D1', icon: '🥜' },
-  shellfish: { label: 'Shellfish', color: '#96CEB4', icon: '🦐' },
-  eggs: { label: 'Eggs', color: '#FFEAA7', icon: '🥚' },
-  soy: { label: 'Soy', color: '#DDA0DD', icon: '🫛' },
-};
+// Convert arrays to config objects for easier lookup
+const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
+  acc[allergen.id] = {
+    label: allergen.label.replace('Contains ', ''),
+    color: allergen.color,
+    icon: allergen.icon
+  };
+  return acc;
+}, {});
 
-const categoryConfig = {
-  salty: { label: 'Salty', color: '#4A90E2', emoji: '🧂' },
-  sweet: { label: 'Sweet', color: '#F5A623', emoji: '🍯' },
-  sour: { label: 'Sour', color: '#7ED321', emoji: '🍋' },
-  spicy: { label: 'Spicy', color: '#D0021B', emoji: '🌶️' },
-  cold: { label: 'Cold', color: '#50E3C2', emoji: '🧊' },
-  hot: { label: 'Hot', color: '#FF6F00', emoji: '🔥' },
-};
+const categoryConfig = CATEGORIES.reduce((acc, category) => {
+  acc[category.id] = {
+    label: category.label,
+    color: category.color,
+    emoji: category.icon
+  };
+  return acc;
+}, {});
 
 export default function RecipeCard({ recipe }) {
   const { theme } = useTheme();
@@ -51,17 +52,15 @@ export default function RecipeCard({ recipe }) {
   };
 
   return (
-    <TouchableOpacity style={styles.card} onPress={handlePress}>
+    <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.9}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: recipe.image }} style={styles.image} />
-        
-        {/* Top right corner tags */}
         <View style={styles.topTags}>
-          {recipe.categories && recipe.categories.slice(0, 2).map((category, index) => {
+          {recipe.categories && recipe.categories.slice(0, 2).map((category) => {
             const config = categoryConfig[category];
             if (!config) return null;
             return (
-              <View key={category} style={[styles.tag, styles.categoryTag, { backgroundColor: config.color }]}>
+              <View key={category} style={[styles.tag, { backgroundColor: config.color }]}>
                 <Text style={styles.tagEmoji}>{config.emoji}</Text>
                 <Text style={styles.tagText}>{config.label}</Text>
               </View>
@@ -114,7 +113,7 @@ export default function RecipeCard({ recipe }) {
           </View>
 
           <View style={styles.ratingContainer}>
-            <Ionicons name="star" size={16} color="#F5A623" />
+            <Ionicons name="star" size={16} color="#ffc107" />
             <Text style={styles.rating}>{recipe.rating}</Text>
             <Text style={styles.reviews}>({recipe.reviews})</Text>
           </View>
@@ -122,32 +121,18 @@ export default function RecipeCard({ recipe }) {
 
         <View style={styles.footer}>
           <Text style={styles.author}>by {recipe.author}</Text>
-          <View style={styles.actions}>
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={(e) => {
-                e.stopPropagation();
-                console.log('Like recipe');
-              }}
-            >
-              <Ionicons name="heart-outline" size={20} color={theme.colors.text} />
+          
+          <View style={styles.engagement}>
+            <TouchableOpacity style={styles.likeButton}>
+              <Ionicons name="heart-outline" size={18} color={theme.colors.text} />
             </TouchableOpacity>
             
-            <TouchableOpacity 
-              style={styles.commentButton}
-              onPress={handleCommentPress}
-            >
+            <TouchableOpacity style={styles.commentButton} onPress={handleCommentPress}>
               <Ionicons name="chatbubble-outline" size={18} color={theme.colors.text} />
-              <Text style={styles.commentCount}>{commentCount}</Text>
+              {commentCount > 0 && <Text style={styles.commentCount}>{commentCount}</Text>}
             </TouchableOpacity>
             
-            <TouchableOpacity 
-              style={styles.followButton}
-              onPress={(e) => {
-                e.stopPropagation();
-                console.log('Follow user');
-              }}
-            >
+            <TouchableOpacity style={styles.followButton}>
               <Text style={styles.followText}>Follow</Text>
             </TouchableOpacity>
           </View>
@@ -298,12 +283,12 @@ const createStyles = (theme) => StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
   },
-  actions: {
+  engagement: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 15,
   },
-  actionButton: {
+  likeButton: {
     padding: 4,
   },
   commentButton: {
@@ -314,7 +299,7 @@ const createStyles = (theme) => StyleSheet.create({
   },
   commentCount: {
     fontSize: 12,
-    color: theme.colors.textSecondary,
+    color: theme.colors.text,
     fontWeight: '500',
   },
   followButton: {
