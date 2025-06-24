@@ -1,10 +1,12 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import RecipeCard from '../../components/RecipeCard';
 import RecipeForm from '../../components/RecipeForm/RecipeForm';
 import { useTheme } from '../../contexts/ThemeContext';
+import {db} from '../../lib/firebaseconfig'
+import { getDocs, collection  } from  'firebase/firestore'
 
 const mockRecipes = [
   {
@@ -32,6 +34,25 @@ const mockRecipes = [
 ];
 
 export default function HomeScreen() {
+
+  const [recipeList, setRecipeList] = useState([]);
+  const recipesCollectionRef = collection(db, "recipes")
+ useEffect(() => {
+  const getRecipeList = async () => {
+    try {
+      const data = await getDocs(recipesCollectionRef);
+      const filteredData = data.docs.map((doc) => ({
+        id: doc.id,   
+        ...doc.data() 
+      }));
+      setRecipeList(filteredData);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  getRecipeList();
+}, []);
+
   const { theme } = useTheme();
   const styles = createStyles(theme);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -67,7 +88,7 @@ export default function HomeScreen() {
 
       {/* Recipe Feed */}
       <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
-        {mockRecipes.map((recipe) => (
+        {recipeList.map((recipe) => (
           <RecipeCard key={recipe.id} recipe={recipe} />
         ))}
       </ScrollView>
