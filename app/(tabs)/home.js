@@ -35,6 +35,7 @@ export default function HomeScreen() {
   const styles = createStyles(theme);
 
     const { user, isLoading } = useAuth()
+  console.log(user)
   if (isLoading) {
     return <ActivityIndicator />
   }
