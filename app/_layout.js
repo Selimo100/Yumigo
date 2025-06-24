@@ -1,6 +1,7 @@
 import {Stack} from 'expo-router';
 import {StatusBar} from 'expo-status-bar';
 import {ThemeProvider} from '../contexts/ThemeContext';
+import AuthenticatedUserProvider from "../lib/AuthenticatedUserProvider";
 
 function App() {
     return (
