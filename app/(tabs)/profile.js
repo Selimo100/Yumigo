@@ -73,7 +73,7 @@ export default function ProfileScreen({
     {
       id: '2',
       title: 'Quick Pasta Carbonara',
-      time: '16 min',
+      time: '15 min',
       rating: 4.8,
       likes: 99,
       chef: 'Chef Mario',
