@@ -8,25 +8,26 @@ import { StarRating } from '../../components/CommentComponents';
 import { CommentInput } from '../../components/CommentInput';
 import { CommentsSection } from '../../components/CommentsSection';
 import { RatingModal } from '../../components/RatingModal';
+import { ALLERGENS, CATEGORIES } from '../../utils/constants';
 
-// Tag configurations
-const allergyConfig = {
-  gluten: { label: 'Gluten', color: '#FF6B6B', icon: '🌾' },
-  dairy: { label: 'Dairy', color: '#4ECDC4', icon: '🥛' },
-  nuts: { label: 'Nuts', color: '#45B7D1', icon: '🥜' },
-  shellfish: { label: 'Shellfish', color: '#96CEB4', icon: '🦐' },
-  eggs: { label: 'Eggs', color: '#FF6F00', icon: '🥚' },
-  soy: { label: 'Soy', color: '#DDA0DD', icon: '🫛' },
-};
+// Convert arrays to config objects for easier lookup
+const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
+  acc[allergen.id] = {
+    label: allergen.label.replace('Contains ', ''),
+    color: allergen.color,
+    icon: allergen.icon
+  };
+  return acc;
+}, {});
 
-const categoryConfig = {
-  salty: { label: 'Salty', color: '#4A90E2', emoji: '🧂' },
-  sweet: { label: 'Sweet', color: '#F5A623', emoji: '🍯' },
-  sour: { label: 'Sour', color: '#7ED321', emoji: '🍋' },
-  spicy: { label: 'Spicy', color: '#D0021B', emoji: '🌶️' },
-  cold: { label: 'Cold', color: '#50E3C2', emoji: '🧊' },
-  hot: { label: 'Hot', color: '#FF6F00', emoji: '🔥' },
-};
+const categoryConfig = CATEGORIES.reduce((acc, category) => {
+  acc[category.id] = {
+    label: category.label,
+    color: category.color,
+    emoji: category.icon
+  };
+  return acc;
+}, {});
 
 const mockRecipeDetails = {
   1: {
@@ -204,7 +205,7 @@ export default function RecipeDetailScreen() {
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 120 }} // Extra padding for comment input
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
         {/* Recipe Image with Category Tags */}
         <View style={styles.imageContainer}>
@@ -341,7 +342,7 @@ export default function RecipeDetailScreen() {
         </View>
       </ScrollView>
 
-      {/* Comment Input - Now positioned absolutely */}
+      {/* Comment Input */}
       <CommentInput onAddComment={handleAddComment} theme={theme} />
 
       {/* Rating Modal */}
@@ -508,39 +509,6 @@ const createStyles = (theme) => StyleSheet.create({
   },
   allergyText: {
     fontSize: 12,
-    fontWeight: '600',
-  },
-  categorySection: {
-    backgroundColor: theme.colors.surface,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  categoryTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.text,
-    marginBottom: 12,
-  },
-  categoryTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  categoryPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    gap: 6,
-  },
-  categoryPillEmoji: {
-    fontSize: 16,
-  },
-  categoryPillText: {
-    fontSize: 14,
     fontWeight: '600',
   },
   description: {

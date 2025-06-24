@@ -2,15 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTheme } from '../../contexts/ThemeContext';
-
-const cravingTypes = [
-  { id: 1, label: 'Salty', emoji: '🧂', color: '#4A90E2', slug: 'salty' },
-  { id: 2, label: 'Sweet', emoji: '🍯', color: '#F5A623', slug: 'sweet' },
-  { id: 3, label: 'Sour', emoji: '🍋', color: '#7ED321', slug: 'sour' },
-  { id: 4, label: 'Spicy', emoji: '🌶️', color: '#D0021B', slug: 'spicy' },
-  { id: 5, label: 'Cold', emoji: '🧊', color: '#50E3C2', slug: 'cold' },
-  { id: 6, label: 'Hot', emoji: '🔥', color: '#F8E71C', slug: 'hot' },
-];
+import { CATEGORIES } from '../../utils/constants';
 
 export default function ExploreScreen() {
   const { theme } = useTheme();
@@ -29,14 +21,14 @@ export default function ExploreScreen() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.cravingsGrid}>
-          {cravingTypes.map((craving) => (
+          {CATEGORIES.map((craving) => (
             <TouchableOpacity
               key={craving.id}
               style={[styles.cravingButton, { borderColor: craving.color }]}
               onPress={() => handleCravingPress(craving)}
               activeOpacity={0.8}
             >
-              <Text style={styles.cravingEmoji}>{craving.emoji}</Text>
+              <Text style={styles.cravingEmoji}>{craving.icon}</Text>
               <Text style={styles.cravingLabel}>{craving.label}</Text>
             </TouchableOpacity>
           ))}

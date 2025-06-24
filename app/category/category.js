@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useTheme } from '../../contexts/ThemeContext';
+import { CATEGORIES } from '../../utils/constants';
 import RecipeCard from '../../components/RecipeCard';
 
 const categoryData = {
@@ -84,7 +85,15 @@ export default function CategoryScreen() {
   const { theme } = useTheme();
   const styles = createStyles(theme);
   
-  const category = categoryData[slug] || categoryData.salty;
+  // Find category by slug from constants
+  const categoryFromConstants = CATEGORIES.find(cat => cat.slug === slug);
+  const category = categoryData[slug] || {
+    name: categoryFromConstants?.label || 'Unknown',
+    emoji: categoryFromConstants?.icon || '🍽️',
+    color: categoryFromConstants?.color || '#999',
+    description: `Delicious ${categoryFromConstants?.label?.toLowerCase() || 'unknown'} recipes`,
+    recipes: []
+  };
 
   return (
     <SafeAreaView style={styles.container}>

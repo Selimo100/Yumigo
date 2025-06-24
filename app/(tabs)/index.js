@@ -1,8 +1,12 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 import RecipeCard from '../../components/RecipeCard';
+import RecipeForm from '../../components/RecipeForm/RecipeForm';
 import { useTheme } from '../../contexts/ThemeContext';
+import {db} from '../../lib/firebaseconfig'
+import { getDocs, collection  } from  'firebase/firestore'
 
 const mockRecipes = [
   {
@@ -28,9 +32,47 @@ const mockRecipes = [
     categories: ['salty'],
   },
 ];
+
 export default function HomeScreen() {
+
+  const [recipeList, setRecipeList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const getRecipes = async () => {
+      try {
+        console.log('🔍 Fetching recipes from Firestore...');
+        const data = await getDocs(collection(db, 'recipes'));
+        const recipes = data.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        console.log('✅ Recipes fetched:', recipes);
+        setRecipeList(recipes);
+      } catch (err) {
+        console.error('❌ Error fetching recipes:', err);
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getRecipes();
+  }, []);
+
   const { theme } = useTheme();
   const styles = createStyles(theme);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const handleCreatePress = () => {
+    setShowCreateModal(true);
+  };
+
+  const handleRecipeSuccess = (recipeId) => {
+    console.log('Recipe created with ID:', recipeId);
+    setShowCreateModal(false);
+  };
+
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -38,7 +80,7 @@ export default function HomeScreen() {
       <View style={styles.topNav}>
         <Text style={styles.logo}>Yumigo</Text>
         <View style={styles.topNavIcons}>
-          <TouchableOpacity style={styles.createButton}>
+          <TouchableOpacity style={styles.createButton} onPress={handleCreatePress}>
             <Ionicons name="add" size={24} color={theme.colors.buttonText} />
             <Text style={styles.createText}>Create</Text>
           </TouchableOpacity>
@@ -50,10 +92,36 @@ export default function HomeScreen() {
 
       {/* Recipe Feed */}
       <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
-        {mockRecipes.map((recipe) => (
+        {recipeList.map((recipe) => (
           <RecipeCard key={recipe.id} recipe={recipe} />
         ))}
       </ScrollView>
+
+      {/* Create Recipe Modal */}
+       {/* Create Recipe Modal */}
+      <Modal
+        visible={showCreateModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCloseModal}
+      >
+        <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
+          {/* Modal Header */}
+          <View style={[styles.modalHeader, { 
+            backgroundColor: theme.isDarkMode 
+              ? 'rgba(0,0,0,0.8)' 
+              : 'rgba(255,255,255,0.9)',
+            borderBottomColor: theme.colors.border 
+          }]}>
+            <TouchableOpacity onPress={handleCloseModal} style={styles.modalCloseButton}>
+              <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+            </TouchableOpacity>
+            <Text style={[styles.modalHeaderTitle, { color: theme.colors.text }]}>Create Recipe</Text>
+          </View>
+
+          <RecipeForm onSuccess={handleRecipeSuccess} onCancel={handleCloseModal} />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -102,5 +170,30 @@ const createStyles = (theme) => StyleSheet.create({
   feed: {
     flex: 1,
     paddingTop: 10,
+  },
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+  },
+  modalCloseButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  modalHeaderTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 16,
   },
 });
