@@ -39,7 +39,6 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
     const getRecipes = async () => {
       try {
         console.log('🔍 Fetching recipes from Firestore...');
@@ -54,8 +53,11 @@ export default function HomeScreen() {
         setIsLoading(false);
       }
     };
-    getRecipes();
-  }, []);
+    
+
+  useEffect(() => {
+  getRecipes();
+}, []);
 
   const { theme } = useTheme();
   const styles = createStyles(theme);
@@ -68,6 +70,7 @@ export default function HomeScreen() {
   const handleRecipeSuccess = (recipeId) => {
     console.log('Recipe created with ID:', recipeId);
     setShowCreateModal(false);
+    getRecipes();
   };
 
   const handleCloseModal = () => {
