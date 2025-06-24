@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { useTheme } from '../contexts/ThemeContext';
 import { ALLERGENS, CATEGORIES } from '../utils/constants';
 
-// Mock comment counts for recipes
 const mockCommentCounts = {
   1: 8,
   2: 3,
@@ -18,7 +17,6 @@ const mockCommentCounts = {
   10: 6
 };
 
-// Convert arrays to config objects for easier lookup
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
   acc[allergen.id] = {
     label: allergen.label.replace('Contains ', ''),
@@ -54,7 +52,7 @@ export default function RecipeCard({ recipe }) {
   return (
     <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.9}>
       <View style={styles.imageContainer}>
-        <Image source={{ uri: recipe.image }} style={styles.image} />
+        <Image source={{ uri: recipe.imageUrl }} style={styles.image} />
         <View style={styles.topTags}>
           {recipe.categories && recipe.categories.slice(0, 2).map((category) => {
             const config = categoryConfig[category];
@@ -68,7 +66,7 @@ export default function RecipeCard({ recipe }) {
           })}
         </View>
       </View>
-      
+
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>{recipe.title}</Text>
@@ -83,13 +81,12 @@ export default function RecipeCard({ recipe }) {
           </TouchableOpacity>
         </View>
 
-        {/* Allergy tags */}
-        {recipe.allergies && recipe.allergies.length > 0 && (
+        {recipe.allergens && recipe.allergens.length > 0 && (
           <View style={styles.allergyTags}>
             <Ionicons name="warning-outline" size={14} color={theme.colors.textSecondary} />
             <Text style={styles.allergyLabel}>Contains:</Text>
             <View style={styles.allergyList}>
-              {recipe.allergies.slice(0, 3).map((allergy) => {
+              {recipe.allergens.slice(0, 3).map((allergy) => {
                 const config = allergyConfig[allergy];
                 if (!config) return null;
                 return (
@@ -99,8 +96,8 @@ export default function RecipeCard({ recipe }) {
                   </View>
                 );
               })}
-              {recipe.allergies.length > 3 && (
-                <Text style={styles.moreAllergies}>+{recipe.allergies.length - 3}</Text>
+              {recipe.allergens.length > 3 && (
+                <Text style={styles.moreAllergies}>+{recipe.allergens.length - 3}</Text>
               )}
             </View>
           </View>
@@ -109,7 +106,7 @@ export default function RecipeCard({ recipe }) {
         <View style={styles.metadata}>
           <View style={styles.timeContainer}>
             <Ionicons name="time-outline" size={16} color={theme.colors.textSecondary} />
-            <Text style={styles.time}>{recipe.time}</Text>
+            <Text style={styles.time}>{recipe.time} min</Text>
           </View>
 
           <View style={styles.ratingContainer}>
@@ -120,19 +117,18 @@ export default function RecipeCard({ recipe }) {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.author}>by {recipe.author}</Text>
-          
+          <Text style={styles.author}>by {recipe.authorId}</Text>
+
           <View style={styles.engagement}>
             <TouchableOpacity style={styles.likeButton}>
               <Ionicons name="heart-outline" size={18} color={theme.colors.text} />
             </TouchableOpacity>
 
-            
             <TouchableOpacity style={styles.commentButton} onPress={handleCommentPress}>
               <Ionicons name="chatbubble-outline" size={18} color={theme.colors.text} />
               {commentCount > 0 && <Text style={styles.commentCount}>{commentCount}</Text>}
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.followButton}>
               <Text style={styles.followText}>Follow</Text>
             </TouchableOpacity>

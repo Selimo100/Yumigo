@@ -36,22 +36,26 @@ const mockRecipes = [
 export default function HomeScreen() {
 
   const [recipeList, setRecipeList] = useState([]);
-  const recipesCollectionRef = collection(db, "recipes")
- useEffect(() => {
-  const getRecipeList = async () => {
-    try {
-      const data = await getDocs(recipesCollectionRef);
-      const filteredData = data.docs.map((doc) => ({
-        id: doc.id,   
-        ...doc.data() 
-      }));
-      setRecipeList(filteredData);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  getRecipeList();
-}, []);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const getRecipes = async () => {
+      try {
+        console.log('🔍 Fetching recipes from Firestore...');
+        const data = await getDocs(collection(db, 'recipes'));
+        const recipes = data.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        console.log('✅ Recipes fetched:', recipes);
+        setRecipeList(recipes);
+      } catch (err) {
+        console.error('❌ Error fetching recipes:', err);
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getRecipes();
+  }, []);
 
   const { theme } = useTheme();
   const styles = createStyles(theme);
