@@ -5,6 +5,7 @@ export const useRecipeForm = () => {
   const [recipe, setRecipe] = useState({
     title: '',
     description: '',
+    time: 15, // Default to 15 minutes
     categories: [],
     allergens: [],
     dietary: [],
@@ -107,6 +108,7 @@ export const useRecipeForm = () => {
     setRecipe({
       title: '',
       description: '',
+      time: 15,
       categories: [],
       allergens: [],
       dietary: [],

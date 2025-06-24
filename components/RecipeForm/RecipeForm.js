@@ -19,6 +19,7 @@ import AllergenSelector from './AllergenSelector';
 import DietarySelector from './DietarySelector';
 import IngredientInput from './IngredientInput';
 import InstructionInput from './InstructionInput';
+import TimePicker from './TimePicker'; // Add this import
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function RecipeForm({ onSuccess, onCancel }) {
@@ -64,6 +65,7 @@ export default function RecipeForm({ onSuccess, onCancel }) {
       const recipeData = {
         title: recipe.title.trim(),
         description: recipe.description.trim(),
+        time: `${recipe.time} min${recipe.time !== 1 ? 's' : ''}`, // Format time
         categories: recipe.categories,
         allergens: recipe.allergens,
         dietary: recipe.dietary,
@@ -147,6 +149,12 @@ export default function RecipeForm({ onSuccess, onCancel }) {
             {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
           </View>
 
+          <TimePicker
+            time={recipe.time}
+            onTimeChange={(time) => updateField('time', time)}
+            error={errors.time}
+          />
+
           <CategorySelector
             selectedCategories={recipe.categories}
             onToggleCategory={toggleCategory}
@@ -181,20 +189,20 @@ export default function RecipeForm({ onSuccess, onCancel }) {
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[styles.cancelButton, { borderColor: theme.colors.border, backgroundColor: theme.colors.surface }]}
+              style={styles.cancelButton}
               onPress={onCancel}
               disabled={isLoading}
             >
-              <Text style={[styles.cancelButtonText, { color: theme.colors.text }]}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.publishButton, { backgroundColor: theme.colors.primary }, isLoading && styles.disabledButton]}
+              style={[styles.publishButton, isLoading && styles.disabledButton]}
               onPress={handlePublish}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={theme.colors.text} />
               ) : (
                 <Text style={styles.publishButtonText}>Publish Recipe</Text>
               )}

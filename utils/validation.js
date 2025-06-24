@@ -9,6 +9,10 @@ export const validateRecipe = (recipe) => {
     errors.description = 'Description must be at least 10 characters long';
   }
 
+  if (!recipe.time || recipe.time < 1 || recipe.time > 15) {
+    errors.time = 'Cooking time must be between 1 and 15 minutes';
+  }
+
   if (!recipe.categories || recipe.categories.length === 0) {
     errors.categories = 'Please select at least one category';
   }
