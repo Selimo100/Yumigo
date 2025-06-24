@@ -126,6 +126,7 @@ export default function RecipeCard({ recipe }) {
             <TouchableOpacity style={styles.likeButton}>
               <Ionicons name="heart-outline" size={18} color={theme.colors.text} />
             </TouchableOpacity>
+
             
             <TouchableOpacity style={styles.commentButton} onPress={handleCommentPress}>
               <Ionicons name="chatbubble-outline" size={18} color={theme.colors.text} />
