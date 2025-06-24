@@ -10,6 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -18,11 +19,10 @@ const { width } = Dimensions.get('window');
 export default function ProfileScreen({
                                         user,
                                         recipes = [],
-                                        onEditProfile,
                                         onShareProfile,
                                         onRecipePress,
                                       }) {
-  const { theme, toggleTheme, isDarkMode } = useTheme();
+  const { theme, isDarkMode } = useTheme();
 
   const defaultUser = {
     id: '1',
@@ -155,8 +155,7 @@ export default function ProfileScreen({
               <View style={styles.statItem}>
                 <Text style={[styles.statNumber, { color: theme.colors.text }]}>
                   {currentUser.recipes}
-                </Text>
-                <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+                </Text>                <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
                   Recipes
                 </Text>
               </View>
@@ -169,7 +168,7 @@ export default function ProfileScreen({
             <View style={styles.actionButtons}>
               <TouchableOpacity
                   style={[styles.editButton, { backgroundColor: theme.colors.button }]}
-                  onPress={onEditProfile}
+                  onPress={() => router.push('/profile/settings')}
               >
                 <Ionicons name="create-outline" size={18} color={theme.colors.buttonText} />
                 <Text style={[styles.buttonText, { color: theme.colors.buttonText }]}>Edit</Text>
@@ -181,20 +180,6 @@ export default function ProfileScreen({
               >
                 <Ionicons name="share-outline" size={18} color={theme.colors.buttonText} />
                 <Text style={[styles.buttonText, { color: theme.colors.buttonText }]}>Share</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                  style={[styles.shareButton, { backgroundColor: theme.colors.button }]}
-                  onPress={toggleTheme}
-              >
-                <Ionicons
-                    name={isDarkMode ? 'sunny-outline' : 'moon-outline'}
-                    size={18}
-                    color={theme.colors.buttonText}
-                />
-                <Text style={[styles.buttonText, { color: theme.colors.buttonText }]}>
-                  {isDarkMode ? 'Light' : 'Dark'}
-                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -254,8 +239,7 @@ const styles = StyleSheet.create({
   statItem: {
     alignItems: 'center',
     flex: 1,
-  },
-  statNumber: {
+  },  statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 4,
@@ -274,6 +258,7 @@ const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: 'row',
     gap: 12,
+    justifyContent: 'center',
   },
   editButton: {
     flexDirection: 'row',
