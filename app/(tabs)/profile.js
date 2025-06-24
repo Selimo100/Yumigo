@@ -13,127 +13,144 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
+import useAuth from "../../lib/useAuth";
+import {logout} from '../../services/authService';
+import {useRouter} from 'expo-router';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 export default function ProfileScreen({
-                                        user,
-                                        recipes = [],
-                                        onShareProfile,
-                                        onRecipePress,
+                                          recipes = [],
+                                          onEditProfile,
+                                          onShareProfile,
+                                          onRecipePress,
                                       }) {
-  const { theme, isDarkMode } = useTheme();
+    const {theme, toggleTheme, isDarkMode} = useTheme();
+    const {user} = useAuth();
+    const router = useRouter();
 
-  const defaultUser = {
-    id: '1',
-    username: 'Username',
-    bio: 'Food enthusiast | 15-min recipe creator | Making cooking simple',
-    following: 89,
-    followers: 125,
-    recipes: 2,
-  };
 
-  const defaultRecipes = [
-    {
-      id: '1',
-      title: 'Quick Pasta Carbonara',
-      time: '15 min',
-      rating: 4.8,
-      likes: 99,
-      chef: 'Chef Mario',
-    },
-    {
-      id: '2',
-      title: 'Quick Pasta Carbonara',
-      time: '15 min',
-      rating: 4.8,
-      likes: 99,
-      chef: 'Chef Mario',
-    },
-  ];
+    const defaultUser = {
+        id: '1',
+        username: "Username",
+        bio: 'Food enthusiast | 15-min recipe creator | Making cooking simple',
+        following: 89,
+        followers: 125,
+        recipes: 2,
+    };
 
-  const currentUser = user || defaultUser;
-  const recipeList = recipes.length > 0 ? recipes : defaultRecipes;
+    const defaultRecipes = [
+        {
+            id: '1',
+            title: 'Quick Pasta Carbonara',
+            time: '15 min',
+            rating: 4.8,
+            likes: 99,
+            chef: 'Chef Mario',
+        },
+        {
+            id: '2',
+            title: 'Quick Pasta Carbonara',
+            time: '15 min',
+            rating: 4.8,
+            likes: 99,
+            chef: 'Chef Mario',
+        },
+    ];
 
-  const renderRecipeCard = (recipe) => (
-      <TouchableOpacity
-          key={recipe.id}
-          style={[
-            styles.recipeCard,
-            { backgroundColor: theme.colors.surface },
-          ]}
-          onPress={() => onRecipePress?.(recipe)}
-      >
-        <View style={styles.recipeImageContainer}>
-          <View
-              style={[
-                styles.recipeImagePlaceholder,
-                { backgroundColor: theme.colors.border },
-              ]}
-          >
-            <Ionicons name="restaurant" size={40} color="#999" />
-          </View>
-          <View style={styles.timeTag}>
-            <Ionicons name="time-outline" size={12} color="#fff" />
-            <Text style={styles.timeText}>{recipe.time}</Text>
-          </View>
-        </View>
+    const currentUser = user || defaultUser;
+    const recipeList = recipes.length > 0 ? recipes : defaultRecipes;
 
-        <View style={styles.recipeInfo}>
-          <Text style={[styles.recipeTitle, { color: theme.colors.text }]}>
-            {recipe.title}
-          </Text>
-          <Text style={[styles.chefName, { color: theme.colors.textSecondary }]}>
-            by {recipe.chef}
-          </Text>
-
-          <View style={styles.recipeStats}>
-            <View style={styles.ratingContainer}>
-              <Ionicons name="star" size={14} color="#ffc107" />
-              <Text style={[styles.ratingText, { color: theme.colors.text }]}>
-                {recipe.rating}
-              </Text>
-            </View>
-
-            <View style={styles.likesContainer}>
-              <Ionicons name="heart-outline" size={14} color="#6c757d" />
-              <Text style={[styles.likesText, { color: theme.colors.textSecondary }]}>
-                {recipe.likes}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-  );
-
-  return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <StatusBar
-            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-            backgroundColor={theme.colors.background}
-        />
-
-        <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
+    const renderRecipeCard = (recipe) => (
+        <TouchableOpacity
+            key={recipe.id}
+            style={[
+                styles.recipeCard,
+                {backgroundColor: theme.colors.surface},
+            ]}
+            onPress={() => onRecipePress?.(recipe)}
         >
-          <View style={[styles.profileHeader, { backgroundColor: theme.colors.surface }]}>
-            <View
-                style={[
-                  styles.profilePicture,
-                  { backgroundColor: theme.colors.border, borderColor: theme.colors.surface },
-                ]}
-            >
-              {currentUser.profileImage ? (
-                  <Image source={{ uri: currentUser.profileImage }} style={styles.profileImage} />
-              ) : (
-                  <Ionicons name="person" size={50} color={theme.colors.textSecondary} />
-              )}
+            <View style={styles.recipeImageContainer}>
+                <View
+                    style={[
+                        styles.recipeImagePlaceholder,
+                        {backgroundColor: theme.colors.border},
+                    ]}
+                >
+                    <Ionicons name="restaurant" size={40} color="#999"/>
+                </View>
+                <View style={styles.timeTag}>
+                    <Ionicons name="time-outline" size={12} color="#fff"/>
+                    <Text style={styles.timeText}>{recipe.time}</Text>
+                </View>
             </View>
 
-            <Text style={[styles.username, { color: theme.colors.text }]}>
-              {currentUser.username}
-            </Text>
+            <View style={styles.recipeInfo}>
+                <Text style={[styles.recipeTitle, {color: theme.colors.text}]}>
+                    {recipe.title}
+                </Text>
+                <Text style={[styles.chefName, {color: theme.colors.textSecondary}]}>
+                    by {recipe.chef}
+                </Text>
+
+                <View style={styles.recipeStats}>
+                    <View style={styles.ratingContainer}>
+                        <Ionicons name="star" size={14} color="#ffc107"/>
+                        <Text style={[styles.ratingText, {color: theme.colors.text}]}>
+                            {recipe.rating}
+                        </Text>
+                    </View>
+
+                    <View style={styles.likesContainer}>
+                        <Ionicons name="heart-outline" size={14} color="#6c757d"/>
+                        <Text style={[styles.likesText, {color: theme.colors.textSecondary}]}>
+                            {recipe.likes}
+                        </Text>
+                    </View>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            // Nach Logout willst du eventuell zur Login-Seite navigieren
+            router.replace('/login');
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
+    };
+
+
+    return (
+        <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
+            <StatusBar
+                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+                backgroundColor={theme.colors.background}
+            />
+
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+            >
+                <View style={[styles.profileHeader, {backgroundColor: theme.colors.surface}]}>
+                    <View
+                        style={[
+                            styles.profilePicture,
+                            {backgroundColor: theme.colors.border, borderColor: theme.colors.surface},
+                        ]}
+                    >
+                        {currentUser.profileImage ? (
+                            <Image source={{uri: currentUser.profileImage}} style={styles.profileImage}/>
+                        ) : (
+                            <Ionicons name="person" size={50} color={theme.colors.textSecondary}/>
+                        )}
+                    </View>
+
+                    <Text style={[styles.username, {color: theme.colors.text}]}>
+                        {currentUser.email || currentUser.username || 'Guest'}
+                    </Text>
 
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
@@ -161,9 +178,9 @@ export default function ProfileScreen({
               </View>
             </View>
 
-            <Text style={[styles.bio, { color: theme.colors.textSecondary }]}>
-              {currentUser.bio}
-            </Text>
+                    <Text style={[styles.bio, {color: theme.colors.textSecondary}]}>
+                        {currentUser.bio}
+                    </Text>
 
             <View style={styles.actionButtons}>
               <TouchableOpacity
@@ -181,19 +198,27 @@ export default function ProfileScreen({
                 <Ionicons name="share-outline" size={18} color={theme.colors.buttonText} />
                 <Text style={[styles.buttonText, { color: theme.colors.buttonText }]}>Share</Text>
               </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.logoutButton, {backgroundColor: theme.colors.accent}]}
+                    onPress={handleLogout}
+                >
+                    <Ionicons name="log-out-outline" size={18} color={theme.colors.textOnAccent}/>
+                    <Text style={[styles.buttonText, {color: theme.colors.textOnAccent}]}>Logout</Text>
+                </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.recipesSection}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-              Your Recipes
-            </Text>
+                <View style={styles.recipesSection}>
+                    <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+                        Your Recipes
+                    </Text>
 
-            <View style={styles.recipesGrid}>{recipeList.map(renderRecipeCard)}</View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-  );
+                    <View style={styles.recipesGrid}>{recipeList.map(renderRecipeCard)}</View>
+                </View>
+            </ScrollView>
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -368,4 +393,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+    logoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 24,
+        gap: 8,
+        marginLeft: 12,
+    },
 });
