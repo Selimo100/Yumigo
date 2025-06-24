@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import RecipeCard from '../../components/RecipeCard';
 import { useTheme } from '../../contexts/ThemeContext';
+import useAuth from "../../lib/useAuth"
+import { Stack, Redirect } from 'expo-router'
 
 const mockRecipes = [
   {
@@ -31,6 +33,15 @@ const mockRecipes = [
 export default function HomeScreen() {
   const { theme } = useTheme();
   const styles = createStyles(theme);
+
+    const { user, isLoading } = useAuth()
+  if (isLoading) {
+    return <ActivityIndicator />
+  }
+
+  if (!user) {
+    return <Redirect href="/login" />
+  }
 
   return (
     <SafeAreaView style={styles.container}>
