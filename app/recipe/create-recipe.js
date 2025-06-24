@@ -4,48 +4,56 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import RecipeForm from '../../components/RecipeForm/RecipeForm';
-import { COLORS } from '../../utils/constants';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function CreateRecipeScreen() {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   const handleRecipeSuccess = (recipeId) => {
     console.log('Recipe created with ID:', recipeId);
     // Navigate back to home
     router.push('/(tabs)');
   };
 
-  const { theme } = useTheme();
+  const handleCancel = () => {
+    router.back();
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Header - Same style as recipe detail */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Recipe</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity style={styles.shareButton}>
+          <Ionicons name="close" size={24} color={theme.colors.text} />
+        </TouchableOpacity>
       </View>
 
-      <RecipeForm onSuccess={handleRecipeSuccess} />
+      <RecipeForm onSuccess={handleRecipeSuccess} onCancel={handleCancel} />
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
+    backgroundColor: theme.isDarkMode 
+      ? 'rgba(0,0,0,0.8)' 
+      : 'rgba(255,255,255,0.9)',
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightGray,
-    backgroundColor: COLORS.white,
+    borderBottomColor: theme.colors.border,
   },
   backButton: {
     padding: 8,
@@ -57,9 +65,16 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.black,
+    color: theme.colors.text,
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 16,
   },
-  placeholder: {
-    width: 40,
+  shareButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
 });

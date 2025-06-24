@@ -73,6 +73,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Create Recipe Modal */}
+       {/* Create Recipe Modal */}
       <Modal
         visible={showCreateModal}
         animationType="slide"
@@ -81,14 +82,18 @@ export default function HomeScreen() {
       >
         <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
           {/* Modal Header */}
-          <View style={[styles.modalHeader, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
+          <View style={[styles.modalHeader, { 
+            backgroundColor: theme.isDarkMode 
+              ? 'rgba(0,0,0,0.8)' 
+              : 'rgba(255,255,255,0.9)',
+            borderBottomColor: theme.colors.border 
+          }]}>
             <TouchableOpacity onPress={handleCloseModal} style={styles.modalCloseButton}>
-              <Ionicons name="close" size={24} color={theme.colors.text} />
+              <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
             </TouchableOpacity>
             <Text style={[styles.modalHeaderTitle, { color: theme.colors.text }]}>Create Recipe</Text>
-            <View style={styles.modalPlaceholder} />
           </View>
-          
+
           <RecipeForm onSuccess={handleRecipeSuccess} onCancel={handleCloseModal} />
         </SafeAreaView>
       </Modal>
@@ -146,20 +151,24 @@ const createStyles = (theme) => StyleSheet.create({
   },
   modalHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderBottomWidth: 1,
   },
   modalCloseButton: {
     padding: 8,
+    borderRadius: 20,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   modalHeaderTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  modalPlaceholder: {
-    width: 40,
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 16,
   },
 });
