@@ -11,6 +11,16 @@ import { RatingModal } from '../../components/RatingModal';
 import { ALLERGENS, CATEGORIES } from '../../utils/constants';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import {db} from '../../lib/firebaseconfig'
+import { formatDistanceToNow } from 'date-fns';
+
+const formatTime = (timestamp) => {
+  try {
+    const date = timestamp?.toDate?.() || new Date(timestamp);
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch {
+    return 'just now';
+  }
+};
 
 // Convert arrays to config objects for easier lookup
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
@@ -58,7 +68,20 @@ useEffect(() => {
           setRecipe(recipeData);
 
           const commentsSnap = await getDocs(collection(db, 'recipes', id, 'comments'));
-          const commentsData = commentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const commentsData = commentsSnap.docs.map(doc => {
+  const data = doc.data();
+  console.log('🔥 Kommentar-Dokument:', data);
+  return {
+    id: doc.id,
+    user: data.authorId || 'Anonymous',
+    avatar: 'https://via.placeholder.com/40x40', // fallback avatar
+    comment: data.text || '',  // <- das ist wichtig!
+    time: formatTime(data.createdAt?.toDate?.() || new Date()),
+    likes: 0,
+    isLiked: false,
+  };
+});
+
           setComments(commentsData);
         } else {
           console.warn('❌ Recipe not found');
