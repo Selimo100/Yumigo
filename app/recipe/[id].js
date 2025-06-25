@@ -12,6 +12,8 @@ import { ALLERGENS, CATEGORIES } from '../../utils/constants';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import {db} from '../../lib/firebaseconfig'
 import { formatDistanceToNow } from 'date-fns';
+import { getAuth } from 'firebase/auth';
+import { addDoc, serverTimestamp } from 'firebase/firestore';
 
 const formatTime = (timestamp) => {
   try {
@@ -144,19 +146,42 @@ useEffect(() => {
     );
   };
 
-  const handleAddComment = (commentText) => {
-    const comment = {
-      id: Date.now(),
-      user: 'You',
-      avatar: 'https://via.placeholder.com/40x40',
-      comment: commentText,
-      time: 'now',
-      likes: 0,
-      isLiked: false
+
+
+const handleAddComment = async (commentText) => {
+  try {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    
+    const newComment = {
+      text: commentText,
+      authorId: currentUser?.displayName || currentUser?.email || 'Anonymous',
+      createdAt: serverTimestamp(),
     };
-    setComments([comment, ...comments]);
-    Alert.alert('Comment Added', 'Your comment has been posted!');
-  };
+
+    const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newComment);
+
+    // 👇 Sofort lokaler Eintrag zum UI anzeigen
+    const localComment = {
+      id: docRef.id,
+      user: newComment.authorId,
+      avatar: 'https://via.placeholder.com/40x40',
+      comment: commentText, // <--- Change this line from 'text' to 'comment'
+      time: 'just now',
+      likes: 0,
+      isLiked: false,
+    };
+
+    setComments(prev => [localComment, ...prev]);
+
+    Alert.alert('Comment added', 'Your comment has been posted!');
+  } catch (error) {
+    console.error('❌ Failed to post comment:', error);
+    Alert.alert('Error', 'Failed to post comment.');
+  }
+};
+
+
 
   if (loading || !recipe) {
     return (
