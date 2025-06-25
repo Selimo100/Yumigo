@@ -9,6 +9,8 @@ import { CommentInput } from '../../components/CommentInput';
 import { CommentsSection } from '../../components/CommentsSection';
 import { RatingModal } from '../../components/RatingModal';
 import { ALLERGENS, CATEGORIES } from '../../utils/constants';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import {db} from '../../lib/firebaseconfig'
 
 // Convert arrays to config objects for easier lookup
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
@@ -29,105 +31,48 @@ const categoryConfig = CATEGORIES.reduce((acc, category) => {
   return acc;
 }, {});
 
-const mockRecipeDetails = {
-  1: {
-    id: 1,
-    title: 'Quick Pasta Carbonara',
-    image: 'https://via.placeholder.com/400x300',
-    time: '15 min',
-    rating: 4.8,
-    reviews: 124,
-    author: 'Chef Mario',
-    allergies: ['gluten', 'dairy', 'eggs'],
-    categories: ['salty', 'hot'],
-    description: 'A classic Italian pasta dish made with eggs, cheese, and pancetta. Perfect for a quick dinner that feels luxurious.',
-    ingredients: [
-      '400g spaghetti',
-      '200g pancetta or bacon',
-      '4 large eggs',
-      '100g Parmesan cheese',
-      '2 cloves garlic',
-      'Black pepper',
-      'Salt'
-    ],
-    comments: [
-      {
-        id: 1,
-        user: 'FoodLover23',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Absolutely delicious! Made this for dinner last night and my family loved it. 😍',
-        time: '2h',
-        likes: 12,
-        isLiked: false
-      },
-      {
-        id: 2,
-        user: 'CookingMama',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Great recipe! I added some peas for extra color 🟢',
-        time: '1d',
-        likes: 8,
-        isLiked: false
-      },
-      {
-        id: 3,
-        user: 'PastaKing',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Pro tip: Use fresh pasta if you can! 👨‍🍳',
-        time: '3d',
-        likes: 15,
-        isLiked: false
-      }
-    ]
-  },
-  2: {
-    id: 2,
-    title: 'Avocado Toast Supreme',
-    image: 'https://via.placeholder.com/400x300',
-    time: '10 min',
-    rating: 4.6,
-    reviews: 89,
-    author: 'FoodieQueen',
-    allergies: ['gluten', 'eggs'],
-    categories: ['salty'],
-    description: 'Elevated avocado toast with perfectly seasoned avocado, cherry tomatoes, and a poached egg on top.',
-    ingredients: [
-      '2 slices sourdough bread',
-      '1 ripe avocado',
-      '1 egg',
-      'Cherry tomatoes',
-      'Lime juice',
-      'Red pepper flakes',
-      'Salt and pepper'
-    ],
-    comments: [
-      {
-        id: 1,
-        user: 'HealthyEater',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Perfect breakfast! Love the poached egg 🥚',
-        time: '5h',
-        likes: 6,
-        isLiked: false
-      }
-    ]
-  }
-};
+
 
 export default function RecipeDetailScreen() {
   const { id, scrollToComments } = useLocalSearchParams();
   const { theme } = useTheme();
   const styles = createStyles(theme);
-  const recipe = mockRecipeDetails[id] || mockRecipeDetails[1];
-  
+  const scrollViewRef = useRef(null);
+  const commentsRef = useRef(null);
+
+  const [recipe, setRecipe] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [showRating, setShowRating] = useState(false);
-  const [comments, setComments] = useState(recipe.comments || []);
+
+useEffect(() => {
+    const fetchRecipe = async () => {
+      try {
+        const docRef = doc(db, 'recipes', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const recipeData = { id: docSnap.id, ...docSnap.data() };
+          setRecipe(recipeData);
+
+          const commentsSnap = await getDocs(collection(db, 'recipes', id, 'comments'));
+          const commentsData = commentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setComments(commentsData);
+        } else {
+          console.warn('❌ Recipe not found');
+        }
+      } catch (error) {
+        console.error('❌ Error fetching recipe:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchRecipe();
+  }, [id]);
+
   
-  const scrollViewRef = useRef(null);
-  const commentsRef = useRef(null);
 
   useEffect(() => {
     if (scrollToComments === 'true') {
@@ -188,6 +133,14 @@ export default function RecipeDetailScreen() {
     setComments([comment, ...comments]);
     Alert.alert('Comment Added', 'Your comment has been posted!');
   };
+
+  if (loading || !recipe) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -324,12 +277,14 @@ export default function RecipeDetailScreen() {
           {/* Ingredients */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
-            {recipe.ingredients.map((ingredient, index) => (
-              <View key={index} style={styles.ingredientItem}>
-                <View style={styles.bulletPoint} />
-                <Text style={styles.ingredientText}>{ingredient}</Text>
-              </View>
-            ))}
+            {recipe.ingredients.map((item, index) => (
+            <View key={index} style={styles.ingredientItem}>
+            <View style={styles.bulletPoint} />
+            <Text style={styles.ingredientText}>
+      {item.amount} {item.ingredient}
+    </Text>
+  </View>
+))}
           </View>
 
           {/* Comments Section */}
