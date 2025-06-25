@@ -9,17 +9,19 @@ import { CommentInput } from '../../components/CommentInput';
 import { CommentsSection } from '../../components/CommentsSection';
 import { RatingModal } from '../../components/RatingModal';
 import { ALLERGENS, CATEGORIES } from '../../utils/constants';
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import {db} from '../../lib/firebaseconfig'
+import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, setDoc } from 'firebase/firestore'; // Added setDoc and deleteDoc
+import { db } from '../../lib/firebaseconfig';
 import { formatDistanceToNow } from 'date-fns';
 import { getAuth } from 'firebase/auth';
-import { addDoc, serverTimestamp } from 'firebase/firestore';
+import { serverTimestamp } from 'firebase/firestore'; // Removed addDoc as it's already imported
 
 const formatTime = (timestamp) => {
   try {
+    // Firestore Timestamps have a .toDate() method
     const date = timestamp?.toDate?.() || new Date(timestamp);
     return formatDistanceToNow(date, { addSuffix: true });
-  } catch {
+  } catch (e) {
+    console.error("Error formatting time:", e);
     return 'just now';
   }
 };
@@ -43,8 +45,6 @@ const categoryConfig = CATEGORIES.reduce((acc, category) => {
   return acc;
 }, {});
 
-
-
 export default function RecipeDetailScreen() {
   const { id, scrollToComments } = useLocalSearchParams();
   const { theme } = useTheme();
@@ -56,49 +56,89 @@ export default function RecipeDetailScreen() {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-  const [userRating, setUserRating] = useState(0);
+  const [isSaved, setIsSaved] = useState(false); // Saved status is still local
+  const [userRating, setUserRating] = useState(0); // User rating is still local
   const [showRating, setShowRating] = useState(false);
 
-useEffect(() => {
-    const fetchRecipe = async () => {
+  const auth = getAuth(); // Initialize auth
+  const currentUser = auth.currentUser; // Get current user
+
+  useEffect(() => {
+    const fetchRecipeAndData = async () => {
+      setLoading(true);
       try {
-        const docRef = doc(db, 'recipes', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const recipeData = { id: docSnap.id, ...docSnap.data() };
+        const recipeDocRef = doc(db, 'recipes', id);
+        const recipeDocSnap = await getDoc(recipeDocRef);
+
+        if (recipeDocSnap.exists()) {
+          const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
           setRecipe(recipeData);
 
+          // Check if current user has liked this recipe
+          if (currentUser) {
+            const recipeLikeDocRef = doc(db, 'recipes', id, 'likes', currentUser.uid);
+            const recipeLikeSnap = await getDoc(recipeLikeDocRef);
+            setIsLiked(recipeLikeSnap.exists());
+          }
+
+          // Fetch comments and their like status/counts
           const commentsSnap = await getDocs(collection(db, 'recipes', id, 'comments'));
-          const commentsData = commentsSnap.docs.map(doc => {
-  const data = doc.data();
-  console.log('🔥 Kommentar-Dokument:', data);
-  return {
-    id: doc.id,
-    user: data.authorId || 'Anonymous',
-    avatar: 'https://via.placeholder.com/40x40', // fallback avatar
-    comment: data.text || '',  // <- das ist wichtig!
-    time: formatTime(data.createdAt?.toDate?.() || new Date()),
-    likes: 0,
-    isLiked: false,
-  };
-});
+          const commentsData = await Promise.all(commentsSnap.docs.map(async docSnapshot => {
+            const data = docSnapshot.data();
+            let isCommentLikedByUser = false;
+            let commentLikesCount = 0;
+
+            // Fetch total likes for this comment
+            const commentLikesCollectionRef = collection(db, 'recipes', id, 'comments', docSnapshot.id, 'likes');
+            const commentLikesSnapshot = await getDocs(commentLikesCollectionRef);
+            commentLikesCount = commentLikesSnapshot.size;
+
+            // Check if current user liked this comment
+            if (currentUser) {
+              const userCommentLikeDocRef = doc(commentLikesCollectionRef, currentUser.uid);
+              const userCommentLikeSnap = await getDoc(userCommentLikeDocRef);
+              isCommentLikedByUser = userCommentLikeSnap.exists();
+            }
+
+            return {
+              id: docSnapshot.id,
+              user: data.authorName || data.authorId || 'Anonymous', // Prefer authorName for display
+              avatar: 'https://via.placeholder.com/40x40', // Fallback, implement real avatars later
+              comment: data.text || '',
+              time: formatTime(data.createdAt?.toDate?.() || new Date()),
+              likes: commentLikesCount,
+              isLiked: isCommentLikedByUser,
+            };
+          }));
+
+          // Sort comments by timestamp, newest first
+          commentsData.sort((a, b) => {
+            // Note: `time` is a string like "X minutes ago", so direct comparison isn't ideal for sorting.
+            // You'd ideally want to store and sort by the raw `createdAt` timestamp from Firestore.
+            // For now, if your `formatTime` returns "just now" for new comments, they might not sort correctly.
+            // If you had `createdAt` as a Date object in the comment state, you could do:
+            // return b.createdAt.getTime() - a.createdAt.getTime();
+            // Since we don't have the raw timestamp here, new comments added locally will appear at the top.
+            // For fetched comments, they might appear in an arbitrary order from getDocs,
+            // so we'll just keep the initial fetched order for existing ones.
+            // If you need strict chronological order, fetch `createdAt` directly and sort by it.
+            return 0; // Keeping original order of fetched comments for now
+          });
 
           setComments(commentsData);
+
         } else {
           console.warn('❌ Recipe not found');
         }
       } catch (error) {
-        console.error('❌ Error fetching recipe:', error);
+        console.error('❌ Error fetching recipe and data:', error);
       } finally {
         setLoading(false);
       }
     };
-    if (id) fetchRecipe();
-  }, [id]);
-  
+    if (id) fetchRecipeAndData();
+  }, [id, currentUser]); // Re-run effect if recipe ID or current user changes
 
-  
 
   useEffect(() => {
     if (scrollToComments === 'true') {
@@ -113,7 +153,33 @@ useEffect(() => {
     }
   }, [scrollToComments]);
 
-  const handleLike = () => setIsLiked(!isLiked);
+  const handleLike = async () => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to like recipes.");
+      return;
+    }
+
+    const recipeLikeDocRef = doc(db, 'recipes', id, 'likes', currentUser.uid);
+
+    try {
+      if (isLiked) {
+        // User is unliking
+        await deleteDoc(recipeLikeDocRef);
+        setIsLiked(false);
+        Alert.alert("Unliked", "Recipe removed from your liked items.");
+      } else {
+        // User is liking
+        await setDoc(recipeLikeDocRef, { timestamp: serverTimestamp() }); // Add timestamp for potential future use (e.g., when it was liked)
+        setIsLiked(true);
+        Alert.alert("Liked", "Recipe added to your liked items!");
+      }
+      // TODO: Consider updating the recipe's global like count field in Firestore here
+      // (This would typically involve Cloud Functions or a transaction for atomic updates)
+    } catch (error) {
+      console.error("Error updating recipe like:", error);
+      Alert.alert("Error", "Could not update like status.");
+    }
+  };
 
   const handleSave = () => {
     setIsSaved(!isSaved);
@@ -121,6 +187,7 @@ useEffect(() => {
       isSaved ? 'Removed from Favorites' : 'Saved to Favorites',
       isSaved ? 'Recipe removed from your favorites' : 'Recipe saved to your favorites'
     );
+    // TODO: Implement actual saving to a user's favorites collection in Firestore
   };
 
   const handleRating = (rating) => {
@@ -130,63 +197,97 @@ useEffect(() => {
       'Rating Submitted',
       `You rated this recipe ${rating} star${rating !== 1 ? 's' : ''}!`
     );
+    // TODO: Implement saving user ratings to Firestore
   };
 
   const handleCommentLike = (commentId) => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to like comments.");
+      return;
+    }
+
+    const commentLikeDocRef = doc(db, 'recipes', id, 'comments', commentId, 'likes', currentUser.uid);
+
     setComments(prevComments =>
-      prevComments.map(comment =>
-        comment.id === commentId
-          ? {
-              ...comment,
-              isLiked: !comment.isLiked,
-              likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1
+      prevComments.map(comment => {
+        if (comment.id === commentId) {
+          const newIsLiked = !comment.isLiked;
+          const newLikes = newIsLiked ? comment.likes + 1 : comment.likes - 1;
+
+          // Optimistically update UI
+          const updatedComment = {
+            ...comment,
+            isLiked: newIsLiked,
+            likes: newLikes,
+          };
+
+          // Perform Firestore update in the background
+          (async () => {
+            try {
+              if (newIsLiked) {
+                await setDoc(commentLikeDocRef, { timestamp: serverTimestamp() });
+              } else {
+                await deleteDoc(commentLikeDocRef);
+              }
+            } catch (error) {
+              console.error("Error updating comment like in Firestore:", error);
+              // If Firestore update fails, revert the local state change
+              setComments(prev => prev.map(c => c.id === commentId ? comment : c)); // Revert to original state
+              Alert.alert("Error", "Could not update comment like status.");
             }
-          : comment
-      )
+          })();
+
+          return updatedComment;
+        }
+        return comment;
+      })
     );
   };
 
+  const handleAddComment = async (commentText) => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to post comments.");
+      return;
+    }
 
+    if (!commentText.trim()) {
+      Alert.alert("Empty Comment", "Please enter some text for your comment.");
+      return;
+    }
 
-const handleAddComment = async (commentText) => {
-  try {
-    const auth = getAuth();
-    const currentUser = auth.currentUser;
-    
-    const newComment = {
-      text: commentText,
-      authorId: currentUser?.displayName || currentUser?.email || 'Anonymous',
-      createdAt: serverTimestamp(),
-    };
+    try {
+      const newCommentData = {
+        text: commentText,
+        authorId: currentUser.uid, // Store UID for security/lookup
+        authorName: currentUser.displayName || currentUser.email || 'Anonymous', // Store display name for UI
+        createdAt: serverTimestamp(),
+      };
 
-    const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newComment);
+      const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newCommentData);
 
-    // 👇 Sofort lokaler Eintrag zum UI anzeigen
-    const localComment = {
-      id: docRef.id,
-      user: newComment.authorId,
-      avatar: 'https://via.placeholder.com/40x40',
-      comment: commentText, // <--- Change this line from 'text' to 'comment'
-      time: 'just now',
-      likes: 0,
-      isLiked: false,
-    };
+      // Create local comment for immediate UI update, ensuring 'comment' key
+      const localComment = {
+        id: docRef.id,
+        user: newCommentData.authorName, // Use the display name for UI
+        avatar: 'https://via.placeholder.com/40x40', // Fallback avatar
+        comment: commentText, // Corrected: This must be 'comment' for CommentsSection
+        time: 'just now', // Will be updated on next fetch
+        likes: 0,
+        isLiked: false,
+      };
 
-    setComments(prev => [localComment, ...prev]);
-
-    Alert.alert('Comment added', 'Your comment has been posted!');
-  } catch (error) {
-    console.error('❌ Failed to post comment:', error);
-    Alert.alert('Error', 'Failed to post comment.');
-  }
-};
-
-
+      setComments(prev => [localComment, ...prev]); // Add new comment to the top
+      Alert.alert('Comment added', 'Your comment has been posted!');
+    } catch (error) {
+      console.error('❌ Failed to post comment:', error);
+      Alert.alert('Error', 'Failed to post comment.');
+    }
+  };
 
   if (loading || !recipe) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading...</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
+        <Text style={{ color: theme.colors.text }}>Loading recipe details...</Text>
       </View>
     );
   }
@@ -203,7 +304,7 @@ const handleAddComment = async (commentText) => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
+      <ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
@@ -212,7 +313,7 @@ const handleAddComment = async (commentText) => {
         {/* Recipe Image with Category Tags */}
         <View style={styles.imageContainer}>
           <Image source={{ uri: recipe.imageUrl }} style={styles.recipeImage} />
-          
+
           {/* Category Tags on Image */}
           {recipe.categories && recipe.categories.length > 0 && (
             <View style={styles.imageTags}>
@@ -233,7 +334,7 @@ const handleAddComment = async (commentText) => {
         {/* Recipe Info */}
         <View style={styles.content}>
           <Text style={styles.title}>{recipe.title}</Text>
-          
+
           <View style={styles.metadata}>
             <View style={styles.timeContainer}>
               <Ionicons name="time-outline" size={16} color={theme.colors.textSecondary} />
@@ -275,28 +376,28 @@ const handleAddComment = async (commentText) => {
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            <TouchableOpacity 
-              style={[styles.likeButton, isLiked && styles.likedButton]} 
+            <TouchableOpacity
+              style={[styles.likeButton, isLiked && styles.likedButton]}
               onPress={handleLike}
             >
-              <Ionicons 
-                name={isLiked ? "heart" : "heart-outline"} 
-                size={20} 
-                color={isLiked ? "#FF6B6B" : theme.colors.buttonText} 
+              <Ionicons
+                name={isLiked ? "heart" : "heart-outline"}
+                size={20}
+                color={isLiked ? "#FF6B6B" : theme.colors.buttonText}
               />
               <Text style={[styles.buttonText, isLiked && styles.likedText]}>
                 {isLiked ? 'Liked' : 'Like'}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[styles.saveButton, isSaved && styles.savedButton]} 
+            <TouchableOpacity
+              style={[styles.saveButton, isSaved && styles.savedButton]}
               onPress={handleSave}
             >
-              <Ionicons 
-                name={isSaved ? "bookmark" : "bookmark-outline"} 
-                size={20} 
-                color={isSaved ? "#4ECDC4" : theme.colors.buttonText} 
+              <Ionicons
+                name={isSaved ? "bookmark" : "bookmark-outline"}
+                size={20}
+                color={isSaved ? "#4ECDC4" : theme.colors.buttonText}
               />
               <Text style={[styles.buttonText, isSaved && styles.savedText]}>
                 {isSaved ? 'Saved' : 'Save'}
@@ -327,40 +428,39 @@ const handleAddComment = async (commentText) => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
             {recipe.ingredients.map((item, index) => (
-            <View key={index} style={styles.ingredientItem}>
-            <View style={styles.bulletPoint} />
-            <Text style={styles.ingredientText}>
-      {item.amount} {item.ingredient}
-    </Text>
-  </View>
-))}
-
-          <View style={styles.section}>
-  <Text style={styles.sectionTitle}>Instructions</Text>
-  <Text style={styles.sectionSubtitle}>Step-by-step guide</Text>
-
-  {recipe.instructions?.length > 0 ? (
-    recipe.instructions.map((step, index) => (
-      <View key={index} style={styles.stepCard}>
-        <View style={styles.stepHeader}>
-          <View style={styles.stepCircle}>
-            <Text style={styles.stepNumber}>{index + 1}</Text>
+              <View key={index} style={styles.ingredientItem}>
+                <View style={styles.bulletPoint} />
+                <Text style={styles.ingredientText}>
+                  {item.amount} {item.ingredient}
+                </Text>
+              </View>
+            ))}
           </View>
-          <Text style={styles.stepTitle}>Step {index + 1}</Text>
-        </View>
-        <Text style={styles.stepDescription}>{step}</Text>
-      </View>
-    ))
-  ) : (
-    <Text style={styles.ingredientText}>No instructions provided.</Text>
-  )}
-</View>
 
+          {/* Instructions */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Instructions</Text>
+            <Text style={styles.sectionSubtitle}>Step-by-step guide</Text>
 
+            {recipe.instructions?.length > 0 ? (
+              recipe.instructions.map((step, index) => (
+                <View key={index} style={styles.stepCard}>
+                  <View style={styles.stepHeader}>
+                    <View style={styles.stepCircle}>
+                      <Text style={styles.stepNumber}>{index + 1}</Text>
+                    </View>
+                    <Text style={styles.stepTitle}>Step {index + 1}</Text>
+                  </View>
+                  <Text style={styles.stepDescription}>{step}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.ingredientText}>No instructions provided.</Text>
+            )}
           </View>
 
           {/* Comments Section */}
-          <CommentsSection 
+          <CommentsSection
             comments={comments}
             onCommentLike={handleCommentLike}
             theme={theme}
@@ -373,7 +473,7 @@ const handleAddComment = async (commentText) => {
       <CommentInput onAddComment={handleAddComment} theme={theme} />
 
       {/* Rating Modal */}
-      <RatingModal 
+      <RatingModal
         visible={showRating}
         onClose={() => setShowRating(false)}
         onRating={handleRating}
