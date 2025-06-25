@@ -206,7 +206,7 @@ const createStyles = (theme) => StyleSheet.create({
         borderWidth: 1,
         borderRadius: 8,
         paddingVertical: 10,
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
         marginTop: 12,
         shadowColor: '#a71d2a',
         shadowOffset: { width: 0, height: 1 },
