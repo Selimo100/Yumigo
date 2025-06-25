@@ -9,15 +9,14 @@ import { CommentInput } from '../../components/CommentInput';
 import { CommentsSection } from '../../components/CommentsSection';
 import { RatingModal } from '../../components/RatingModal';
 import { ALLERGENS, CATEGORIES } from '../../utils/constants';
-import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, setDoc } from 'firebase/firestore'; // Added setDoc and deleteDoc
+import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebaseconfig';
 import { formatDistanceToNow } from 'date-fns';
 import { getAuth } from 'firebase/auth';
-import { serverTimestamp } from 'firebase/firestore'; // Removed addDoc as it's already imported
+import { serverTimestamp } from 'firebase/firestore';
 
 const formatTime = (timestamp) => {
   try {
-    // Firestore Timestamps have a .toDate() method
     const date = timestamp?.toDate?.() || new Date(timestamp);
     return formatDistanceToNow(date, { addSuffix: true });
   } catch (e) {
@@ -56,12 +55,12 @@ export default function RecipeDetailScreen() {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false); // Saved status is still local
-  const [userRating, setUserRating] = useState(0); // User rating is still local
+  const [isSaved, setIsSaved] = useState(false);
+  const [userRating, setUserRating] = useState(0);
   const [showRating, setShowRating] = useState(false);
 
-  const auth = getAuth(); // Initialize auth
-  const currentUser = auth.currentUser; // Get current user
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
 
   useEffect(() => {
     const fetchRecipeAndData = async () => {
@@ -72,7 +71,22 @@ export default function RecipeDetailScreen() {
 
         if (recipeDocSnap.exists()) {
           const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
-          setRecipe(recipeData);
+
+          // --- START CHANGES HERE ---
+          // Fetch author's display name
+          let authorDisplayName = 'Anonymous';
+          if (recipeData.authorId) {
+            const userDocRef = doc(db, 'users', recipeData.authorId); // Assuming you have a 'users' collection
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+              authorDisplayName = userDocSnap.data().displayName || userDocSnap.data().email || 'Anonymous';
+            } else if (currentUser && currentUser.uid === recipeData.authorId) {
+              // Fallback to current user's display name if the recipe is by them
+              authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
+            }
+          }
+          setRecipe({ ...recipeData, authorName: authorDisplayName });
+          // --- END CHANGES HERE ---
 
           // Check if current user has liked this recipe
           if (currentUser) {
@@ -87,6 +101,17 @@ export default function RecipeDetailScreen() {
             const data = docSnapshot.data();
             let isCommentLikedByUser = false;
             let commentLikesCount = 0;
+            let commentAuthorName = data.authorName || data.authorId || 'Anonymous'; // Use existing authorName from comment or fallback
+
+            // If authorId is present but authorName is not, try fetching from users collection for comments too
+            if (!data.authorName && data.authorId) {
+              const commentUserDocRef = doc(db, 'users', data.authorId);
+              const commentUserDocSnap = await getDoc(commentUserDocRef);
+              if (commentUserDocSnap.exists()) {
+                commentAuthorName = commentUserDocSnap.data().displayName || commentUserDocSnap.data().email || commentAuthorName;
+              }
+            }
+
 
             // Fetch total likes for this comment
             const commentLikesCollectionRef = collection(db, 'recipes', id, 'comments', docSnapshot.id, 'likes');
@@ -102,7 +127,7 @@ export default function RecipeDetailScreen() {
 
             return {
               id: docSnapshot.id,
-              user: data.authorName || data.authorId || 'Anonymous', // Prefer authorName for display
+              user: commentAuthorName, // Use the fetched/resolved author name for comments
               avatar: 'https://via.placeholder.com/40x40', // Fallback, implement real avatars later
               comment: data.text || '',
               time: formatTime(data.createdAt?.toDate?.() || new Date()),
@@ -113,15 +138,17 @@ export default function RecipeDetailScreen() {
 
           // Sort comments by timestamp, newest first
           commentsData.sort((a, b) => {
-            // Note: `time` is a string like "X minutes ago", so direct comparison isn't ideal for sorting.
-            // You'd ideally want to store and sort by the raw `createdAt` timestamp from Firestore.
+            // This sort is problematic if 'time' is a string like "X minutes ago".
+            // Ideally, you'd sort by the raw `createdAt` timestamp.
             // For now, if your `formatTime` returns "just now" for new comments, they might not sort correctly.
-            // If you had `createdAt` as a Date object in the comment state, you could do:
-            // return b.createdAt.getTime() - a.createdAt.getTime();
-            // Since we don't have the raw timestamp here, new comments added locally will appear at the top.
-            // For fetched comments, they might appear in an arbitrary order from getDocs,
-            // so we'll just keep the initial fetched order for existing ones.
-            // If you need strict chronological order, fetch `createdAt` directly and sort by it.
+            // Let's assume you fetch `createdAt` and use it for sorting directly:
+            // If `data.createdAt` from Firestore is a Timestamp, it needs to be compared as such.
+            // This section assumes `commentsData` now includes `createdAt` as a Date object or Firebase Timestamp
+            // For better sorting, pass `createdAt` from `docSnapshot.data()` to the comment object.
+            // Example:
+            // const timeA = commentsSnap.docs.find(d => d.id === a.id)?.data()?.createdAt?.toDate?.() || new Date(0);
+            // const timeB = commentsSnap.docs.find(d => d.id === b.id)?.data()?.createdAt?.toDate?.() || new Date(0);
+            // return timeB.getTime() - timeA.getTime();
             return 0; // Keeping original order of fetched comments for now
           });
 
@@ -348,7 +375,8 @@ export default function RecipeDetailScreen() {
             </View>
           </View>
 
-          <Text style={styles.author}>by {recipe.authorId}</Text>
+          {/* Use recipe.authorName here */}
+          <Text style={styles.author}>by {recipe.authorName}</Text>
 
           {/* Allergy Information */}
           {recipe.allergens && recipe.allergens.length > 0 && (
@@ -501,8 +529,8 @@ const createStyles = (theme) => StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
-    backgroundColor: theme.isDarkMode 
-      ? 'rgba(0,0,0,0.8)' 
+    backgroundColor: theme.isDarkMode
+      ? 'rgba(0,0,0,0.8)'
       : 'rgba(255,255,255,0.9)',
   },
   backButton: {
@@ -756,54 +784,54 @@ const createStyles = (theme) => StyleSheet.create({
   },
 
   stepCard: {
-  borderWidth: 1,
-  borderColor: '#E9ECEF',
-  backgroundColor: '#FAFAFA',
-  borderRadius: 12,
-  padding: 16,
-  marginBottom: 16,
-},
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+    backgroundColor: '#FAFAFA',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
 
-stepHeader: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginBottom: 8,
-},
+  stepHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
 
-stepCircle: {
-  width: 26,
-  height: 26,
-  borderRadius: 13,
-  borderWidth: 1,
-  borderColor: '#CCC',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginRight: 10,
-  backgroundColor: '#fff',
-},
+  stepCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1,
+    borderColor: '#CCC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    backgroundColor: '#fff',
+  },
 
-stepNumber: {
-  fontWeight: '600',
-  fontSize: 13,
-  color: '#333',
-},
+  stepNumber: {
+    fontWeight: '600',
+    fontSize: 13,
+    color: '#333',
+  },
 
-stepTitle: {
-  fontSize: 16,
-  fontWeight: '600',
-  color: theme.colors.text,
-},
+  stepTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.text,
+  },
 
-stepDescription: {
-  fontSize: 15,
-  color: theme.colors.textSecondary,
-  lineHeight: 22,
-},
+  stepDescription: {
+    fontSize: 15,
+    color: theme.colors.textSecondary,
+    lineHeight: 22,
+  },
 
-sectionSubtitle: {
-  fontSize: 14,
-  color: theme.colors.textSecondary,
-  marginBottom: 10,
-},
+  sectionSubtitle: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    marginBottom: 10,
+  },
 
 });

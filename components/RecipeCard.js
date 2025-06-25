@@ -132,7 +132,7 @@ export default function RecipeCard({ recipe }) {
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.author}>by {recipe.authorId}</Text>
+                    <Text style={styles.author}>by {recipe.authorName}</Text>
 
                     <View style={styles.engagement}>
                         {/* Display Likes Count Here */}
