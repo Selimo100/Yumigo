@@ -113,7 +113,9 @@ export default function CravingSelection() {
                             onPress={handleNextButton}
                             disabled={selectedCravings.length === 0}
                         >
-                            <Text style={styles.submitButtonText}>Next →</Text>
+                            <Text style={styles.submitButtonText}>
+                                {selectedCravings.length === 0 ? 'Please select at least one craving' : 'Next →'}
+                            </Text>
                         </TouchableOpacity>
                     )}
                 </View>
