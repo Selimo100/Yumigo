@@ -71,6 +71,7 @@ useEffect(() => {
     };
     if (id) fetchRecipe();
   }, [id]);
+  
 
   
 
@@ -162,7 +163,7 @@ useEffect(() => {
       >
         {/* Recipe Image with Category Tags */}
         <View style={styles.imageContainer}>
-          <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
+          <Image source={{ uri: recipe.imageUrl }} style={styles.recipeImage} />
           
           {/* Category Tags on Image */}
           {recipe.categories && recipe.categories.length > 0 && (
@@ -188,7 +189,7 @@ useEffect(() => {
           <View style={styles.metadata}>
             <View style={styles.timeContainer}>
               <Ionicons name="time-outline" size={16} color={theme.colors.textSecondary} />
-              <Text style={styles.time}>{recipe.time}</Text>
+              <Text style={styles.time}>{recipe.time} min</Text>
             </View>
 
             <View style={styles.ratingContainer}>
@@ -198,17 +199,17 @@ useEffect(() => {
             </View>
           </View>
 
-          <Text style={styles.author}>by {recipe.author}</Text>
+          <Text style={styles.author}>by {recipe.authorId}</Text>
 
           {/* Allergy Information */}
-          {recipe.allergies && recipe.allergies.length > 0 && (
+          {recipe.allergens && recipe.allergens.length > 0 && (
             <View style={styles.allergySection}>
               <View style={styles.allergyHeader}>
                 <Ionicons name="warning-outline" size={18} color="#FF6B6B" />
                 <Text style={styles.allergyTitle}>Allergen Information</Text>
               </View>
               <View style={styles.allergyTags}>
-                {recipe.allergies.map((allergy) => {
+                {recipe.allergens.map((allergy) => {
                   const config = allergyConfig[allergy];
                   if (!config) return null;
                   return (
@@ -285,6 +286,29 @@ useEffect(() => {
     </Text>
   </View>
 ))}
+
+          <View style={styles.section}>
+  <Text style={styles.sectionTitle}>Instructions</Text>
+  <Text style={styles.sectionSubtitle}>Step-by-step guide</Text>
+
+  {recipe.instructions?.length > 0 ? (
+    recipe.instructions.map((step, index) => (
+      <View key={index} style={styles.stepCard}>
+        <View style={styles.stepHeader}>
+          <View style={styles.stepCircle}>
+            <Text style={styles.stepNumber}>{index + 1}</Text>
+          </View>
+          <Text style={styles.stepTitle}>Step {index + 1}</Text>
+        </View>
+        <Text style={styles.stepDescription}>{step}</Text>
+      </View>
+    ))
+  ) : (
+    <Text style={styles.ingredientText}>No instructions provided.</Text>
+  )}
+</View>
+
+
           </View>
 
           {/* Comments Section */}
@@ -582,4 +606,56 @@ const createStyles = (theme) => StyleSheet.create({
     color: theme.colors.text,
     flex: 1,
   },
+
+  stepCard: {
+  borderWidth: 1,
+  borderColor: '#E9ECEF',
+  backgroundColor: '#FAFAFA',
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 16,
+},
+
+stepHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 8,
+},
+
+stepCircle: {
+  width: 26,
+  height: 26,
+  borderRadius: 13,
+  borderWidth: 1,
+  borderColor: '#CCC',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: 10,
+  backgroundColor: '#fff',
+},
+
+stepNumber: {
+  fontWeight: '600',
+  fontSize: 13,
+  color: '#333',
+},
+
+stepTitle: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: theme.colors.text,
+},
+
+stepDescription: {
+  fontSize: 15,
+  color: theme.colors.textSecondary,
+  lineHeight: 22,
+},
+
+sectionSubtitle: {
+  fontSize: 14,
+  color: theme.colors.textSecondary,
+  marginBottom: 10,
+},
+
 });
