@@ -149,7 +149,7 @@ export default function ProfileScreen({
                     </View>
 
                     <Text style={[styles.username, {color: theme.colors.text}]}>
-                        {currentUser.email || currentUser.username || 'Guest'}
+                        {currentUser.username }
                     </Text>
 
             <View style={styles.statsContainer}>

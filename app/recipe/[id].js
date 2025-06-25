@@ -9,6 +9,22 @@ import { CommentInput } from '../../components/CommentInput';
 import { CommentsSection } from '../../components/CommentsSection';
 import { RatingModal } from '../../components/RatingModal';
 import { ALLERGENS, CATEGORIES } from '../../utils/constants';
+import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, setDoc } from 'firebase/firestore'; // Added setDoc and deleteDoc
+import { db } from '../../lib/firebaseconfig';
+import { formatDistanceToNow } from 'date-fns';
+import { getAuth } from 'firebase/auth';
+import { serverTimestamp } from 'firebase/firestore'; // Removed addDoc as it's already imported
+
+const formatTime = (timestamp) => {
+  try {
+    // Firestore Timestamps have a .toDate() method
+    const date = timestamp?.toDate?.() || new Date(timestamp);
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch (e) {
+    console.error("Error formatting time:", e);
+    return 'just now';
+  }
+};
 
 // Convert arrays to config objects for easier lookup
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
@@ -29,105 +45,100 @@ const categoryConfig = CATEGORIES.reduce((acc, category) => {
   return acc;
 }, {});
 
-const mockRecipeDetails = {
-  1: {
-    id: 1,
-    title: 'Quick Pasta Carbonara',
-    image: 'https://via.placeholder.com/400x300',
-    time: '15 min',
-    rating: 4.8,
-    reviews: 124,
-    author: 'Chef Mario',
-    allergies: ['gluten', 'dairy', 'eggs'],
-    categories: ['salty', 'hot'],
-    description: 'A classic Italian pasta dish made with eggs, cheese, and pancetta. Perfect for a quick dinner that feels luxurious.',
-    ingredients: [
-      '400g spaghetti',
-      '200g pancetta or bacon',
-      '4 large eggs',
-      '100g Parmesan cheese',
-      '2 cloves garlic',
-      'Black pepper',
-      'Salt'
-    ],
-    comments: [
-      {
-        id: 1,
-        user: 'FoodLover23',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Absolutely delicious! Made this for dinner last night and my family loved it. 😍',
-        time: '2h',
-        likes: 12,
-        isLiked: false
-      },
-      {
-        id: 2,
-        user: 'CookingMama',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Great recipe! I added some peas for extra color 🟢',
-        time: '1d',
-        likes: 8,
-        isLiked: false
-      },
-      {
-        id: 3,
-        user: 'PastaKing',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Pro tip: Use fresh pasta if you can! 👨‍🍳',
-        time: '3d',
-        likes: 15,
-        isLiked: false
-      }
-    ]
-  },
-  2: {
-    id: 2,
-    title: 'Avocado Toast Supreme',
-    image: 'https://via.placeholder.com/400x300',
-    time: '10 min',
-    rating: 4.6,
-    reviews: 89,
-    author: 'FoodieQueen',
-    allergies: ['gluten', 'eggs'],
-    categories: ['salty'],
-    description: 'Elevated avocado toast with perfectly seasoned avocado, cherry tomatoes, and a poached egg on top.',
-    ingredients: [
-      '2 slices sourdough bread',
-      '1 ripe avocado',
-      '1 egg',
-      'Cherry tomatoes',
-      'Lime juice',
-      'Red pepper flakes',
-      'Salt and pepper'
-    ],
-    comments: [
-      {
-        id: 1,
-        user: 'HealthyEater',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Perfect breakfast! Love the poached egg 🥚',
-        time: '5h',
-        likes: 6,
-        isLiked: false
-      }
-    ]
-  }
-};
-
 export default function RecipeDetailScreen() {
   const { id, scrollToComments } = useLocalSearchParams();
   const { theme } = useTheme();
   const styles = createStyles(theme);
-  const recipe = mockRecipeDetails[id] || mockRecipeDetails[1];
-  
-  const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-  const [userRating, setUserRating] = useState(0);
-  const [showRating, setShowRating] = useState(false);
-  const [comments, setComments] = useState(recipe.comments || []);
-  
   const scrollViewRef = useRef(null);
   const commentsRef = useRef(null);
+
+  const [recipe, setRecipe] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false); // Saved status is still local
+  const [userRating, setUserRating] = useState(0); // User rating is still local
+  const [showRating, setShowRating] = useState(false);
+
+  const auth = getAuth(); // Initialize auth
+  const currentUser = auth.currentUser; // Get current user
+
+  useEffect(() => {
+    const fetchRecipeAndData = async () => {
+      setLoading(true);
+      try {
+        const recipeDocRef = doc(db, 'recipes', id);
+        const recipeDocSnap = await getDoc(recipeDocRef);
+
+        if (recipeDocSnap.exists()) {
+          const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
+          setRecipe(recipeData);
+
+          // Check if current user has liked this recipe
+          if (currentUser) {
+            const recipeLikeDocRef = doc(db, 'recipes', id, 'likes', currentUser.uid);
+            const recipeLikeSnap = await getDoc(recipeLikeDocRef);
+            setIsLiked(recipeLikeSnap.exists());
+          }
+
+          // Fetch comments and their like status/counts
+          const commentsSnap = await getDocs(collection(db, 'recipes', id, 'comments'));
+          const commentsData = await Promise.all(commentsSnap.docs.map(async docSnapshot => {
+            const data = docSnapshot.data();
+            let isCommentLikedByUser = false;
+            let commentLikesCount = 0;
+
+            // Fetch total likes for this comment
+            const commentLikesCollectionRef = collection(db, 'recipes', id, 'comments', docSnapshot.id, 'likes');
+            const commentLikesSnapshot = await getDocs(commentLikesCollectionRef);
+            commentLikesCount = commentLikesSnapshot.size;
+
+            // Check if current user liked this comment
+            if (currentUser) {
+              const userCommentLikeDocRef = doc(commentLikesCollectionRef, currentUser.uid);
+              const userCommentLikeSnap = await getDoc(userCommentLikeDocRef);
+              isCommentLikedByUser = userCommentLikeSnap.exists();
+            }
+
+            return {
+              id: docSnapshot.id,
+              user: data.authorName || data.authorId || 'Anonymous', // Prefer authorName for display
+              avatar: 'https://via.placeholder.com/40x40', // Fallback, implement real avatars later
+              comment: data.text || '',
+              time: formatTime(data.createdAt?.toDate?.() || new Date()),
+              likes: commentLikesCount,
+              isLiked: isCommentLikedByUser,
+            };
+          }));
+
+          // Sort comments by timestamp, newest first
+          commentsData.sort((a, b) => {
+            // Note: `time` is a string like "X minutes ago", so direct comparison isn't ideal for sorting.
+            // You'd ideally want to store and sort by the raw `createdAt` timestamp from Firestore.
+            // For now, if your `formatTime` returns "just now" for new comments, they might not sort correctly.
+            // If you had `createdAt` as a Date object in the comment state, you could do:
+            // return b.createdAt.getTime() - a.createdAt.getTime();
+            // Since we don't have the raw timestamp here, new comments added locally will appear at the top.
+            // For fetched comments, they might appear in an arbitrary order from getDocs,
+            // so we'll just keep the initial fetched order for existing ones.
+            // If you need strict chronological order, fetch `createdAt` directly and sort by it.
+            return 0; // Keeping original order of fetched comments for now
+          });
+
+          setComments(commentsData);
+
+        } else {
+          console.warn('❌ Recipe not found');
+        }
+      } catch (error) {
+        console.error('❌ Error fetching recipe and data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchRecipeAndData();
+  }, [id, currentUser]); // Re-run effect if recipe ID or current user changes
+
 
   useEffect(() => {
     if (scrollToComments === 'true') {
@@ -142,7 +153,33 @@ export default function RecipeDetailScreen() {
     }
   }, [scrollToComments]);
 
-  const handleLike = () => setIsLiked(!isLiked);
+  const handleLike = async () => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to like recipes.");
+      return;
+    }
+
+    const recipeLikeDocRef = doc(db, 'recipes', id, 'likes', currentUser.uid);
+
+    try {
+      if (isLiked) {
+        // User is unliking
+        await deleteDoc(recipeLikeDocRef);
+        setIsLiked(false);
+        Alert.alert("Unliked", "Recipe removed from your liked items.");
+      } else {
+        // User is liking
+        await setDoc(recipeLikeDocRef, { timestamp: serverTimestamp() }); // Add timestamp for potential future use (e.g., when it was liked)
+        setIsLiked(true);
+        Alert.alert("Liked", "Recipe added to your liked items!");
+      }
+      // TODO: Consider updating the recipe's global like count field in Firestore here
+      // (This would typically involve Cloud Functions or a transaction for atomic updates)
+    } catch (error) {
+      console.error("Error updating recipe like:", error);
+      Alert.alert("Error", "Could not update like status.");
+    }
+  };
 
   const handleSave = () => {
     setIsSaved(!isSaved);
@@ -150,6 +187,7 @@ export default function RecipeDetailScreen() {
       isSaved ? 'Removed from Favorites' : 'Saved to Favorites',
       isSaved ? 'Recipe removed from your favorites' : 'Recipe saved to your favorites'
     );
+    // TODO: Implement actual saving to a user's favorites collection in Firestore
   };
 
   const handleRating = (rating) => {
@@ -159,35 +197,100 @@ export default function RecipeDetailScreen() {
       'Rating Submitted',
       `You rated this recipe ${rating} star${rating !== 1 ? 's' : ''}!`
     );
+    // TODO: Implement saving user ratings to Firestore
   };
 
   const handleCommentLike = (commentId) => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to like comments.");
+      return;
+    }
+
+    const commentLikeDocRef = doc(db, 'recipes', id, 'comments', commentId, 'likes', currentUser.uid);
+
     setComments(prevComments =>
-      prevComments.map(comment =>
-        comment.id === commentId
-          ? {
-              ...comment,
-              isLiked: !comment.isLiked,
-              likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1
+      prevComments.map(comment => {
+        if (comment.id === commentId) {
+          const newIsLiked = !comment.isLiked;
+          const newLikes = newIsLiked ? comment.likes + 1 : comment.likes - 1;
+
+          // Optimistically update UI
+          const updatedComment = {
+            ...comment,
+            isLiked: newIsLiked,
+            likes: newLikes,
+          };
+
+          // Perform Firestore update in the background
+          (async () => {
+            try {
+              if (newIsLiked) {
+                await setDoc(commentLikeDocRef, { timestamp: serverTimestamp() });
+              } else {
+                await deleteDoc(commentLikeDocRef);
+              }
+            } catch (error) {
+              console.error("Error updating comment like in Firestore:", error);
+              // If Firestore update fails, revert the local state change
+              setComments(prev => prev.map(c => c.id === commentId ? comment : c)); // Revert to original state
+              Alert.alert("Error", "Could not update comment like status.");
             }
-          : comment
-      )
+          })();
+
+          return updatedComment;
+        }
+        return comment;
+      })
     );
   };
 
-  const handleAddComment = (commentText) => {
-    const comment = {
-      id: Date.now(),
-      user: 'You',
-      avatar: 'https://via.placeholder.com/40x40',
-      comment: commentText,
-      time: 'now',
-      likes: 0,
-      isLiked: false
-    };
-    setComments([comment, ...comments]);
-    Alert.alert('Comment Added', 'Your comment has been posted!');
+  const handleAddComment = async (commentText) => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to post comments.");
+      return;
+    }
+
+    if (!commentText.trim()) {
+      Alert.alert("Empty Comment", "Please enter some text for your comment.");
+      return;
+    }
+
+    try {
+      const newCommentData = {
+        text: commentText,
+        authorId: currentUser.uid, // Store UID for security/lookup
+        authorName: currentUser.displayName || currentUser.email || 'Anonymous', // Store display name for UI
+        createdAt: serverTimestamp(),
+      };
+
+      const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newCommentData);
+
+      // Create local comment for immediate UI update, ensuring 'comment' key
+      const localComment = {
+        id: docRef.id,
+        user: newCommentData.authorName, // Use the display name for UI
+        avatar: 'https://via.placeholder.com/40x40', // Fallback avatar
+        comment: commentText, // Corrected: This must be 'comment' for CommentsSection
+        time: 'just now', // Will be updated on next fetch
+        likes: 0,
+        isLiked: false,
+      };
+
+      setComments(prev => [localComment, ...prev]); // Add new comment to the top
+      Alert.alert('Comment added', 'Your comment has been posted!');
+    } catch (error) {
+      console.error('❌ Failed to post comment:', error);
+      Alert.alert('Error', 'Failed to post comment.');
+    }
   };
+
+  if (loading || !recipe) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
+        <Text style={{ color: theme.colors.text }}>Loading recipe details...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -201,7 +304,7 @@ export default function RecipeDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
+      <ScrollView
         ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
@@ -209,8 +312,8 @@ export default function RecipeDetailScreen() {
       >
         {/* Recipe Image with Category Tags */}
         <View style={styles.imageContainer}>
-          <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
-          
+          <Image source={{ uri: recipe.imageUrl }} style={styles.recipeImage} />
+
           {/* Category Tags on Image */}
           {recipe.categories && recipe.categories.length > 0 && (
             <View style={styles.imageTags}>
@@ -231,11 +334,11 @@ export default function RecipeDetailScreen() {
         {/* Recipe Info */}
         <View style={styles.content}>
           <Text style={styles.title}>{recipe.title}</Text>
-          
+
           <View style={styles.metadata}>
             <View style={styles.timeContainer}>
               <Ionicons name="time-outline" size={16} color={theme.colors.textSecondary} />
-              <Text style={styles.time}>{recipe.time}</Text>
+              <Text style={styles.time}>{recipe.time} min</Text>
             </View>
 
             <View style={styles.ratingContainer}>
@@ -245,17 +348,17 @@ export default function RecipeDetailScreen() {
             </View>
           </View>
 
-          <Text style={styles.author}>by {recipe.author}</Text>
+          <Text style={styles.author}>by {recipe.authorId}</Text>
 
           {/* Allergy Information */}
-          {recipe.allergies && recipe.allergies.length > 0 && (
+          {recipe.allergens && recipe.allergens.length > 0 && (
             <View style={styles.allergySection}>
               <View style={styles.allergyHeader}>
                 <Ionicons name="warning-outline" size={18} color="#FF6B6B" />
                 <Text style={styles.allergyTitle}>Allergen Information</Text>
               </View>
               <View style={styles.allergyTags}>
-                {recipe.allergies.map((allergy) => {
+                {recipe.allergens.map((allergy) => {
                   const config = allergyConfig[allergy];
                   if (!config) return null;
                   return (
@@ -273,28 +376,28 @@ export default function RecipeDetailScreen() {
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            <TouchableOpacity 
-              style={[styles.likeButton, isLiked && styles.likedButton]} 
+            <TouchableOpacity
+              style={[styles.likeButton, isLiked && styles.likedButton]}
               onPress={handleLike}
             >
-              <Ionicons 
-                name={isLiked ? "heart" : "heart-outline"} 
-                size={20} 
-                color={isLiked ? "#FF6B6B" : theme.colors.buttonText} 
+              <Ionicons
+                name={isLiked ? "heart" : "heart-outline"}
+                size={20}
+                color={isLiked ? "#FF6B6B" : theme.colors.buttonText}
               />
               <Text style={[styles.buttonText, isLiked && styles.likedText]}>
                 {isLiked ? 'Liked' : 'Like'}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[styles.saveButton, isSaved && styles.savedButton]} 
+            <TouchableOpacity
+              style={[styles.saveButton, isSaved && styles.savedButton]}
               onPress={handleSave}
             >
-              <Ionicons 
-                name={isSaved ? "bookmark" : "bookmark-outline"} 
-                size={20} 
-                color={isSaved ? "#4ECDC4" : theme.colors.buttonText} 
+              <Ionicons
+                name={isSaved ? "bookmark" : "bookmark-outline"}
+                size={20}
+                color={isSaved ? "#4ECDC4" : theme.colors.buttonText}
               />
               <Text style={[styles.buttonText, isSaved && styles.savedText]}>
                 {isSaved ? 'Saved' : 'Save'}
@@ -324,16 +427,40 @@ export default function RecipeDetailScreen() {
           {/* Ingredients */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
-            {recipe.ingredients.map((ingredient, index) => (
+            {recipe.ingredients.map((item, index) => (
               <View key={index} style={styles.ingredientItem}>
                 <View style={styles.bulletPoint} />
-                <Text style={styles.ingredientText}>{ingredient}</Text>
+                <Text style={styles.ingredientText}>
+                  {item.amount} {item.ingredient}
+                </Text>
               </View>
             ))}
           </View>
 
+          {/* Instructions */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Instructions</Text>
+            <Text style={styles.sectionSubtitle}>Step-by-step guide</Text>
+
+            {recipe.instructions?.length > 0 ? (
+              recipe.instructions.map((step, index) => (
+                <View key={index} style={styles.stepCard}>
+                  <View style={styles.stepHeader}>
+                    <View style={styles.stepCircle}>
+                      <Text style={styles.stepNumber}>{index + 1}</Text>
+                    </View>
+                    <Text style={styles.stepTitle}>Step {index + 1}</Text>
+                  </View>
+                  <Text style={styles.stepDescription}>{step}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.ingredientText}>No instructions provided.</Text>
+            )}
+          </View>
+
           {/* Comments Section */}
-          <CommentsSection 
+          <CommentsSection
             comments={comments}
             onCommentLike={handleCommentLike}
             theme={theme}
@@ -346,7 +473,7 @@ export default function RecipeDetailScreen() {
       <CommentInput onAddComment={handleAddComment} theme={theme} />
 
       {/* Rating Modal */}
-      <RatingModal 
+      <RatingModal
         visible={showRating}
         onClose={() => setShowRating(false)}
         onRating={handleRating}
@@ -627,4 +754,56 @@ const createStyles = (theme) => StyleSheet.create({
     color: theme.colors.text,
     flex: 1,
   },
+
+  stepCard: {
+  borderWidth: 1,
+  borderColor: '#E9ECEF',
+  backgroundColor: '#FAFAFA',
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 16,
+},
+
+stepHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 8,
+},
+
+stepCircle: {
+  width: 26,
+  height: 26,
+  borderRadius: 13,
+  borderWidth: 1,
+  borderColor: '#CCC',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: 10,
+  backgroundColor: '#fff',
+},
+
+stepNumber: {
+  fontWeight: '600',
+  fontSize: 13,
+  color: '#333',
+},
+
+stepTitle: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: theme.colors.text,
+},
+
+stepDescription: {
+  fontSize: 15,
+  color: theme.colors.textSecondary,
+  lineHeight: 22,
+},
+
+sectionSubtitle: {
+  fontSize: 14,
+  color: theme.colors.textSecondary,
+  marginBottom: 10,
+},
+
 });
