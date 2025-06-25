@@ -19,7 +19,7 @@ import AllergenSelector from './AllergenSelector';
 import DietarySelector from './DietarySelector';
 import IngredientInput from './IngredientInput';
 import InstructionInput from './InstructionInput';
-import TimePicker from './TimePicker'; // Add this import
+import TimePicker from './TimePicker';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function RecipeForm({ onSuccess, onCancel }) {
@@ -65,7 +65,9 @@ export default function RecipeForm({ onSuccess, onCancel }) {
       const recipeData = {
         title: recipe.title.trim(),
         description: recipe.description.trim(),
-        time: `${recipe.time} min${recipe.time !== 1 ? 's' : ''}`, // Format time
+        // *** FIX APPLIED HERE: Use recipe.time directly ***
+        time: recipe.time, // TimePicker should already return "X min" or "X mins"
+        // **************************************************
         categories: recipe.categories,
         allergens: recipe.allergens,
         dietary: recipe.dietary,
@@ -164,6 +166,7 @@ export default function RecipeForm({ onSuccess, onCancel }) {
           <AllergenSelector
             selectedAllergens={recipe.allergens}
             onToggleAllergen={toggleAllergen}
+            error={errors.allergens}
           />
 
           <DietarySelector
