@@ -1,66 +1,112 @@
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {Ionicons} from '@expo/vector-icons';
-import {useEffect, useState} from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState, useCallback } from 'react'; // Added useCallback
 import RecipeCard from '../../components/RecipeCard';
 import RecipeForm from '../../components/RecipeForm/RecipeForm';
-import {useTheme} from '../../contexts/ThemeContext';
-import useAuth from "../../lib/useAuth"
-import {Stack, Redirect} from 'expo-router'
-import {db} from '../../lib/firebaseconfig'
-import {getDocs, collection} from 'firebase/firestore'
+import { useTheme } from '../../contexts/ThemeContext';
+import useAuth from "../../lib/useAuth";
+import { Redirect } from 'expo-router'; // No Stack needed here directly
+import { db } from '../../lib/firebaseconfig';
+import { getDocs, collection, doc, getDoc } from 'firebase/firestore'; // Added getDoc
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 
 export default function HomeScreen() {
-
     const [recipeList, setRecipeList] = useState([]);
     const [error, setError] = useState(null);
+    const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
 
-    const getRecipes = async () => {
-        try {
-            console.log('🔍 Fetching recipes from Firestore...');
-            const data = await getDocs(collection(db, 'recipes'));
-            const recipes = data.docs.map((doc) => ({id: doc.id, ...doc.data()}));
-            console.log('✅ Recipes fetched:', recipes);
-            setRecipeList(recipes);
-        } catch (err) {
-            console.error('❌ Error fetching recipes:', err);
-            setError(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-
-    useEffect(() => {
-        getRecipes();
-    }, []);
-
-    const {theme} = useTheme();
+    const { theme } = useTheme();
     const styles = createStyles(theme);
     const [showCreateModal, setShowCreateModal] = useState(false);
+
+    const { user, isLoading: isLoadingAuth } = useAuth();
+
+    // Memoize getRecipes to prevent unnecessary re-creations
+    const getRecipes = useCallback(async () => {
+        if (!user) { // Only fetch if user is logged in
+            console.log('[HomeScreen] User not authenticated yet, skipping recipe fetch.');
+            setIsLoadingRecipes(false);
+            return;
+        }
+
+        setIsLoadingRecipes(true);
+        setError(null);
+        try {
+            console.log('🔍 [HomeScreen] Fetching recipes from Firestore...');
+            const recipesCollectionRef = collection(db, 'recipes');
+            const data = await getDocs(recipesCollectionRef);
+
+            const recipesWithLikesAndStatus = await Promise.all(
+                data.docs.map(async (docSnapshot) => {
+                    const recipeData = { id: docSnapshot.id, ...docSnapshot.data() };
+
+                    // Fetch the likes count for each recipe from its subcollection
+                    const likesCollectionRef = collection(db, 'recipes', docSnapshot.id, 'likes');
+                    const likesSnapshot = await getDocs(likesCollectionRef);
+                    const likesCount = likesSnapshot.size;
+
+                    // Check if the current user has liked this recipe
+                    let isLikedByCurrentUser = false;
+                    if (user && user.uid) { // Ensure user and uid exist before checking
+                        const userLikeDocRef = doc(db, 'recipes', docSnapshot.id, 'likes', user.uid);
+                        const userLikeDoc = await getDoc(userLikeDocRef);
+                        isLikedByCurrentUser = userLikeDoc.exists();
+                    }
+
+                    console.log(`✅ [HomeScreen] Recipe ID: ${docSnapshot.id}, Likes: ${likesCount}, Liked by current user: ${isLikedByCurrentUser}`);
+
+                    return { ...recipeData, likesCount, isLikedByCurrentUser }; // Add both counts and status
+                })
+            );
+
+            console.log('✅ [HomeScreen] All recipes fetched with likes and user status.');
+            setRecipeList(recipesWithLikesAndStatus);
+        } catch (err) {
+            console.error('❌ [HomeScreen] Error fetching recipes:', err);
+            setError(err);
+        } finally {
+            setIsLoadingRecipes(false);
+        }
+    }, [user]); // Re-create getRecipes if the user object changes
+
+    // Use useFocusEffect to re-fetch recipes when the screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            getRecipes();
+            // Optional: return a cleanup function if you had listeners that needed unsubscribing
+            return () => {
+                console.log('[HomeScreen] Screen unfocused. No specific cleanup needed for getDocs.');
+            };
+        }, [getRecipes]) // Depend on getRecipes to re-run when getRecipes changes
+    );
+
 
     const handleCreatePress = () => {
         setShowCreateModal(true);
     };
 
     const handleRecipeSuccess = (recipeId) => {
-        console.log('Recipe created with ID:', recipeId);
+        console.log('[HomeScreen] Recipe created with ID:', recipeId);
         setShowCreateModal(false);
-        getRecipes();
+        getRecipes(); // Refresh the list to include the new recipe and its like count
     };
 
     const handleCloseModal = () => {
         setShowCreateModal(false);
     };
 
-    const {user, isLoading} = useAuth()
-    console.log(user)
-    if (isLoading) {
-        return <ActivityIndicator/>
+    if (isLoadingAuth) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+                <Text style={{ color: theme.colors.text, marginTop: 10 }}>Checking authentication...</Text>
+            </View>
+        );
     }
 
     if (!user) {
-        return <Redirect href="/login"/>
+        return <Redirect href="/login" />;
     }
 
     return (
@@ -70,23 +116,42 @@ export default function HomeScreen() {
                 <Text style={styles.logo}>Yumigo</Text>
                 <View style={styles.topNavIcons}>
                     <TouchableOpacity style={styles.createButton} onPress={handleCreatePress}>
-                        <Ionicons name="add" size={24} color={theme.colors.buttonText}/>
+                        <Ionicons name="add" size={24} color={theme.colors.buttonText} />
                         <Text style={styles.createText}>Create</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.notificationIcon}>
-                        <Ionicons name="notifications-outline" size={24} color={theme.colors.text}/>
+                        <Ionicons name="notifications-outline" size={24} color={theme.colors.text} />
                     </TouchableOpacity>
                 </View>
             </View>
 
             {/* Recipe Feed */}
-            <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
-                {recipeList.map((recipe) => (
-                    <RecipeCard key={recipe.id} recipe={recipe}/>
-                ))}
-            </ScrollView>
+            {isLoadingRecipes ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                    <Text style={{ color: theme.colors.text, marginTop: 10 }}>Loading recipes...</Text>
+                </View>
+            ) : error ? (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>Error loading recipes: {error.message}</Text>
+                    <TouchableOpacity onPress={getRecipes} style={styles.retryButton}>
+                        <Text style={styles.retryButtonText}>Tap to Retry</Text>
+                    </TouchableOpacity>
+                </View>
+            ) : recipeList.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                    <Ionicons name="pizza-outline" size={80} color={theme.colors.textSecondary} />
+                    <Text style={styles.emptyText}>No recipes yet! Be the first to create one.</Text>
+                </View>
+            ) : (
+                <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
+                    {recipeList.map((recipe) => (
+                        // Pass the recipe object which now contains likesCount and isLikedByCurrentUser
+                        <RecipeCard key={recipe.id} recipe={recipe} />
+                    ))}
+                </ScrollView>
+            )}
 
-            {/* Create Recipe Modal */}
             {/* Create Recipe Modal */}
             <Modal
                 visible={showCreateModal}
@@ -94,7 +159,7 @@ export default function HomeScreen() {
                 presentationStyle="pageSheet"
                 onRequestClose={handleCloseModal}
             >
-                <SafeAreaView style={[styles.modalContainer, {backgroundColor: theme.colors.background}]}>
+                <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
                     {/* Modal Header */}
                     <View style={[styles.modalHeader, {
                         backgroundColor: theme.isDarkMode
@@ -103,12 +168,12 @@ export default function HomeScreen() {
                         borderBottomColor: theme.colors.border
                     }]}>
                         <TouchableOpacity onPress={handleCloseModal} style={styles.modalCloseButton}>
-                            <Ionicons name="arrow-back" size={24} color={theme.colors.text}/>
+                            <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
                         </TouchableOpacity>
-                        <Text style={[styles.modalHeaderTitle, {color: theme.colors.text}]}>Create Recipe</Text>
+                        <Text style={[styles.modalHeaderTitle, { color: theme.colors.text }]}>Create Recipe</Text>
                     </View>
 
-                    <RecipeForm onSuccess={handleRecipeSuccess} onCancel={handleCloseModal}/>
+                    <RecipeForm onSuccess={handleRecipeSuccess} onCancel={handleCloseModal} />
                 </SafeAreaView>
             </Modal>
         </SafeAreaView>
@@ -184,5 +249,45 @@ const createStyles = (theme) => StyleSheet.create({
         flex: 1,
         textAlign: 'center',
         marginHorizontal: 16,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    errorText: {
+        color: 'red',
+        textAlign: 'center',
+        marginBottom: 10,
+        fontSize: 16,
+    },
+    retryButton: {
+        backgroundColor: theme.colors.button,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+    },
+    retryButtonText: {
+        color: theme.colors.buttonText,
+        fontWeight: 'bold',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    emptyText: {
+        color: theme.colors.textSecondary,
+        textAlign: 'center',
+        marginTop: 15,
+        fontSize: 18,
     },
 });
