@@ -137,7 +137,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     paddingVertical: 20,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
-    backgroundColor: theme.colors.cardAccent,
+    backgroundColor: '#FFFFFF', // White background for header
   },
   title: {
     fontSize: 28,
@@ -188,9 +188,13 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.cardAccent,
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
   },
   searchInputContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.colors.background,
@@ -198,8 +202,13 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.primary,
     gap: 10,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   searchInput: {
     flex: 1,
