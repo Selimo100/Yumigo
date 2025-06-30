@@ -9,6 +9,8 @@ import {
   StatusBar,
   Image,
   ActivityIndicator,
+  Share,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -149,12 +151,38 @@ export default function ProfileScreen({
   const handleLogout = async () => {
     try {
       await logout();
-      router.replace('/login'); s
+      router.replace('/login');
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
+  const handleShareProfile = async () => {
+    try {
+      const shareText = `👨‍🍳 Check out ${currentUser.username}'s profile on Yumigo!
+
+📝 ${currentUser.bio || 'Food enthusiast | Making cooking simple'}
+
+📊 Stats:
+👥 ${displayFollowerCount} followers
+👤 ${displayFollowingCount} following  
+🍽️ ${recipeList.length} delicious recipes
+
+Join the Yumigo community and discover amazing recipes!`;
+
+      const result = await Share.share({
+        message: shareText,
+        title: `${currentUser.username}'s Yumigo Profile`,
+      });
+
+      if (result.action === Share.sharedAction) {
+        console.log('Profile shared successfully!');
+      }
+    } catch (error) {
+      console.error('Error sharing profile:', error);
+      Alert.alert('Error', 'Could not share profile. Please try again.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -233,7 +261,7 @@ export default function ProfileScreen({
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.shareButton}
-              onPress={onShareProfile}
+              onPress={handleShareProfile}
             >
               <Ionicons name="share-outline" size={18} color={theme.colors.primary} />
               <Text style={styles.shareButtonText}>Share</Text>
