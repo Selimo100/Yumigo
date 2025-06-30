@@ -15,6 +15,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { getAuth } from 'firebase/auth';
 import { serverTimestamp } from 'firebase/firestore';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import useFavorites from '../../hooks/useFavorites';
 
 const formatTime = (timestamp) => {
   try {
@@ -52,14 +53,17 @@ export default function RecipeDetailScreen() {
   const scrollViewRef = useRef(null);
   const commentsRef = useRef(null);
   const { profile: userProfile } = useUserProfile();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const [recipe, setRecipe] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [showRating, setShowRating] = useState(false);
+
+  // Check if this recipe is in favorites
+  const isSaved = isFavorite(id);
 
   const auth = getAuth();
   const currentUser = auth.currentUser;
@@ -208,13 +212,29 @@ export default function RecipeDetailScreen() {
     }
   };
 
-  const handleSave = () => {
-    setIsSaved(!isSaved);
-    Alert.alert(
-      isSaved ? 'Removed from Favorites' : 'Saved to Favorites',
-      isSaved ? 'Recipe removed from your favorites' : 'Recipe saved to your favorites'
-    );
-    // TODO: Implement actual saving to a user's favorites collection in Firestore
+  const handleSave = async () => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to save recipes to favorites.");
+      return;
+    }
+
+    try {
+      await toggleFavorite(id);
+      Alert.alert(
+        isSaved ? 'Removed from Favorites' : 'Saved to Favorites',
+        isSaved ? 'Recipe removed from your favorites' : 'Recipe saved to your favorites'
+      );
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
+        Alert.alert(
+          "Setup Required", 
+          "Favorites feature requires Firestore rules setup. Check UPDATE_FIRESTORE_RULES.md in your project."
+        );
+      } else {
+        Alert.alert("Error", "Could not update favorite status.");
+      }
+    }
   };
 
   const handleRating = (rating) => {

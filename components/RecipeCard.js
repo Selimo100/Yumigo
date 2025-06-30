@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTheme } from '../contexts/ThemeContext';
 import { ALLERGENS, CATEGORIES } from '../utils/constants';
 import FollowButton from './FollowButton';
 import useAuth from '../lib/useAuth';
+import useFavorites from '../hooks/useFavorites';
 
 // mockCommentCounts is still here, as per your previous code.
 // If you want real comment counts, you'd fetch them in HomeScreen.js
@@ -45,6 +46,7 @@ const categoryConfig = CATEGORIES.reduce((acc, category) => {
 export default function RecipeCard({ recipe }) {
     const { theme } = useTheme();
     const { user } = useAuth();
+    const { isFavorite, toggleFavorite } = useFavorites();
     const styles = createStyles(theme);
 
     // Use the likesCount from the recipe object, defaulting to 0 if not present
@@ -53,6 +55,9 @@ export default function RecipeCard({ recipe }) {
 
     // Access the new isLikedByCurrentUser prop
     const isLiked = recipe.isLikedByCurrentUser || false;
+
+    // Check if this recipe is in favorites
+    const isRecipeFavorite = isFavorite(recipe.id);
 
     // Use mockCommentCounts as per your original code for comments
     const commentCount = mockCommentCounts[recipe.id] || 0;
@@ -98,12 +103,34 @@ export default function RecipeCard({ recipe }) {
                     <Text style={styles.title}>{recipe.title}</Text>
                     <TouchableOpacity
                         style={styles.saveButton}
-                        onPress={(e) => {
+                        onPress={async (e) => {
                             e.stopPropagation();
-                            console.log('Save recipe');
+                            if (!user) {
+                                Alert.alert("Login Required", "You need to be logged in to save recipes to favorites.");
+                                return;
+                            }
+                            try {
+                                await toggleFavorite(recipe.id);
+                                // No need to show alert here as user gets visual feedback
+                                // from the icon change
+                            } catch (error) {
+                                console.error('Error toggling favorite:', error);
+                                if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
+                                    Alert.alert(
+                                        "Setup Required", 
+                                        "Favorites feature requires Firestore rules setup. Check UPDATE_FIRESTORE_RULES.md in your project."
+                                    );
+                                } else {
+                                    Alert.alert("Error", "Could not update favorite status.");
+                                }
+                            }
                         }}
                     >
-                        <Ionicons name="bookmark-outline" size={20} color={theme.colors.text} />
+                        <Ionicons 
+                            name={isRecipeFavorite ? "bookmark" : "bookmark-outline"} 
+                            size={20} 
+                            color={isRecipeFavorite ? theme.colors.button : theme.colors.text} 
+                        />
                     </TouchableOpacity>
                 </View>
 
