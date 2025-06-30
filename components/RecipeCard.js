@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Animated, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTheme } from '../contexts/ThemeContext';
@@ -159,6 +159,26 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
         }
     };
 
+    const handleShare = async (e) => {
+        e.stopPropagation();
+        
+        try {
+            const shareText = `🍽️ ${recipe.title}\n\n⏱️ ${recipe.time} min\n⭐ ${recipe.rating || '0.0'} rating\n👨‍🍳 by ${recipe.authorName}\n\nCheck out this delicious recipe!`;
+            
+            const result = await Share.share({
+                message: shareText,
+                title: recipe.title,
+            });
+            
+            if (result.action === Share.sharedAction) {
+                console.log('Recipe shared successfully from card!');
+            }
+        } catch (error) {
+            console.error('Error sharing recipe:', error);
+            Alert.alert('Error', 'Could not share recipe. Please try again.');
+        }
+    };
+
     return (
         <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.9}>
             <View style={styles.imageContainer}>
@@ -275,6 +295,11 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                         <TouchableOpacity style={styles.commentButton} onPress={handleCommentPress}>
                             <Ionicons name="chatbubble-outline" size={18} color={theme.colors.textSecondary} />
                             {commentCount > 0 && <Text style={[styles.commentCount, { color: theme.colors.textSecondary }]}>{commentCount}</Text>}
+                        </TouchableOpacity>
+
+                        {/* Share Button */}
+                        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+                            <Ionicons name="share-outline" size={18} color={theme.colors.textSecondary} />
                         </TouchableOpacity>
 
                         {/* Use the FollowButton component instead of custom follow button */}
@@ -475,5 +500,11 @@ const createStyles = (theme) => StyleSheet.create({
         fontSize: 12,
         color: theme.colors.text,
         fontWeight: '500',
+    },
+    shareButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        padding: 4,
     },
 });
