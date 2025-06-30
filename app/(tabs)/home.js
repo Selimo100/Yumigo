@@ -18,6 +18,7 @@ export default function HomeScreen() {
     const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
     const [activeTab, setActiveTab] = useState('discover'); 
     const [searchQuery, setSearchQuery] = useState('');
+    const [showFilterModal, setShowFilterModal] = useState(false);
 
     const { theme } = useTheme();
     const styles = createStyles(theme);
@@ -164,13 +165,13 @@ export default function HomeScreen() {
                 </View>
             </View>
 
-            {/* Search Bar */}
+            {/* Search Bar with Filter */}
             <View style={styles.searchContainer}>
                 <View style={styles.searchInputContainer}>
                     <Ionicons name="search" size={20} color={theme.colors.textSecondary} />
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Search recipes..."
+                        placeholder="Search ..."
                         placeholderTextColor={theme.colors.textSecondary}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -181,63 +182,12 @@ export default function HomeScreen() {
                         </TouchableOpacity>
                     )}
                 </View>
-            </View>
-
-            {/* Tab Navigation */}
-            <View style={styles.tabContainer}>
-                <TouchableOpacity
-                    style={[
-                        styles.tab,
-                        activeTab === 'discover' && { backgroundColor: theme.colors.button }
-                    ]}
-                    onPress={() => setActiveTab('discover')}
+                
+                <TouchableOpacity 
+                    style={styles.filterButton}
+                    onPress={() => setShowFilterModal(true)}
                 >
-                    <Ionicons 
-                        name="compass" 
-                        size={18} 
-                        color={activeTab === 'discover' ? theme.colors.buttonText : theme.colors.textSecondary} 
-                    />
-                    <Text
-                        style={[
-                            styles.tabText,
-                            {
-                                color: activeTab === 'discover' 
-                                    ? theme.colors.buttonText 
-                                    : theme.colors.textSecondary
-                            }
-                        ]}
-                    >
-                        Discover
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[
-                        styles.tab,
-                        activeTab === 'following' && { backgroundColor: theme.colors.button }
-                    ]}
-                    onPress={() => {
-                        setActiveTab('following');
-                        loadFollowingFeed();
-                    }}
-                >
-                    <Ionicons 
-                        name="people" 
-                        size={18} 
-                        color={activeTab === 'following' ? theme.colors.buttonText : theme.colors.textSecondary} 
-                    />
-                    <Text
-                        style={[
-                            styles.tabText,
-                            {
-                                color: activeTab === 'following' 
-                                    ? theme.colors.buttonText 
-                                    : theme.colors.textSecondary
-                            }
-                        ]}
-                    >
-                        Following
-                    </Text>
+                    <Ionicons name="options" size={20} color={theme.colors.text} />
                 </TouchableOpacity>
             </View>
 
@@ -314,6 +264,116 @@ export default function HomeScreen() {
                     </View>
 
                     <RecipeForm onSuccess={handleRecipeSuccess} onCancel={handleCloseModal} />
+                </SafeAreaView>
+            </Modal>
+
+            {/* Filter Modal */}
+            <Modal
+                visible={showFilterModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowFilterModal(false)}
+            >
+                <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
+                    {/* Modal Header */}
+                    <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
+                        <TouchableOpacity 
+                            onPress={() => setShowFilterModal(false)} 
+                            style={styles.modalCloseButton}
+                        >
+                            <Ionicons name="close" size={24} color={theme.colors.text} />
+                        </TouchableOpacity>
+                        <Text style={[styles.modalTitle, { color: theme.colors.text }]}>Search & Filter</Text>
+                        <View style={styles.placeholder} />
+                    </View>
+
+                    {/* Modal Content */}
+                    <ScrollView style={styles.modalContent}>
+                        {/* Search Section */}
+                        <View style={styles.modalSection}>
+                            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Search</Text>
+                            <View style={styles.modalSearchContainer}>
+                                <Ionicons name="search" size={20} color={theme.colors.textSecondary} />
+                                <TextInput
+                                    style={[styles.modalSearchInput, { color: theme.colors.text }]}
+                                    placeholder="Search recipes..."
+                                    placeholderTextColor={theme.colors.textSecondary}
+                                    value={searchQuery}
+                                    onChangeText={setSearchQuery}
+                                />
+                                {searchQuery.length > 0 && (
+                                    <TouchableOpacity onPress={() => setSearchQuery('')}>
+                                        <Ionicons name="close" size={20} color={theme.colors.textSecondary} />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        </View>
+
+                        {/* Feed Type Section */}
+                        <View style={styles.modalSection}>
+                            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Feed Type</Text>
+                            
+                            <TouchableOpacity 
+                                style={[
+                                    styles.filterOption,
+                                    activeTab === 'discover' && styles.filterOptionActive
+                                ]}
+                                onPress={() => setActiveTab('discover')}
+                            >
+                                <Ionicons 
+                                    name="compass" 
+                                    size={20} 
+                                    color={activeTab === 'discover' ? theme.colors.buttonText : theme.colors.button} 
+                                />
+                                <Text style={[
+                                    styles.filterOptionText, 
+                                    { color: activeTab === 'discover' ? theme.colors.buttonText : theme.colors.text }
+                                ]}>
+                                    Discover - All Recipes
+                                </Text>
+                                {activeTab === 'discover' && (
+                                    <Ionicons name="checkmark" size={20} color={theme.colors.buttonText} />
+                                )}
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity 
+                                style={[
+                                    styles.filterOption,
+                                    activeTab === 'following' && styles.filterOptionActive
+                                ]}
+                                onPress={() => {
+                                    setActiveTab('following');
+                                    loadFollowingFeed();
+                                }}
+                            >
+                                <Ionicons 
+                                    name="people" 
+                                    size={20} 
+                                    color={activeTab === 'following' ? theme.colors.buttonText : theme.colors.button} 
+                                />
+                                <Text style={[
+                                    styles.filterOptionText, 
+                                    { color: activeTab === 'following' ? theme.colors.buttonText : theme.colors.text }
+                                ]}>
+                                    Following - From People You Follow
+                                </Text>
+                                {activeTab === 'following' && (
+                                    <Ionicons name="checkmark" size={20} color={theme.colors.buttonText} />
+                                )}
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Current Results */}
+                        <View style={styles.modalSection}>
+                            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                                Current Feed: {activeTab === 'discover' ? 'Discover' : 'Following'}
+                            </Text>
+                            <Text style={[styles.resultsSubtitle, { color: theme.colors.textSecondary }]}>
+                                {getFilteredRecipes().length} recipe{getFilteredRecipes().length !== 1 ? 's' : ''} 
+                                {searchQuery ? ` found for "${searchQuery}"` : ' available'}
+                            </Text>
+                        </View>
+                    </ScrollView>
                 </SafeAreaView>
             </Modal>
         </SafeAreaView>
@@ -430,28 +490,6 @@ const createStyles = (theme) => StyleSheet.create({
         marginTop: 15,
         fontSize: 18,
     },
-    tabContainer: {
-        flexDirection: 'row',
-        marginHorizontal: 16,
-        marginVertical: 12,
-        backgroundColor: 'rgba(0,0,0,0.05)',
-        borderRadius: 12,
-        padding: 4,
-    },
-    tab: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        gap: 6,
-    },
-    tabText: {
-        fontSize: 14,
-        fontWeight: '600',
-    },
     discoverUsersButton: {
         paddingHorizontal: 24,
         paddingVertical: 12,
@@ -466,8 +504,12 @@ const createStyles = (theme) => StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: theme.colors.surface,
+        flexDirection: 'row',
+        gap: 12,
+        alignItems: 'center',
     },
     searchInputContainer: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: theme.colors.background,
@@ -482,5 +524,67 @@ const createStyles = (theme) => StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: theme.colors.text,
+    },
+    filterButton: {
+        padding: 10,
+        backgroundColor: theme.colors.background,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    placeholder: {
+        width: 40,
+    },
+    modalContent: {
+        flex: 1,
+        padding: 20,
+    },
+    modalSection: {
+        marginBottom: 30,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+    },
+    modalSearchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: theme.colors.surface,
+        borderRadius: 25,
+        paddingHorizontal: 15,
+        paddingVertical: 12,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        gap: 10,
+    },
+    modalSearchInput: {
+        flex: 1,
+        fontSize: 16,
+    },
+    filterOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 16,
+        backgroundColor: theme.colors.surface,
+        borderRadius: 12,
+        marginBottom: 12,
+        gap: 12,
+    },
+    filterOptionActive: {
+        backgroundColor: theme.colors.button,
+    },
+    filterOptionText: {
+        fontSize: 16,
+        fontWeight: '500',
+        flex: 1,
+    },
+    resultsSubtitle: {
+        fontSize: 14,
     },
 });
