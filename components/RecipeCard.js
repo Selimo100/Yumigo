@@ -181,14 +181,14 @@ export default function RecipeCard({ recipe }) {
                             <Ionicons
                                 name={isLiked ? "heart" : "heart-outline"}
                                 size={18}
-                                color={isLiked ? "red" : theme.colors.text}
+                                color={isLiked ? theme.colors.primary : theme.colors.textSecondary}
                             />
-                            <Text style={styles.likesCountText}>{likesCount}</Text>
+                            <Text style={[styles.likesCountText, { color: isLiked ? theme.colors.primary : theme.colors.textSecondary }]}>{likesCount}</Text>
                         </View>
 
                         <TouchableOpacity style={styles.commentButton} onPress={handleCommentPress}>
-                            <Ionicons name="chatbubble-outline" size={18} color={theme.colors.text} />
-                            {commentCount > 0 && <Text style={styles.commentCount}>{commentCount}</Text>}
+                            <Ionicons name="chatbubble-outline" size={18} color={theme.colors.textSecondary} />
+                            {commentCount > 0 && <Text style={[styles.commentCount, { color: theme.colors.textSecondary }]}>{commentCount}</Text>}
                         </TouchableOpacity>
 
                         {/* Use the FollowButton component instead of custom follow button */}
@@ -212,6 +212,8 @@ const createStyles = (theme) => StyleSheet.create({
         marginBottom: 20,
         borderRadius: 16,
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     imageContainer: {
         position: 'relative',

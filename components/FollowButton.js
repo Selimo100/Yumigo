@@ -85,8 +85,8 @@ export default function FollowButton({
       style={[
         styles.followButton,
         {
-          backgroundColor: isFollowing ? theme.colors.surface : theme.colors.button,
-          borderColor: theme.colors.button,
+          backgroundColor: isFollowing ? theme.colors.surface : theme.colors.primary,
+          borderColor: theme.colors.primary,
           width: buttonSize.width,
           height: buttonSize.height,
         },
@@ -98,21 +98,21 @@ export default function FollowButton({
       {isLoading ? (
         <ActivityIndicator 
           size="small" 
-          color={isFollowing ? theme.colors.button : theme.colors.buttonText} 
+          color={isFollowing ? theme.colors.primary : '#FFFFFF'} 
         />
       ) : (
         <>
           <Ionicons
             name={isFollowing ? "person-remove" : "person-add"}
             size={buttonSize.iconSize}
-            color={isFollowing ? theme.colors.button : theme.colors.buttonText}
+            color={isFollowing ? theme.colors.primary : '#FFFFFF'}
             style={styles.icon}
           />
           <Text
             style={[
               styles.buttonText,
               {
-                color: isFollowing ? theme.colors.button : theme.colors.buttonText,
+                color: isFollowing ? theme.colors.primary : '#FFFFFF',
                 fontSize: buttonSize.fontSize,
               }
             ]}

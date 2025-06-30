@@ -53,6 +53,13 @@ export const ThemeProvider = ({ children }) => {
       button: isDarkMode ? '#333333' : '#E0E0E0',
       buttonText: isDarkMode ? '#FFFFFF' : '#000000',
       error: '#FF6B6B',
+      // Logo Brand Colors - Dezente Akzente
+      primary: '#0D6159', // Schriftfarbe des Logos
+      primaryLight: isDarkMode ? '#1A7A6E' : '#0D6159',
+      secondary: '#A5B68D', // Hintergrundfarbe des Logos
+      secondaryLight: isDarkMode ? '#8FA876' : '#B8C5A0',
+      accent: isDarkMode ? '#A5B68D' : '#0D6159',
+      accentBackground: isDarkMode ? 'rgba(165, 182, 141, 0.1)' : 'rgba(13, 97, 89, 0.05)',
     },
   };
 
