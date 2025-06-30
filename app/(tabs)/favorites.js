@@ -5,11 +5,13 @@ import { useState, useCallback } from 'react';
 import RecipeCard from '../../components/RecipeCard';
 import { useTheme } from '../../contexts/ThemeContext';
 import useFavorites from '../../hooks/useFavorites';
+import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 
 export default function FavoritesScreen() {
   const { theme } = useTheme();
   const { favorites, isLoading } = useFavorites();
-  const styles = createStyles(theme);
+  const tabBarHeight = useTabBarHeight();
+  const styles = createStyles(theme, tabBarHeight);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Simple filter function for favorites
@@ -95,7 +97,11 @@ export default function FavoritesScreen() {
       </View>
 
       {getFilteredFavorites().length > 0 ? (
-        <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.feed} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.feedContent}
+        >
           {getFilteredFavorites().map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
@@ -121,7 +127,7 @@ export default function FavoritesScreen() {
   );
 }
 
-const createStyles = (theme) => StyleSheet.create({
+const createStyles = (theme, tabBarHeight) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -156,6 +162,9 @@ const createStyles = (theme) => StyleSheet.create({
   feed: {
     flex: 1,
     paddingTop: 10,
+  },
+  feedContent: {
+    paddingBottom: tabBarHeight, // Add padding to prevent content being hidden behind tab bar
   },
   emptyState: {
     flex: 1,
