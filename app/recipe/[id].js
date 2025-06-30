@@ -16,7 +16,7 @@ import { getAuth } from 'firebase/auth';
 import { serverTimestamp } from 'firebase/firestore';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
-import { deleteRecipe, isRecipeOwner } from '../../services/recipeService';
+import { deleteRecipe, isRecipeOwner, rateRecipe, getUserRating } from '../../services/recipeService';
 import useAuth from '../../lib/useAuth';
 
 const formatTime = (timestamp) => {
@@ -80,38 +80,54 @@ export default function RecipeDetailScreen() {
         if (recipeDocSnap.exists()) {
           const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
 
-          // --- START CHANGES HERE ---
-          // Fetch author's display name
           let authorDisplayName = 'Anonymous';
           if (recipeData.authorId) {
-            const userDocRef = doc(db, 'users', recipeData.authorId); // Assuming you have a 'users' collection
+            const userDocRef = doc(db, 'users', recipeData.authorId); 
             const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists()) {
               authorDisplayName = userDocSnap.data().displayName || userDocSnap.data().email || 'Anonymous';
             } else if (currentUser && currentUser.uid === recipeData.authorId) {
-              // Fallback to current user's display name if the recipe is by them
               authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
             }
           }
-          setRecipe({ ...recipeData, authorDisplayName });
-          // --- END CHANGES HERE ---
 
-          // Check if current user has liked this recipe
+          const ratingsCollectionRef = collection(db, 'recipes', id, 'ratings');
+          const ratingsSnapshot = await getDocs(ratingsCollectionRef);
+          const reviewsCount = ratingsSnapshot.size;
+          
+          let averageRating = recipeData.rating || 0;
+          if (reviewsCount > 0 && !recipeData.rating) {
+            let totalRating = 0;
+            ratingsSnapshot.docs.forEach(doc => {
+              totalRating += doc.data().rating;
+            });
+            averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
+          }
+
+          setRecipe({ 
+            ...recipeData, 
+            authorDisplayName,
+            rating: averageRating,
+            reviews: reviewsCount
+          });
+
+          if (currentUser) {
+            const userCurrentRating = await getUserRating(id, currentUser.uid);
+            setUserRating(userCurrentRating);
+          }
           if (currentUser) {
             const recipeLikeDocRef = doc(db, 'recipes', id, 'likes', currentUser.uid);
             const recipeLikeSnap = await getDoc(recipeLikeDocRef);
             setIsLiked(recipeLikeSnap.exists());
           }
 
-          // Fetch comments and their like status/counts
           const commentsSnap = await getDocs(collection(db, 'recipes', id, 'comments'));
           const commentsData = await Promise.all(commentsSnap.docs.map(async docSnapshot => {
             const data = docSnapshot.data();
             let isCommentLikedByUser = false;
             let commentLikesCount = 0;
-            let commentAuthorName = data.authorName || data.authorId || 'Anonymous'; // Use existing authorName from comment or fallback
+            let commentAuthorName = data.authorName || data.authorId || 'Anonymous'; 
 
-            // If authorId is present but authorName is not, try fetching from users collection for comments too
             if (!data.authorName && data.authorId) {
               const commentUserDocRef = doc(db, 'users', data.authorId);
               const commentUserDocSnap = await getDoc(commentUserDocRef);
@@ -121,20 +137,18 @@ export default function RecipeDetailScreen() {
             }
 
 
-            // Fetch total likes for this comment
             const commentLikesCollectionRef = collection(db, 'recipes', id, 'comments', docSnapshot.id, 'likes');
             const commentLikesSnapshot = await getDocs(commentLikesCollectionRef);
             commentLikesCount = commentLikesSnapshot.size;
 
-            // Check if current user liked this comment
             if (currentUser) {
               const userCommentLikeDocRef = doc(commentLikesCollectionRef, currentUser.uid);
               const userCommentLikeSnap = await getDoc(userCommentLikeDocRef);
               isCommentLikedByUser = userCommentLikeSnap.exists();
             }            return {
               id: docSnapshot.id,
-              user: commentAuthorName, // Use the fetched/resolved author name for comments
-              avatar: data.authorAvatar || null, // Use the stored avatar from comment data
+              user: commentAuthorName, 
+              avatar: data.authorAvatar || null, 
               comment: data.text || '',
               time: formatTime(data.createdAt?.toDate?.() || new Date()),
               likes: commentLikesCount,
@@ -142,20 +156,8 @@ export default function RecipeDetailScreen() {
             };
           }));
 
-          // Sort comments by timestamp, newest first
           commentsData.sort((a, b) => {
-            // This sort is problematic if 'time' is a string like "X minutes ago".
-            // Ideally, you'd sort by the raw `createdAt` timestamp.
-            // For now, if your `formatTime` returns "just now" for new comments, they might not sort correctly.
-            // Let's assume you fetch `createdAt` and use it for sorting directly:
-            // If `data.createdAt` from Firestore is a Timestamp, it needs to be compared as such.
-            // This section assumes `commentsData` now includes `createdAt` as a Date object or Firebase Timestamp
-            // For better sorting, pass `createdAt` from `docSnapshot.data()` to the comment object.
-            // Example:
-            // const timeA = commentsSnap.docs.find(d => d.id === a.id)?.data()?.createdAt?.toDate?.() || new Date(0);
-            // const timeB = commentsSnap.docs.find(d => d.id === b.id)?.data()?.createdAt?.toDate?.() || new Date(0);
-            // return timeB.getTime() - timeA.getTime();
-            return 0; // Keeping original order of fetched comments for now
+            return 0; 
           });
 
           setComments(commentsData);
@@ -170,7 +172,7 @@ export default function RecipeDetailScreen() {
       }
     };
     if (id) fetchRecipeAndData();
-  }, [id, currentUser]); // Re-run effect if recipe ID or current user changes
+  }, [id, currentUser]);
 
 
   useEffect(() => {
@@ -196,18 +198,12 @@ export default function RecipeDetailScreen() {
 
     try {
       if (isLiked) {
-        // User is unliking
         await deleteDoc(recipeLikeDocRef);
         setIsLiked(false);
-        Alert.alert("Unliked", "Recipe removed from your liked items.");
       } else {
-        // User is liking
-        await setDoc(recipeLikeDocRef, { timestamp: serverTimestamp() }); // Add timestamp for potential future use (e.g., when it was liked)
+        await setDoc(recipeLikeDocRef, { timestamp: serverTimestamp() }); 
         setIsLiked(true);
-        Alert.alert("Liked", "Recipe added to your liked items!");
       }
-      // TODO: Consider updating the recipe's global like count field in Firestore here
-      // (This would typically involve Cloud Functions or a transaction for atomic updates)
     } catch (error) {
       console.error("Error updating recipe like:", error);
       Alert.alert("Error", "Could not update like status.");
@@ -222,10 +218,6 @@ export default function RecipeDetailScreen() {
 
     try {
       await toggleFavorite(id);
-      Alert.alert(
-        isSaved ? 'Removed from Favorites' : 'Saved to Favorites',
-        isSaved ? 'Recipe removed from your favorites' : 'Recipe saved to your favorites'
-      );
     } catch (error) {
       console.error('Error toggling favorite:', error);
       if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
@@ -239,14 +231,23 @@ export default function RecipeDetailScreen() {
     }
   };
 
-  const handleRating = (rating) => {
-    setUserRating(rating);
-    setShowRating(false);
-    Alert.alert(
-      'Rating Submitted',
-      `You rated this recipe ${rating} star${rating !== 1 ? 's' : ''}!`
-    );
-    // TODO: Implement saving user ratings to Firestore
+  const handleRating = async (rating) => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to rate recipes.");
+      return;
+    }
+
+    try {
+      await rateRecipe(id, currentUser.uid, rating);
+      setUserRating(rating);
+      setShowRating(false);
+      
+      await reloadRecipeData();
+      
+    } catch (error) {
+      console.error('Error rating recipe:', error);
+      Alert.alert("Error", "Could not save your rating.");
+    }
   };
 
   const handleCommentLike = (commentId) => {
@@ -263,14 +264,12 @@ export default function RecipeDetailScreen() {
           const newIsLiked = !comment.isLiked;
           const newLikes = newIsLiked ? comment.likes + 1 : comment.likes - 1;
 
-          // Optimistically update UI
           const updatedComment = {
             ...comment,
             isLiked: newIsLiked,
             likes: newLikes,
           };
 
-          // Perform Firestore update in the background
           (async () => {
             try {
               if (newIsLiked) {
@@ -280,8 +279,7 @@ export default function RecipeDetailScreen() {
               }
             } catch (error) {
               console.error("Error updating comment like in Firestore:", error);
-              // If Firestore update fails, revert the local state change
-              setComments(prev => prev.map(c => c.id === commentId ? comment : c)); // Revert to original state
+              setComments(prev => prev.map(c => c.id === commentId ? comment : c)); 
               Alert.alert("Error", "Could not update comment like status.");
             }
           })();
@@ -307,34 +305,31 @@ export default function RecipeDetailScreen() {
     try {
       const newCommentData = {
         text: commentText,
-        authorId: currentUser.uid, // Store UID for security/lookup
-        authorName: userProfile?.username || currentUser.displayName || currentUser.email || 'Anonymous', // Store display name for UI
-        authorAvatar: userProfile?.avatar || null, // Store user's profile picture
+        authorId: currentUser.uid, 
+        authorName: userProfile?.username || currentUser.displayName || currentUser.email || 'Anonymous', 
+        authorAvatar: userProfile?.avatar || null, 
         createdAt: serverTimestamp(),
       };
 
       const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newCommentData);
 
-      // Create local comment for immediate UI update, ensuring 'comment' key
       const localComment = {
         id: docRef.id,
-        user: newCommentData.authorName, // Use the display name for UI
-        avatar: newCommentData.authorAvatar, // Use user's actual avatar
-        comment: commentText, // Corrected: This must be 'comment' for CommentsSection
-        time: 'just now', // Will be updated on next fetch
+        user: newCommentData.authorName, 
+        avatar: newCommentData.authorAvatar,
+        comment: commentText, 
+        time: 'just now', 
         likes: 0,
         isLiked: false,
       };
 
-      setComments(prev => [localComment, ...prev]); // Add new comment to the top
-      Alert.alert('Comment added', 'Your comment has been posted!');
+      setComments(prev => [localComment, ...prev]);
     } catch (error) {
       console.error('❌ Failed to post comment:', error);
       Alert.alert('Error', 'Failed to post comment.');
     }
   };
 
-  // Handle recipe deletion
   const handleDeleteRecipe = () => {
     Alert.alert(
       "Delete Recipe",
@@ -350,7 +345,6 @@ export default function RecipeDetailScreen() {
           onPress: async () => {
             try {
               await deleteRecipe(id, recipe.authorId);
-              // Set global flag so profile page can reload to show updated recipe list
               global.profileNeedsReload = true;
               Alert.alert("Recipe Deleted", "Your recipe has been deleted successfully.");
               router.back();
@@ -364,7 +358,6 @@ export default function RecipeDetailScreen() {
     );
   };
 
-  // Function to reload recipe data
   const reloadRecipeData = async () => {
     try {
       setLoading(true);
@@ -374,7 +367,6 @@ export default function RecipeDetailScreen() {
       if (recipeDocSnap.exists()) {
         const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
 
-        // Fetch author's display name
         let authorDisplayName = 'Anonymous';
         if (recipeData.authorId) {
           const userDocRef = doc(db, 'users', recipeData.authorId);
@@ -385,7 +377,31 @@ export default function RecipeDetailScreen() {
             authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
           }
         }
-        setRecipe({ ...recipeData, authorDisplayName });
+
+        const ratingsCollectionRef = collection(db, 'recipes', id, 'ratings');
+        const ratingsSnapshot = await getDocs(ratingsCollectionRef);
+        const reviewsCount = ratingsSnapshot.size;
+        
+        let averageRating = recipeData.rating || 0;
+        if (reviewsCount > 0 && !recipeData.rating) {
+          let totalRating = 0;
+          ratingsSnapshot.docs.forEach(doc => {
+            totalRating += doc.data().rating;
+          });
+          averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
+        }
+
+        setRecipe({ 
+          ...recipeData, 
+          authorDisplayName,
+          rating: averageRating,
+          reviews: reviewsCount
+        });
+
+        if (currentUser) {
+          const userCurrentRating = await getUserRating(id, currentUser.uid);
+          setUserRating(userCurrentRating);
+        }
       }
     } catch (error) {
       console.error('Error reloading recipe:', error);
@@ -394,23 +410,19 @@ export default function RecipeDetailScreen() {
     }
   };
 
-  // Handle recipe editing with callback
   const handleEditRecipe = () => {
     router.push(`/recipe/edit-recipe?id=${id}`);
   };
 
-  // Listen for navigation back from edit screen using useFocusEffect
   useFocusEffect(
     useCallback(() => {
-      // Check if edit was completed
       if (global.recipeEditCompleted) {
         reloadRecipeData();
-        global.recipeEditCompleted = false; // Reset flag
+        global.recipeEditCompleted = false;
       }
     }, [])
   );
 
-  // Check if current user is the recipe owner
   const isOwner = isRecipeOwner(recipe, currentUser?.uid);
 
   if (loading || !recipe) {

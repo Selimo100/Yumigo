@@ -80,20 +80,42 @@ export default function HomeScreen() {
                 data.docs.map(async (docSnapshot) => {
                     const recipeData = { id: docSnapshot.id, ...docSnapshot.data() };
 
+                    // Get likes count and user like status
                     const likesCollectionRef = collection(db, 'recipes', docSnapshot.id, 'likes');
                     const likesSnapshot = await getDocs(likesCollectionRef);
                     const likesCount = likesSnapshot.size;
 
                     let isLikedByCurrentUser = false;
-                    if (user && user.uid) { // Ensure user and uid exist before checking
+                    if (user && user.uid) {
                         const userLikeDocRef = doc(db, 'recipes', docSnapshot.id, 'likes', user.uid);
                         const userLikeDoc = await getDoc(userLikeDocRef);
                         isLikedByCurrentUser = userLikeDoc.exists();
                     }
 
-                    console.log(`✅ [HomeScreen] Recipe ID: ${docSnapshot.id}, Likes: ${likesCount}, Liked by current user: ${isLikedByCurrentUser}`);
+                    // Get ratings count and average
+                    const ratingsCollectionRef = collection(db, 'recipes', docSnapshot.id, 'ratings');
+                    const ratingsSnapshot = await getDocs(ratingsCollectionRef);
+                    const reviewsCount = ratingsSnapshot.size;
+                    
+                    let averageRating = recipeData.rating || 0;
+                    if (reviewsCount > 0 && !recipeData.rating) {
+                        // Calculate average if not stored in recipe document
+                        let totalRating = 0;
+                        ratingsSnapshot.docs.forEach(doc => {
+                            totalRating += doc.data().rating;
+                        });
+                        averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
+                    }
 
-                    return { ...recipeData, likesCount, isLikedByCurrentUser }; // Add both counts and status
+                    console.log(`✅ [HomeScreen] Recipe ID: ${docSnapshot.id}, Likes: ${likesCount}, Liked by current user: ${isLikedByCurrentUser}, Rating: ${averageRating}, Reviews: ${reviewsCount}`);
+
+                    return { 
+                        ...recipeData, 
+                        likesCount, 
+                        isLikedByCurrentUser,
+                        rating: averageRating,
+                        reviews: reviewsCount
+                    };
                 })
             );
 
@@ -134,6 +156,30 @@ export default function HomeScreen() {
 
     const handleCloseModal = () => {
         setShowCreateModal(false);
+    };
+
+    const handleLikeUpdate = (recipeId, isLiked, newLikesCount) => {
+        // Update the recipe in both discover and following feeds
+        setRecipeList(prevRecipes => 
+            prevRecipes.map(recipe => 
+                recipe.id === recipeId 
+                    ? { ...recipe, isLikedByCurrentUser: isLiked, likesCount: newLikesCount }
+                    : recipe
+            )
+        );
+        
+        // Update following feed if it exists
+        if (followingFeed.length > 0) {
+            loadFollowingFeed(); // Refresh following feed
+        }
+    };
+
+    const handleRatingUpdate = (recipeId) => {
+        // Refresh recipes to get updated rating
+        getRecipes();
+        if (activeTab === 'following') {
+            loadFollowingFeed();
+        }
     };
 
     if (isLoadingAuth) {
@@ -244,7 +290,12 @@ export default function HomeScreen() {
                 <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
                     {getFilteredRecipes().map((recipe) => (
                         // Pass the recipe object which now contains likesCount and isLikedByCurrentUser
-                        <RecipeCard key={recipe.id} recipe={recipe} />
+                        <RecipeCard 
+                            key={recipe.id} 
+                            recipe={recipe} 
+                            onLikeUpdate={handleLikeUpdate}
+                            onRatingUpdate={handleRatingUpdate}
+                        />
                     ))}
                 </ScrollView>
             )}
