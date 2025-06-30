@@ -1,6 +1,7 @@
 import {Stack} from 'expo-router';
 import {StatusBar} from 'expo-status-bar';
 import {ThemeProvider} from '../contexts/ThemeContext';
+import {NotificationProvider} from '../contexts/NotificationContext';
 import AuthenticatedUserProvider from "../lib/AuthenticatedUserProvider";
 
 function App() {
@@ -18,8 +19,10 @@ export default function RootLayout() {
     return (
         <ThemeProvider>
             <AuthenticatedUserProvider>
-                <StatusBar style="auto"/>
-                <App/>
+                <NotificationProvider>
+                    <StatusBar style="auto"/>
+                    <App/>
+                </NotificationProvider>
             </AuthenticatedUserProvider>
         </ThemeProvider>
     );
