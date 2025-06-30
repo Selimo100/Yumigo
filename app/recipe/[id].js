@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
@@ -17,7 +17,6 @@ import { serverTimestamp } from 'firebase/firestore';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
 import { deleteRecipe, isRecipeOwner, rateRecipe, getUserRating } from '../../services/recipeService';
-import useAuth from '../../lib/useAuth';
 
 const formatTime = (timestamp) => {
   try {
@@ -414,6 +413,25 @@ export default function RecipeDetailScreen() {
     router.push(`/recipe/edit-recipe?id=${id}`);
   };
 
+  const handleShare = async () => {
+    try {
+      const shareText = `Check out this delicious recipe: ${recipe.title}\n\nIngredients:\n${recipe.ingredients.map(item => `• ${item.amount} ${item.ingredient}`).join('\n')}\n\nTime: ${recipe.time} min\nRating: ${recipe.rating}⭐\n\nBy ${recipe.authorName}`;
+      
+      const result = await Share.share({
+        message: shareText,
+        title: recipe.title,
+        url: recipe.imageUrl, // Optional: share the image URL
+      });
+      
+      if (result.action === Share.sharedAction) {
+        console.log('Recipe shared successfully!');
+      }
+    } catch (error) {
+      console.error('Error sharing recipe:', error);
+      Alert.alert('Error', 'Could not share recipe. Please try again.');
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       if (global.recipeEditCompleted) {
@@ -451,7 +469,7 @@ export default function RecipeDetailScreen() {
               </TouchableOpacity>
             </>
           )}
-          <TouchableOpacity style={styles.shareButton}>
+          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
             <Ionicons name="share-outline" size={24} color={theme.colors.text} />
           </TouchableOpacity>
         </View>
