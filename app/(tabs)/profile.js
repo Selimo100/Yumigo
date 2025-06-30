@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { useUserProfile } from '../../hooks/useUserProfile';
 import { logout } from '../../services/authService';
 import { useRouter } from 'expo-router';
 import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
+import { useFollow } from '../../hooks/useFollow';
 
 const { width } = Dimensions.get('window');
 
@@ -28,6 +29,7 @@ export default function ProfileScreen({
   const { theme, toggleTheme, isDarkMode } = useTheme();
   const { user } = useAuth();
   const { profile: userProfile, recipes: userRecipes, isLoading: profileLoading, refreshProfile } = useUserProfile();
+  const { followingList, followersList, followingCount, followerCount, loadFollowingUsers, loadFollowers } = useFollow();
   const router = useRouter();
 
   useEffect(() => {
@@ -35,10 +37,20 @@ export default function ProfileScreen({
       if (refreshProfile) {
         refreshProfile();
       }
+      loadFollowingUsers();
+      loadFollowers();
     });
 
     return unsubscribe;
-  }, [refreshProfile]);
+  }, [refreshProfile, loadFollowingUsers, loadFollowers]);
+
+  // Load follow data when component mounts or user changes
+  useEffect(() => {
+    if (user?.uid) {
+      loadFollowingUsers();
+      loadFollowers();
+    }
+  }, [user?.uid, loadFollowingUsers, loadFollowers]);
 
   if (profileLoading) {
     return (
@@ -61,6 +73,11 @@ export default function ProfileScreen({
     recipeCount: 0,
     avatar: null,
   };
+  
+  // Use real-time counts from useFollow hook with fallback to profile data
+  const displayFollowingCount = followingCount ?? followingList?.length ?? currentUser.followingCount ?? 0;
+  const displayFollowerCount = followerCount ?? followersList?.length ?? currentUser.followerCount ?? 0;
+  
   const recipeList = userRecipes || [];
 
   const renderRecipeCard = (recipe) => (
@@ -157,26 +174,39 @@ export default function ProfileScreen({
           </Text>
 
           <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
+            <TouchableOpacity
+              style={styles.statItem}
+              onPress={() => {
+                loadFollowingUsers();
+                router.push('/profile/follow-list?type=following');
+              }}
+            >
               <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                {currentUser.followingCount || 0}
+                {displayFollowingCount}
               </Text>
               <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
                 Following
               </Text>
-            </View>
-            <View style={styles.statItem}>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.statItem}
+              onPress={() => {
+                loadFollowers();
+                router.push('/profile/follow-list?type=followers');
+              }}
+            >
               <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                {currentUser.followerCount || 0}
+                {displayFollowerCount}
               </Text>
               <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
                 Followers
               </Text>
-            </View>
+            </TouchableOpacity>
             <View style={styles.statItem}>
               <Text style={[styles.statNumber, { color: theme.colors.text }]}>
                 {currentUser.recipeCount || 0}
-              </Text><Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+              </Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
                 Recipes
               </Text>
             </View>
@@ -193,7 +223,8 @@ export default function ProfileScreen({
             >
               <Ionicons name="create-outline" size={18} color={theme.colors.buttonText} />
               <Text style={[styles.buttonText, { color: theme.colors.buttonText }]}>Edit</Text>
-            </TouchableOpacity>            <TouchableOpacity
+            </TouchableOpacity>
+            <TouchableOpacity
               style={[styles.shareButton, { backgroundColor: theme.colors.button }]}
               onPress={onShareProfile}
             >
@@ -233,11 +264,11 @@ export default function ProfileScreen({
                 <Text style={[styles.createButtonText, { color: theme.colors.buttonText }]}>
                   Create Recipe
                 </Text>
-              </TouchableOpacity>            </View>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 
-        {/* Logout Section */}
         <View style={styles.logoutSection}>
           <TouchableOpacity
             style={[styles.logoutButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
@@ -332,8 +363,22 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     gap: 8,
   },
+  discoverButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    gap: 8,
+    borderWidth: 1,
+    marginHorizontal: 4,
+  },
   buttonText: {
     fontSize: 16,
+    fontWeight: '600',
+  },
+  discoverButtonText: {
+    fontSize: 14,
     fontWeight: '600',
   },
   recipesSection: {
@@ -446,7 +491,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     gap: 8,
-  },  createButtonText: {
+  }, createButtonText: {
     fontSize: 16,
     fontWeight: '600',
   },

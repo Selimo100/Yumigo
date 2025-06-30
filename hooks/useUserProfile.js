@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth } from '../lib/firebaseconfig';
 import { getUserProfile, getUserRecipes } from '../services/userService';
 import { onAuthStateChanged } from 'firebase/auth';
+import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
 
 export const useUserProfile = () => {
     const [profile, setProfile] = useState(null);
@@ -61,6 +62,26 @@ export const useUserProfile = () => {
                 setProfile(null);
                 setRecipes([]);
                 setIsLoading(false);
+            }
+        });
+
+        return unsubscribe;
+    }, []);
+
+    // Listen for profile updates (like follow/unfollow changes)
+    useEffect(() => {
+        const unsubscribe = profileUpdateEmitter.subscribe(async () => {
+            const user = auth.currentUser;
+            if (user) {
+                // Only refresh profile data, not recipes to avoid unnecessary loading
+                try {
+                    const userProfile = await getUserProfile(user.uid);
+                    if (userProfile) {
+                        setProfile(userProfile);
+                    }
+                } catch (error) {
+                    console.error('Error refreshing profile:', error);
+                }
             }
         });
 

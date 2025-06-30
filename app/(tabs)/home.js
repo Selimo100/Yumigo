@@ -10,17 +10,20 @@ import { Redirect } from 'expo-router'; // No Stack needed here directly
 import { db } from '../../lib/firebaseconfig';
 import { getDocs, collection, doc, getDoc } from 'firebase/firestore'; // Added getDoc
 import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
+import { useFollow } from '../../hooks/useFollow';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);
     const [error, setError] = useState(null);
     const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
+    const [activeTab, setActiveTab] = useState('discover'); // 'discover' or 'following'
 
     const { theme } = useTheme();
     const styles = createStyles(theme);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     const { user, isLoading: isLoadingAuth } = useAuth();
+    const { followingFeed, loadFollowingFeed, isLoading: isLoadingFeed } = useFollow();
 
     // Memoize getRecipes to prevent unnecessary re-creations
     const getRecipes = useCallback(async () => {
@@ -74,11 +77,14 @@ export default function HomeScreen() {
     useFocusEffect(
         useCallback(() => {
             getRecipes();
+            if (activeTab === 'following') {
+                loadFollowingFeed();
+            }
             // Optional: return a cleanup function if you had listeners that needed unsubscribing
             return () => {
                 console.log('[HomeScreen] Screen unfocused. No specific cleanup needed for getDocs.');
             };
-        }, [getRecipes]) // Depend on getRecipes to re-run when getRecipes changes
+        }, [getRecipes, activeTab, loadFollowingFeed]) // Depend on getRecipes and activeTab to re-run when they change
     );
 
 
@@ -125,11 +131,71 @@ export default function HomeScreen() {
                 </View>
             </View>
 
+            {/* Tab Navigation */}
+            <View style={styles.tabContainer}>
+                <TouchableOpacity
+                    style={[
+                        styles.tab,
+                        activeTab === 'discover' && { backgroundColor: theme.colors.button }
+                    ]}
+                    onPress={() => setActiveTab('discover')}
+                >
+                    <Ionicons 
+                        name="compass" 
+                        size={18} 
+                        color={activeTab === 'discover' ? theme.colors.buttonText : theme.colors.textSecondary} 
+                    />
+                    <Text
+                        style={[
+                            styles.tabText,
+                            {
+                                color: activeTab === 'discover' 
+                                    ? theme.colors.buttonText 
+                                    : theme.colors.textSecondary
+                            }
+                        ]}
+                    >
+                        Discover
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[
+                        styles.tab,
+                        activeTab === 'following' && { backgroundColor: theme.colors.button }
+                    ]}
+                    onPress={() => {
+                        setActiveTab('following');
+                        loadFollowingFeed();
+                    }}
+                >
+                    <Ionicons 
+                        name="people" 
+                        size={18} 
+                        color={activeTab === 'following' ? theme.colors.buttonText : theme.colors.textSecondary} 
+                    />
+                    <Text
+                        style={[
+                            styles.tabText,
+                            {
+                                color: activeTab === 'following' 
+                                    ? theme.colors.buttonText 
+                                    : theme.colors.textSecondary
+                            }
+                        ]}
+                    >
+                        Following
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
             {/* Recipe Feed */}
-            {isLoadingRecipes ? (
+            {(activeTab === 'discover' ? isLoadingRecipes : isLoadingFeed) ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={theme.colors.primary} />
-                    <Text style={{ color: theme.colors.text, marginTop: 10 }}>Loading recipes...</Text>
+                    <Text style={{ color: theme.colors.text, marginTop: 10 }}>
+                        {activeTab === 'discover' ? 'Loading recipes...' : 'Loading following feed...'}
+                    </Text>
                 </View>
             ) : error ? (
                 <View style={styles.errorContainer}>
@@ -138,14 +204,33 @@ export default function HomeScreen() {
                         <Text style={styles.retryButtonText}>Tap to Retry</Text>
                     </TouchableOpacity>
                 </View>
-            ) : recipeList.length === 0 ? (
+            ) : (activeTab === 'discover' ? recipeList : followingFeed).length === 0 ? (
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="pizza-outline" size={80} color={theme.colors.textSecondary} />
-                    <Text style={styles.emptyText}>No recipes yet! Be the first to create one.</Text>
+                    <Ionicons 
+                        name={activeTab === 'discover' ? "pizza-outline" : "people-outline"} 
+                        size={80} 
+                        color={theme.colors.textSecondary} 
+                    />
+                    <Text style={styles.emptyText}>
+                        {activeTab === 'discover' 
+                            ? 'No recipes yet! Be the first to create one.'
+                            : 'No recipes from following users yet. Follow some users to see their recipes here!'
+                        }
+                    </Text>
+                    {activeTab === 'following' && (
+                        <TouchableOpacity 
+                            style={[styles.discoverUsersButton, { backgroundColor: theme.colors.button }]}
+                            onPress={() => setActiveTab('discover')}
+                        >
+                            <Text style={[styles.discoverUsersButtonText, { color: theme.colors.buttonText }]}>
+                                Discover Recipes
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             ) : (
                 <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
-                    {recipeList.map((recipe) => (
+                    {(activeTab === 'discover' ? recipeList : followingFeed).map((recipe) => (
                         // Pass the recipe object which now contains likesCount and isLikedByCurrentUser
                         <RecipeCard key={recipe.id} recipe={recipe} />
                     ))}
@@ -289,5 +374,37 @@ const createStyles = (theme) => StyleSheet.create({
         textAlign: 'center',
         marginTop: 15,
         fontSize: 18,
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        marginHorizontal: 16,
+        marginVertical: 12,
+        backgroundColor: 'rgba(0,0,0,0.05)',
+        borderRadius: 12,
+        padding: 4,
+    },
+    tab: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        gap: 6,
+    },
+    tabText: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    discoverUsersButton: {
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 24,
+        marginTop: 16,
+    },
+    discoverUsersButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
     },
 });

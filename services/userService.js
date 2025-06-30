@@ -156,11 +156,13 @@ export const followUser = async (currentUserId, targetUserId) => {
         });
         
         // Update target user follower count
+        const newFollowerCount = (targetUserData.followerCount || 0) + 1;
         await updateDoc(targetUserRef, {
-          followerCount: (targetUserData.followerCount || 0) + 1,
+          followerCount: newFollowerCount,
           updatedAt: serverTimestamp(),
         });
         
+        console.log(`✅ User ${currentUserId} is now following ${targetUserId}`);
         return true;
       }
     }
@@ -199,11 +201,13 @@ export const unfollowUser = async (currentUserId, targetUserId) => {
         });
         
         // Update target user follower count
+        const newFollowerCount = Math.max(0, (targetUserData.followerCount || 0) - 1);
         await updateDoc(targetUserRef, {
-          followerCount: Math.max(0, (targetUserData.followerCount || 0) - 1),
+          followerCount: newFollowerCount,
           updatedAt: serverTimestamp(),
         });
         
+        console.log(`✅ User ${currentUserId} unfollowed ${targetUserId}`);
         return true;
       }
     }
@@ -327,5 +331,181 @@ export const toggleSaveRecipe = async (userId, recipeId) => {
   } catch (error) {
     console.error('Error toggling save recipe:', error);
     throw error;
+  }
+};
+
+// Get users that the current user is following
+export const getFollowingUsers = async (userId) => {
+  try {
+    const userProfile = await getUserProfile(userId);
+    if (!userProfile || !userProfile.following || userProfile.following.length === 0) {
+      return [];
+    }
+
+    // Get profiles of all following users
+    const followingProfiles = await Promise.all(
+      userProfile.following.map(async (followingId) => {
+        const profile = await getUserProfile(followingId);
+        return profile ? { ...profile, id: followingId } : null;
+      })
+    );
+
+    return followingProfiles.filter(profile => profile !== null);
+  } catch (error) {
+    console.error('Error fetching following users:', error);
+    throw error;
+  }
+};
+
+// Get users who are following the current user
+export const getFollowers = async (userId) => {
+  try {
+    const followersQuery = query(
+      collection(db, 'users'),
+      where('following', 'array-contains', userId)
+    );
+    
+    const querySnapshot = await getDocs(followersQuery);
+    const followers = [];
+    
+    querySnapshot.forEach((doc) => {
+      followers.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return followers;
+  } catch (error) {
+    console.error('Error fetching followers:', error);
+    throw error;
+  }
+};
+
+// Check if current user is following target user
+export const isFollowing = async (currentUserId, targetUserId) => {
+  try {
+    const currentUserProfile = await getUserProfile(currentUserId);
+    if (!currentUserProfile || !currentUserProfile.following) {
+      return false;
+    }
+    return currentUserProfile.following.includes(targetUserId);
+  } catch (error) {
+    console.error('Error checking follow status:', error);
+    return false;
+  }
+};
+
+// Get suggested users to follow (intelligent recommendations)
+export const getSuggestedUsers = async (currentUserId, limit = 10) => {
+  try {
+    const currentUserProfile = await getUserProfile(currentUserId);
+    const following = currentUserProfile?.following || [];
+    
+    // Get all users except current user and already following
+    // Simple query without orderBy to avoid index issues
+    const usersQuery = query(collection(db, 'users'));
+    
+    const querySnapshot = await getDocs(usersQuery);
+    const allUsers = [];
+    
+    querySnapshot.forEach((doc) => {
+      const userData = doc.data();
+      if (doc.id !== currentUserId && !following.includes(doc.id)) {
+        allUsers.push({
+          id: doc.id,
+          ...userData
+        });
+      }
+    });
+
+    // Sort by intelligent criteria: recipe count, follower count, recent activity
+    const suggestedUsers = allUsers
+      .sort((a, b) => {
+        const scoreA = (a.recipeCount || 0) * 2 + (a.followerCount || 0);
+        const scoreB = (b.recipeCount || 0) * 2 + (b.followerCount || 0);
+        return scoreB - scoreA;
+      })
+      .slice(0, limit);
+
+    return suggestedUsers;
+  } catch (error) {
+    console.error('Error fetching suggested users:', error);
+    return [];
+  }
+};
+
+// Get user activity feed from followed users
+export const getFollowingFeed = async (userId) => {
+  try {
+    const followingUsers = await getFollowingUsers(userId);
+    const followingIds = followingUsers.map(user => user.id);
+    
+    if (followingIds.length === 0) {
+      return [];
+    }
+
+    // Get recent recipes from followed users
+    // Simple query without orderBy to avoid index issues
+    const recipesQuery = query(
+      collection(db, 'recipes'),
+      where('authorId', 'in', followingIds)
+    );
+    
+    const querySnapshot = await getDocs(recipesQuery);
+    const feedRecipes = [];
+    
+    querySnapshot.forEach((doc) => {
+      feedRecipes.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    // Sort by createdAt in JavaScript instead
+    feedRecipes.sort((a, b) => {
+      if (a.createdAt && b.createdAt) {
+        return b.createdAt.seconds - a.createdAt.seconds;
+      }
+      return 0;
+    });
+    
+    return feedRecipes;
+  } catch (error) {
+    console.error('Error fetching following feed:', error);
+    return [];
+  }
+};
+
+// Search users by username or email
+export const searchUsers = async (searchTerm, limit = 20) => {
+  try {
+    if (!searchTerm.trim()) {
+      return [];
+    }
+
+    const usersQuery = query(collection(db, 'users'));
+    const querySnapshot = await getDocs(usersQuery);
+    const users = [];
+    
+    querySnapshot.forEach((doc) => {
+      const userData = doc.data();
+      const searchLower = searchTerm.toLowerCase();
+      
+      if (
+        userData.username?.toLowerCase().includes(searchLower) ||
+        userData.email?.toLowerCase().includes(searchLower)
+      ) {
+        users.push({
+          id: doc.id,
+          ...userData
+        });
+      }
+    });
+    
+    return users.slice(0, limit);
+  } catch (error) {
+    console.error('Error searching users:', error);
+    return [];
   }
 };

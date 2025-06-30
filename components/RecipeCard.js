@@ -3,6 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTheme } from '../contexts/ThemeContext';
 import { ALLERGENS, CATEGORIES } from '../utils/constants';
+import FollowButton from './FollowButton';
+import useAuth from '../lib/useAuth';
 
 // mockCommentCounts is still here, as per your previous code.
 // If you want real comment counts, you'd fetch them in HomeScreen.js
@@ -42,6 +44,7 @@ const categoryConfig = CATEGORIES.reduce((acc, category) => {
 // Accept the new isLikedByCurrentUser prop
 export default function RecipeCard({ recipe }) {
     const { theme } = useTheme();
+    const { user } = useAuth();
     const styles = createStyles(theme);
 
     // Use the likesCount from the recipe object, defaulting to 0 if not present
@@ -62,6 +65,14 @@ export default function RecipeCard({ recipe }) {
     const handleCommentPress = (e) => {
         e.stopPropagation();
         router.push(`/recipe/${recipe.id}?scrollToComments=true`);
+    };
+
+    const handleAuthorPress = (e) => {
+        e.stopPropagation();
+        if (recipe.authorId && recipe.authorId !== user?.uid) {
+            // Navigate to author profile (can be implemented later)
+            console.log('Navigate to author profile:', recipe.authorId);
+        }
     };
 
     return (
@@ -132,7 +143,9 @@ export default function RecipeCard({ recipe }) {
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.author}>by {recipe.authorName}</Text>
+                    <TouchableOpacity onPress={handleAuthorPress} style={styles.authorContainer}>
+                        <Text style={styles.author}>by {recipe.authorName}</Text>
+                    </TouchableOpacity>
 
                     <View style={styles.engagement}>
                         {/* Display Likes Count Here */}
@@ -151,9 +164,13 @@ export default function RecipeCard({ recipe }) {
                             {commentCount > 0 && <Text style={styles.commentCount}>{commentCount}</Text>}
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.followButton}>
-                            <Text style={styles.followText}>Follow</Text>
-                        </TouchableOpacity>
+                        {/* Use the FollowButton component instead of custom follow button */}
+                        {recipe.authorId && recipe.authorId !== user?.uid && (
+                            <FollowButton 
+                                userId={recipe.authorId} 
+                                size="small"
+                            />
+                        )}
                     </View>
                 </View>
             </View>
@@ -291,6 +308,9 @@ const createStyles = (theme) => StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
+    authorContainer: {
+        flex: 1,
+    },
     author: {
         fontSize: 14,
         color: theme.colors.textSecondary,
@@ -321,16 +341,5 @@ const createStyles = (theme) => StyleSheet.create({
         fontSize: 12,
         color: theme.colors.text,
         fontWeight: '500',
-    },
-    followButton: {
-        backgroundColor: theme.colors.button,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-    },
-    followText: {
-        color: theme.colors.buttonText,
-        fontSize: 12,
-        fontWeight: '600',
     },
 });
