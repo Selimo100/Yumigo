@@ -129,7 +129,7 @@ export default function RecipeCard({ recipe }) {
                         <Ionicons 
                             name={isRecipeFavorite ? "bookmark" : "bookmark-outline"} 
                             size={20} 
-                            color={isRecipeFavorite ? theme.colors.button : theme.colors.text} 
+                            color={isRecipeFavorite ? theme.colors.primary : theme.colors.textSecondary} 
                         />
                     </TouchableOpacity>
                 </View>
@@ -213,7 +213,12 @@ const createStyles = (theme) => StyleSheet.create({
         borderRadius: 16,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: theme.colors.border,
+        borderColor: theme.colors.cardAccent,
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 3,
     },
     imageContainer: {
         position: 'relative',

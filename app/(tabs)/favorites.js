@@ -131,11 +131,12 @@ const createStyles = (theme) => StyleSheet.create({
     paddingVertical: 20,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
+    backgroundColor: theme.colors.cardAccent,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: theme.colors.text,
+    color: theme.colors.primary,
   },
   subtitle: {
     fontSize: 14,

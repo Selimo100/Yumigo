@@ -20,8 +20,8 @@ export const SettingItem = ({
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: theme.colors.border, true: theme.colors.button }}
-        thumbColor={value ? theme.colors.buttonText : theme.colors.textSecondary}
+        trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+        thumbColor={value ? '#FFFFFF' : theme.colors.textSecondary}
       />
     )}
     {type === 'chevron' && (

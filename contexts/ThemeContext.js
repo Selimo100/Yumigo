@@ -60,6 +60,11 @@ export const ThemeProvider = ({ children }) => {
       secondaryLight: isDarkMode ? '#8FA876' : '#B8C5A0',
       accent: isDarkMode ? '#A5B68D' : '#0D6159',
       accentBackground: isDarkMode ? 'rgba(165, 182, 141, 0.1)' : 'rgba(13, 97, 89, 0.05)',
+      // Erweiterte Farbpalette für mehr Akzente
+      cardAccent: isDarkMode ? 'rgba(165, 182, 141, 0.08)' : 'rgba(13, 97, 89, 0.03)',
+      iconAccent: isDarkMode ? '#8FA876' : '#0D6159',
+      successAccent: '#4CAF50',
+      successBackground: isDarkMode ? 'rgba(76, 175, 80, 0.1)' : 'rgba(76, 175, 80, 0.05)',
     },
   };
 

@@ -193,7 +193,7 @@ export default function HomeScreen() {
                     style={styles.filterButton}
                     onPress={() => setShowFilterModal(true)}
                 >
-                    <Ionicons name="options" size={20} color={theme.colors.text} />
+                    <Ionicons name="options" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
             </View>
 
@@ -403,10 +403,12 @@ const createStyles = (theme) => StyleSheet.create({
     },
     logoContainer: {
         flex: 1,
+        alignItems: 'flex-start',
+        paddingLeft: 10,
     },
     logoImage: {
-        height: 32,
-        width: 120,
+        height: 40,
+        width: 140,
     },
     logo: {
         fontSize: 24,
@@ -434,6 +436,8 @@ const createStyles = (theme) => StyleSheet.create({
     },
     notificationIcon: {
         padding: 5,
+        borderRadius: 20,
+        backgroundColor: theme.colors.cardAccent,
     },
     feed: {
         flex: 1,
@@ -517,7 +521,7 @@ const createStyles = (theme) => StyleSheet.create({
     searchContainer: {
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.colors.cardAccent,
         flexDirection: 'row',
         gap: 12,
         alignItems: 'center',
@@ -531,8 +535,13 @@ const createStyles = (theme) => StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 10,
         borderWidth: 1,
-        borderColor: theme.colors.border,
+        borderColor: theme.colors.primary,
         gap: 10,
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     searchInput: {
         flex: 1,
@@ -541,10 +550,15 @@ const createStyles = (theme) => StyleSheet.create({
     },
     filterButton: {
         padding: 10,
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.primary,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: theme.colors.border,
+        borderColor: theme.colors.primary,
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
     },
     modalTitle: {
         fontSize: 18,
