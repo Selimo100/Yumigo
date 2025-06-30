@@ -13,6 +13,7 @@ import { db } from '../../lib/firebaseconfig';
 import { getDocs, collection, doc, getDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native'; 
 import { useFollow } from '../../hooks/useFollow';
+import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);
@@ -25,7 +26,8 @@ export default function HomeScreen() {
 
     const { theme } = useTheme();
     const { notifications, unreadCount } = useNotifications();
-    const styles = createStyles(theme);
+    const tabBarHeight = useTabBarHeight();
+    const styles = createStyles(theme, tabBarHeight);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     const { user, isLoading: isLoadingAuth } = useAuth();
@@ -309,7 +311,11 @@ export default function HomeScreen() {
                     )}
                 </View>
             ) : (
-                <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
+                <ScrollView 
+                    style={styles.feed} 
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.feedContent}
+                >
                     {getFilteredRecipes().map((recipe) => (
                         // Pass the recipe object which now contains likesCount and isLikedByCurrentUser
                         <RecipeCard 
@@ -466,7 +472,7 @@ export default function HomeScreen() {
     );
 }
 
-const createStyles = (theme) => StyleSheet.create({
+const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.background,
@@ -556,6 +562,9 @@ const createStyles = (theme) => StyleSheet.create({
     feed: {
         flex: 1,
         paddingTop: 10,
+    },
+    feedContent: {
+        paddingBottom: tabBarHeight, // Add padding to prevent content being hidden behind tab bar
     },
     modalContainer: {
         flex: 1,

@@ -22,6 +22,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 import { useFollow } from '../../hooks/useFollow';
 import ShoppingListModal from '../../components/ShoppingListModal';
+import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 
 const { width } = Dimensions.get('window');
 
@@ -30,7 +31,8 @@ export default function ProfileScreen({
   onRecipePress,
 }) {
   const { theme, toggleTheme, isDarkMode } = useTheme();
-  const styles = createStyles(theme);
+  const tabBarHeight = useTabBarHeight();
+  const styles = createStyles(theme, tabBarHeight);
   const { user } = useAuth();
   const { profile: userProfile, recipes: userRecipes, isLoading: profileLoading, refreshProfile } = useUserProfile();
   const { followingList, followersList, followingCount, followerCount, loadFollowingUsers, loadFollowers } = useFollow();
@@ -342,13 +344,13 @@ Join the Yumigo community and discover amazing recipes!`;
   );
 }
 
-const createStyles = (theme) => StyleSheet.create({
+const createStyles = (theme, tabBarHeight) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
   },
   scrollContent: {
-    paddingBottom: 24,
+    paddingBottom: tabBarHeight + 24, // Add padding for tab bar plus existing padding
   },
   profileHeader: {
     alignItems: 'center',
