@@ -11,7 +11,6 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import useAuth from "../../lib/useAuth";
@@ -23,7 +22,6 @@ import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 const {width} = Dimensions.get('window');
 
 export default function ProfileScreen({
-                                          onEditProfile,
                                           onShareProfile,
                                           onRecipePress,
                                       }) {
@@ -32,7 +30,6 @@ export default function ProfileScreen({
     const { profile: userProfile, recipes: userRecipes, isLoading: profileLoading, refreshProfile } = useUserProfile();
     const router = useRouter();
 
-    // Listen for profile updates from settings
     useEffect(() => {        const unsubscribe = profileUpdateEmitter.subscribe(() => {
             if (refreshProfile) {
                 refreshProfile();
@@ -42,7 +39,6 @@ export default function ProfileScreen({
         return unsubscribe;
     }, [refreshProfile]);
 
-    // Show loading state while profile is loading
     if (profileLoading) {
         return (
             <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
@@ -56,7 +52,6 @@ export default function ProfileScreen({
         );
     }
 
-    // Use the real user profile data or fallback only if no profile exists
     const currentUser = userProfile || {
         username: user?.email?.split('@')[0] || 'User',
         bio: 'Food enthusiast | Making cooking simple',
@@ -64,7 +59,7 @@ export default function ProfileScreen({
         followingCount: 0,
         recipeCount: 0,
         avatar: null,
-    };    // Use real user recipes
+    }; 
     const recipeList = userRecipes || [];
 
     const renderRecipeCard = (recipe) => (
@@ -125,8 +120,7 @@ export default function ProfileScreen({
     const handleLogout = async () => {
         try {
             await logout();
-            // Nach Logout willst du eventuell zur Login-Seite navigieren
-            router.replace('/login');
+            router.replace('/login');s
         } catch (error) {
             console.error("Logout error:", error);
         }

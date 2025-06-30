@@ -24,7 +24,6 @@ export const useSettings = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load settings
   useEffect(() => {
     loadSettings();
   }, []);
@@ -32,7 +31,6 @@ export const useSettings = () => {
     try {
       setIsLoading(true);
       
-      // Load profile from Firestore
       const currentUser = auth.currentUser;
       if (currentUser) {
         try {
@@ -45,7 +43,6 @@ export const useSettings = () => {
               avatar: userProfile.avatar || null,
             });
           } else {
-            // Fallback to auth user data if no profile found
             setProfile({
               username: currentUser.email?.split('@')[0] || '',
               bio: 'Food enthusiast | Making cooking simple',
@@ -55,7 +52,6 @@ export const useSettings = () => {
           }
         } catch (error) {
           console.error('Error loading user profile:', error);
-          // Fallback to auth user data
           setProfile({
             username: currentUser.email?.split('@')[0] || '',
             bio: 'Food enthusiast | Making cooking simple',
@@ -65,7 +61,6 @@ export const useSettings = () => {
         }
       }
 
-      // Load notifications from AsyncStorage (keep local)
       const savedNotifications = await AsyncStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
       if (savedNotifications) {
         setNotifications(JSON.parse(savedNotifications));
@@ -97,7 +92,6 @@ export const useSettings = () => {
         throw new Error('No authenticated user found');
       }
 
-      // Save profile to Firestore
       await updateUserProfile(currentUser.uid, {
         username: profile.username,
         bio: profile.bio,
@@ -105,10 +99,8 @@ export const useSettings = () => {
         avatar: profile.avatar,
       });
 
-      // Save notifications to AsyncStorage
       await AsyncStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
       
-      // Reload settings to reflect changes
       await loadSettings();
       
       return true;
