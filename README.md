@@ -16,7 +16,7 @@
 
 ---
 ## Dokumentation
-### 8. Juli 2025 | Projektteam: Serra-Naz Akin, Selina Mogicatom, Timea Portmann
+### 8. Juli 2025 | Projektteam: Serra-Naz Akin, Selina Mogicato, Timea Portmann
 
 ---
 
