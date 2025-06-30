@@ -236,7 +236,7 @@ export const uploadProfileImage = async (uri, userId) => {
 };
 
 // Get recipes created by a specific user
-export const getUserRecipes = async (userId) => {
+export const getUserRecipes = async (userId, currentUserId = null) => {
   try {
     // Simple query without orderBy to avoid index issues
     const recipesQuery = query(
@@ -245,24 +245,60 @@ export const getUserRecipes = async (userId) => {
     );
     
     const querySnapshot = await getDocs(recipesQuery);
-    const recipes = [];
     
-    querySnapshot.forEach((doc) => {
-      recipes.push({
-        id: doc.id,
-        ...doc.data()
-      });
-    });
+    // Fetch likes and ratings data for each recipe (same logic as in home.js)
+    const recipesWithLikesAndStatus = await Promise.all(
+      querySnapshot.docs.map(async (docSnapshot) => {
+        const recipeData = { id: docSnapshot.id, ...docSnapshot.data() };
+
+        // Get likes count and user like status
+        const likesCollectionRef = collection(db, 'recipes', docSnapshot.id, 'likes');
+        const likesSnapshot = await getDocs(likesCollectionRef);
+        const likesCount = likesSnapshot.size;
+
+        let isLikedByCurrentUser = false;
+        if (currentUserId) {
+          const userLikeDocRef = doc(db, 'recipes', docSnapshot.id, 'likes', currentUserId);
+          const userLikeDoc = await getDoc(userLikeDocRef);
+          isLikedByCurrentUser = userLikeDoc.exists();
+        }
+
+        // Get ratings count and average
+        const ratingsCollectionRef = collection(db, 'recipes', docSnapshot.id, 'ratings');
+        const ratingsSnapshot = await getDocs(ratingsCollectionRef);
+        const reviewsCount = ratingsSnapshot.size;
+        
+        let averageRating = recipeData.rating || 0;
+        if (reviewsCount > 0 && !recipeData.rating) {
+          // Calculate average if not stored in recipe document
+          let totalRating = 0;
+          ratingsSnapshot.docs.forEach(doc => {
+            totalRating += doc.data().rating;
+          });
+          averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
+        }
+
+        return { 
+          ...recipeData, 
+          likesCount, 
+          isLikedByCurrentUser,
+          rating: averageRating,
+          reviews: reviewsCount,
+          // Keep old 'likes' property for backward compatibility
+          likes: likesCount
+        };
+      })
+    );
     
     // Sort by createdAt in JavaScript instead
-    recipes.sort((a, b) => {
+    recipesWithLikesAndStatus.sort((a, b) => {
       if (a.createdAt && b.createdAt) {
         return b.createdAt.seconds - a.createdAt.seconds;
       }
       return 0;
     });
     
-    return recipes;
+    return recipesWithLikesAndStatus;
   } catch (error) {
     console.error('Error fetching user recipes:', error);
     throw error;

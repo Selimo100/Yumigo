@@ -15,6 +15,7 @@ import {
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '../lib/firebaseconfig';
 import { updateUserRecipeCount } from './userService';
+import { createLikeNotification } from './notificationService';
 
 // Get a specific recipe by ID
 export const getRecipe = async (recipeId) => {
@@ -175,6 +176,23 @@ export const toggleRecipeLike = async (recipeId, userId) => {
         userId,
         timestamp: serverTimestamp()
       });
+      
+      // Create notification for the recipe owner
+      try {
+        const recipeDoc = await getDoc(doc(db, 'recipes', recipeId));
+        if (recipeDoc.exists()) {
+          const recipeData = recipeDoc.data();
+          const recipeOwnerId = recipeData.authorId;
+          
+          if (recipeOwnerId && recipeOwnerId !== userId) {
+            await createLikeNotification(recipeId, userId, recipeOwnerId);
+          }
+        }
+      } catch (notificationError) {
+        console.error('Error creating like notification:', notificationError);
+        // Don't throw here to avoid breaking the like functionality
+      }
+      
       return true; // Now liked
     }
   } catch (error) {

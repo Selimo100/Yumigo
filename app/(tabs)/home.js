@@ -1,10 +1,12 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useCallback } from 'react'; 
 import RecipeCard from '../../components/RecipeCard';
 import RecipeForm from '../../components/RecipeForm/RecipeForm';
+import NotificationModal from '../../components/NotificationModal';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 import useAuth from "../../lib/useAuth";
 import { Redirect } from 'expo-router'; 
 import { db } from '../../lib/firebaseconfig';
@@ -19,8 +21,10 @@ export default function HomeScreen() {
     const [activeTab, setActiveTab] = useState('discover'); 
     const [searchQuery, setSearchQuery] = useState('');
     const [showFilterModal, setShowFilterModal] = useState(false);
+    const [showNotificationModal, setShowNotificationModal] = useState(false);
 
     const { theme } = useTheme();
+    const { notifications, unreadCount } = useNotifications();
     const styles = createStyles(theme);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -182,6 +186,12 @@ export default function HomeScreen() {
         }
     };
 
+    const handleNotificationPress = () => {
+        console.log('🔔 Notification button pressed!');
+        console.log('Unread count:', unreadCount);
+        setShowNotificationModal(true);
+    };
+
     if (isLoadingAuth) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
@@ -212,8 +222,20 @@ export default function HomeScreen() {
                         <Ionicons name="add" size={24} color="#FFFFFF" />
                         <Text style={styles.createText}>Create</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.notificationIcon}>
+                    <TouchableOpacity 
+                        style={styles.notificationIcon}
+                        onPress={handleNotificationPress}
+                        activeOpacity={0.7}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
                         <Ionicons name="notifications-outline" size={24} color={theme.colors.text} />
+                        {unreadCount > 0 && (
+                            <View style={styles.notificationBadge}>
+                                <Text style={styles.notificationBadgeText}>
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -434,6 +456,12 @@ export default function HomeScreen() {
                     </ScrollView>
                 </SafeAreaView>
             </Modal>
+
+            {/* Notification Modal */}
+            <NotificationModal
+                visible={showNotificationModal}
+                onClose={() => setShowNotificationModal(false)}
+            />
         </SafeAreaView>
     );
 }
@@ -495,9 +523,35 @@ const createStyles = (theme) => StyleSheet.create({
         fontWeight: '600',
     },
     notificationIcon: {
-        padding: 5,
+        padding: 8,
         borderRadius: 20,
         backgroundColor: theme.colors.cardAccent,
+        position: 'relative',
+        minWidth: 44, // Ensure minimum touch target size
+        minHeight: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    notificationBadge: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        backgroundColor: '#ff4444',
+        borderRadius: 10,
+        minWidth: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: theme.colors.background,
+        pointerEvents: 'none', // This allows touches to pass through to the parent
+        zIndex: 1,
+    },
+    notificationBadgeText: {
+        color: '#ffffff',
+        fontSize: 12,
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
     feed: {
         flex: 1,

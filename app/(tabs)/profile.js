@@ -140,7 +140,7 @@ export default function ProfileScreen({
           <View style={styles.likesContainer}>
             <Ionicons name="heart-outline" size={14} color="#6c757d" />
             <Text style={[styles.likesText, { color: theme.colors.textSecondary }]}>
-              {recipe.likes || '0'}
+              {recipe.likesCount || recipe.likes || '0'}
             </Text>
           </View>
         </View>

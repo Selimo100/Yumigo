@@ -30,7 +30,8 @@ export const useUserProfile = () => {
                 setProfile(fallbackProfile);
             }
             try {
-                const userRecipes = await getUserRecipes(user.uid); setRecipes(userRecipes);
+                const userRecipes = await getUserRecipes(user.uid, user.uid); // Pass current user ID for like status
+                setRecipes(userRecipes);
             } catch (recipeError) {
                 console.error('Error loading user recipes:', recipeError);
                 setRecipes([]);
