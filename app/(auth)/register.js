@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     View,
     Image,
+    Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -53,8 +54,16 @@ export default function Register() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView style={styles.container}>
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <KeyboardAvoidingView 
+                style={styles.container}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <ScrollView 
+                    contentContainerStyle={styles.scrollContainer}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
                     <View style={styles.headerContainer}>
                         <Image source={require("../../assets/icon.png")} style={styles.logo} />
                         <Text style={styles.title}>Yumigo</Text>
@@ -140,6 +149,7 @@ const createStyles = (theme) =>
             justifyContent: "center",
             paddingHorizontal: 24,
             paddingVertical: 32,
+            minHeight: '100%',
         },
         headerContainer: {
             alignItems: "center",
