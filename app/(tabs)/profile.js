@@ -27,6 +27,7 @@ export default function ProfileScreen({
   onRecipePress,
 }) {
   const { theme, toggleTheme, isDarkMode } = useTheme();
+  const styles = createStyles(theme);
   const { user } = useAuth();
   const { profile: userProfile, recipes: userRecipes, isLoading: profileLoading, refreshProfile } = useUserProfile();
   const { followingList, followersList, followingCount, followerCount, loadFollowingUsers, loadFollowers } = useFollow();
@@ -64,10 +65,10 @@ export default function ProfileScreen({
 
   if (profileLoading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.button} />
-          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>
             Loading profile...
           </Text>
         </View>
@@ -156,7 +157,7 @@ export default function ProfileScreen({
 
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={styles.container}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={theme.colors.background}
@@ -166,12 +167,8 @@ export default function ProfileScreen({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={[styles.profileHeader, { backgroundColor: theme.colors.surface }]}>                    <View
-          style={[
-            styles.profilePicture,
-            { backgroundColor: theme.colors.border, borderColor: theme.colors.surface },
-          ]}
-        >
+        <View style={styles.profileHeader}>
+          <View style={styles.profilePicture}>
           {currentUser.avatar ? (
             <Image source={{ uri: currentUser.avatar }} style={styles.profileImage} />
           ) : (
@@ -179,7 +176,7 @@ export default function ProfileScreen({
           )}
         </View>
 
-          <Text style={[styles.username, { color: theme.colors.text }]}>
+          <Text style={styles.username}>
             {currentUser.username}
           </Text>
 
@@ -191,10 +188,10 @@ export default function ProfileScreen({
                 router.push('/profile/follow-list?type=following');
               }}
             >
-              <Text style={[styles.statNumber, { color: theme.colors.text }]}>
+              <Text style={styles.statNumber}>
                 {displayFollowingCount}
               </Text>
-              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+              <Text style={styles.statLabel}>
                 Following
               </Text>
             </TouchableOpacity>
@@ -205,47 +202,47 @@ export default function ProfileScreen({
                 router.push('/profile/follow-list?type=followers');
               }}
             >
-              <Text style={[styles.statNumber, { color: theme.colors.text }]}>
+              <Text style={styles.statNumber}>
                 {displayFollowerCount}
               </Text>
-              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+              <Text style={styles.statLabel}>
                 Followers
               </Text>
             </TouchableOpacity>
             <View style={styles.statItem}>
-              <Text style={[styles.statNumber, { color: theme.colors.text }]}>
+              <Text style={styles.statNumber}>
                 {currentUser.recipeCount || 0}
               </Text>
-              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+              <Text style={styles.statLabel}>
                 Recipes
               </Text>
             </View>
           </View>
 
-          <Text style={[styles.bio, { color: theme.colors.textSecondary }]}>
+          <Text style={styles.bio}>
             {currentUser.bio}
           </Text>
 
           <View style={styles.actionButtons}>
             <TouchableOpacity
-              style={[styles.editButton, { backgroundColor: theme.colors.button }]}
+              style={styles.editButton}
               onPress={() => router.push('/profile/settings')}
             >
-              <Ionicons name="create-outline" size={18} color={theme.colors.buttonText} />
-              <Text style={[styles.buttonText, { color: theme.colors.buttonText }]}>Edit</Text>
+              <Ionicons name="create-outline" size={18} color="#FFFFFF" />
+              <Text style={styles.buttonText}>Edit</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.shareButton, { backgroundColor: theme.colors.button }]}
+              style={styles.shareButton}
               onPress={onShareProfile}
             >
-              <Ionicons name="share-outline" size={18} color={theme.colors.buttonText} />
-              <Text style={[styles.buttonText, { color: theme.colors.buttonText }]}>Share</Text>
+              <Ionicons name="share-outline" size={18} color={theme.colors.primary} />
+              <Text style={styles.shareButtonText}>Share</Text>
             </TouchableOpacity>
           </View>
         </View>
         <View style={styles.recipesSection}>
           <View style={styles.recipesSectionHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            <Text style={styles.sectionTitle}>
               My Recipes ({recipeList.length})
             </Text>
             {recipeList.length > 0 && (
@@ -253,15 +250,15 @@ export default function ProfileScreen({
                 style={styles.addRecipeButton}
                 onPress={() => router.push('/recipe/create-recipe')}
               >
-                <Ionicons name="add" size={20} color={theme.colors.text} />
+                <Ionicons name="add" size={20} color="#FFFFFF" />
               </TouchableOpacity>
             )}
           </View>
 
           {profileLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={theme.colors.button} />
-              <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+              <ActivityIndicator size="large" color={theme.colors.primary} />
+              <Text style={styles.loadingText}>
                 Loading recipes...
               </Text>
             </View>
@@ -269,19 +266,19 @@ export default function ProfileScreen({
             <View style={styles.recipesGrid}>{recipeList.map(renderRecipeCard)}</View>
           ) : (
             <View style={styles.emptyContainer}>
-              <Ionicons name="restaurant-outline" size={48} color={theme.colors.textSecondary} />
-              <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
+              <Ionicons name="restaurant-outline" size={48} color={theme.colors.primary} />
+              <Text style={styles.emptyTitle}>
                 No recipes yet
               </Text>
-              <Text style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}>
+              <Text style={styles.emptySubtitle}>
                 Start creating delicious recipes to share with the community!
               </Text>
               <TouchableOpacity
-                style={[styles.createButton, { backgroundColor: theme.colors.button }]}
+                style={styles.createButton}
                 onPress={() => router.push('/recipe/create-recipe')}
               >
-                <Ionicons name="add" size={20} color={theme.colors.buttonText} />
-                <Text style={[styles.createButtonText, { color: theme.colors.buttonText }]}>
+                <Ionicons name="add" size={20} color="#FFFFFF" />
+                <Text style={styles.createButtonText}>
                   Create Recipe
                 </Text>
               </TouchableOpacity>
@@ -291,11 +288,11 @@ export default function ProfileScreen({
 
         <View style={styles.logoutSection}>
           <TouchableOpacity
-            style={[styles.logoutButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+            style={styles.logoutButton}
             onPress={handleLogout}
           >
-            <Ionicons name="log-out-outline" size={20} color={theme.colors.accent} />
-            <Text style={[styles.logoutButtonText, { color: theme.colors.accent }]}>Logout</Text>
+            <Ionicons name="log-out-outline" size={20} color={theme.colors.error} />
+            <Text style={styles.logoutButtonText}>Logout</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -303,9 +300,10 @@ export default function ProfileScreen({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.colors.background,
   },
   scrollContent: {
     paddingBottom: 24,
@@ -314,6 +312,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingVertical: 32,
+    backgroundColor: theme.colors.cardAccent,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
   },
   profilePicture: {
     width: 100,
@@ -323,7 +324,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 3,
+    borderColor: theme.colors.primary,
     overflow: 'hidden',
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 4,
   },
   profileImage: {
     width: '100%',
@@ -333,6 +340,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 24,
+    color: theme.colors.primary,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -342,18 +350,29 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     paddingVertical: 20,
     paddingHorizontal: 20,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
+    marginHorizontal: 24,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statItem: {
     alignItems: 'center',
     flex: 1,
-  }, statNumber: {
+  },
+  statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 4,
+    color: theme.colors.primary,
   },
   statLabel: {
     fontSize: 14,
     fontWeight: '500',
+    color: theme.colors.textSecondary,
   },
   bio: {
     fontSize: 16,
@@ -361,6 +380,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 24,
     paddingHorizontal: 16,
+    color: theme.colors.text,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -374,6 +394,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     gap: 8,
+    backgroundColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   shareButton: {
     flexDirection: 'row',
@@ -382,6 +408,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     gap: 8,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
   },
   discoverButton: {
     flexDirection: 'row',
@@ -391,15 +420,24 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     gap: 8,
     borderWidth: 1,
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.accentBackground,
     marginHorizontal: 4,
   },
   buttonText: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  shareButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.primary,
   },
   discoverButtonText: {
     fontSize: 14,
     fontWeight: '600',
+    color: theme.colors.primary,
   },
   recipesSection: {
     padding: 24,
@@ -408,6 +446,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 16,
+    color: theme.colors.primary,
   },
   recipesSectionHeader: {
     flexDirection: 'row',
@@ -418,7 +457,12 @@ const styles = StyleSheet.create({
   addRecipeButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
   },
   recipesGrid: {
     flexDirection: 'row',
@@ -429,12 +473,14 @@ const styles = StyleSheet.create({
     width: (width - 64) / 2,
     borderRadius: 16,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: theme.colors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: theme.colors.cardAccent,
   },
   recipeImageContainer: {
     position: 'relative',
@@ -445,6 +491,7 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: theme.colors.cardAccent,
   },
   timeTag: {
     position: 'absolute',
@@ -452,7 +499,7 @@ const styles = StyleSheet.create({
     left: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -471,11 +518,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
     lineHeight: 20,
+    color: theme.colors.text,
   },
   chefName: {
     fontSize: 12,
     marginBottom: 8,
     fontWeight: '500',
+    color: theme.colors.textSecondary,
   },
   recipeStats: {
     flexDirection: 'row',
@@ -490,14 +539,17 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 14,
     fontWeight: '600',
+    color: theme.colors.primary,
   },
   likesContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  }, likesText: {
+  },
+  likesText: {
     fontSize: 14,
     fontWeight: '500',
+    color: theme.colors.textSecondary,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -508,12 +560,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 16,
     marginBottom: 8,
+    color: theme.colors.text,
   },
   emptySubtitle: {
     fontSize: 14,
     textAlign: 'center',
     marginBottom: 24,
     paddingHorizontal: 20,
+    color: theme.colors.textSecondary,
   },
   createButton: {
     flexDirection: 'row',
@@ -522,15 +576,23 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     gap: 8,
-  }, createButtonText: {
+    backgroundColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  createButtonText: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#FFFFFF',
   },
   logoutSection: {
     paddingHorizontal: 24,
     paddingVertical: 20,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.1)',
+    borderTopColor: theme.colors.border,
     marginTop: 20,
   },
   logoutButton: {
@@ -541,11 +603,14 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 1,
+    borderColor: theme.colors.error,
+    backgroundColor: theme.colors.surface,
     gap: 8,
   },
   logoutButtonText: {
     fontSize: 16,
     fontWeight: '600',
+    color: theme.colors.error,
   },
   loadingContainer: {
     flex: 1,
@@ -557,6 +622,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     textAlign: 'center',
+    color: theme.colors.textSecondary,
   },
   emptyState: {
     alignItems: 'center',
@@ -566,11 +632,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 16,
+    color: theme.colors.text,
   },
   emptyStateSubtext: {
     fontSize: 14,
     textAlign: 'center',
     marginBottom: 24,
+    color: theme.colors.textSecondary,
   },
   createRecipeButton: {
     flexDirection: 'row',
@@ -579,5 +647,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     gap: 8,
+    backgroundColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });

@@ -525,7 +525,7 @@ export default function RecipeDetailScreen() {
               <Ionicons
                 name={isLiked ? "heart" : "heart-outline"}
                 size={20}
-                color={isLiked ? "#FF6B6B" : theme.colors.buttonText}
+                color="#FFFFFF"
               />
               <Text style={[styles.buttonText, isLiked && styles.likedText]}>
                 {isLiked ? 'Liked' : 'Like'}
@@ -539,7 +539,7 @@ export default function RecipeDetailScreen() {
               <Ionicons
                 name={isSaved ? "bookmark" : "bookmark-outline"}
                 size={20}
-                color={isSaved ? "#4ECDC4" : theme.colors.buttonText}
+                color="#FFFFFF"
               />
               <Text style={[styles.buttonText, isSaved && styles.savedText]}>
                 {isSaved ? 'Saved' : 'Save'}
@@ -560,7 +560,7 @@ export default function RecipeDetailScreen() {
               </View>
             ) : (
               <TouchableOpacity style={styles.rateButton} onPress={() => setShowRating(true)}>
-                <Ionicons name="star-outline" size={20} color={theme.colors.buttonText} />
+                <Ionicons name="star-outline" size={20} color="#FFFFFF" />
                 <Text style={styles.buttonText}>Rate Recipe</Text>
               </TouchableOpacity>
             )}
@@ -650,9 +650,14 @@ const createStyles = (theme) => StyleSheet.create({
   backButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.cardAccent,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   headerActions: {
     flexDirection: 'row',
@@ -662,16 +667,26 @@ const createStyles = (theme) => StyleSheet.create({
   actionButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.cardAccent,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   shareButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.cardAccent,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   imageContainer: {
     position: 'relative',
@@ -722,6 +737,16 @@ const createStyles = (theme) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    backgroundColor: theme.colors.cardAccent,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   timeContainer: {
     flexDirection: 'row',
@@ -753,12 +778,17 @@ const createStyles = (theme) => StyleSheet.create({
     marginBottom: 20,
   },
   allergySection: {
-    backgroundColor: '#FF6B6B10',
+    backgroundColor: theme.colors.accentBackground,
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#FF6B6B30',
+    borderColor: theme.colors.primary,
     marginBottom: 20,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   allergyHeader: {
     flexDirection: 'row',
@@ -808,47 +838,64 @@ const createStyles = (theme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.button,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     borderRadius: 25,
     gap: 8,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   saveButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.button,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     borderRadius: 25,
     gap: 8,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   likedButton: {
-    backgroundColor: '#FF6B6B20',
+    backgroundColor: '#FF6B6B',
     borderWidth: 1,
     borderColor: '#FF6B6B',
   },
   savedButton: {
-    backgroundColor: '#4ECDC420',
+    backgroundColor: '#4ECDC4',
     borderWidth: 1,
     borderColor: '#4ECDC4',
   },
   buttonText: {
-    color: theme.colors.buttonText,
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
   likedText: {
-    color: '#FF6B6B',
+    color: '#FFFFFF',
   },
   savedText: {
-    color: '#4ECDC4',
+    color: '#FFFFFF',
   },
   ratingSection: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.cardAccent,
     padding: 20,
     borderRadius: 16,
     marginBottom: 30,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   ratingSectionTitle: {
     fontSize: 18,
@@ -870,17 +917,22 @@ const createStyles = (theme) => StyleSheet.create({
   },
   changeRatingText: {
     fontSize: 14,
-    color: '#4A90E2',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   rateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.button,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     borderRadius: 25,
     gap: 8,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   section: {
     marginBottom: 30,
@@ -888,19 +940,24 @@ const createStyles = (theme) => StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: theme.colors.text,
+    color: theme.colors.primary,
     marginBottom: 20,
   },
   ingredientItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    backgroundColor: theme.colors.cardAccent,
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: theme.colors.primary,
   },
   bulletPoint: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: theme.colors.text,
+    backgroundColor: theme.colors.primary,
     marginRight: 12,
   },
   ingredientText: {
@@ -911,11 +968,16 @@ const createStyles = (theme) => StyleSheet.create({
 
   stepCard: {
     borderWidth: 1,
-    borderColor: '#E9ECEF',
-    backgroundColor: '#FAFAFA',
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.cardAccent,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
   stepHeader: {
@@ -928,18 +990,18 @@ const createStyles = (theme) => StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    borderWidth: 1,
-    borderColor: '#CCC',
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.primary,
   },
 
   stepNumber: {
     fontWeight: '600',
     fontSize: 13,
-    color: '#333',
+    color: '#FFFFFF',
   },
 
   stepTitle: {

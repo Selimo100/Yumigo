@@ -42,7 +42,7 @@ export default function SettingsScreen() {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={theme.colors.button} />
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
                     <Text style={styles.loadingText}>Loading settings...</Text>
                 </View>
             </SafeAreaView>
@@ -69,7 +69,7 @@ export default function SettingsScreen() {
                 </TouchableOpacity>
                 <Text style={[styles.modalHeaderTitle, { color: theme.colors.text }]}>Settings</Text>
                 <TouchableOpacity onPress={saveProfile} style={styles.saveButton}>
-                    <Text style={[styles.saveButtonText, { color: theme.colors.button }]}>Save</Text>
+                    <Text style={[styles.saveButtonText, { color: theme.colors.primary }]}>Save</Text>
                 </TouchableOpacity>
             </View>
 

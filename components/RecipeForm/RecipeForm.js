@@ -245,8 +245,13 @@ const createStyles = (theme) => StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 16,
-    backgroundColor: theme.colors.inputBackground,
+    backgroundColor: theme.colors.surface,
     color: theme.colors.text,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   textArea: {
     borderWidth: 1,
@@ -288,8 +293,13 @@ const createStyles = (theme) => StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   disabledButton: {
     opacity: 0.6,
@@ -302,6 +312,6 @@ const createStyles = (theme) => StyleSheet.create({
   publishButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.colors.text,
+    color: '#FFFFFF',
   },
 });

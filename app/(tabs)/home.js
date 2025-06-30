@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useCallback } from 'react'; 
@@ -153,10 +153,17 @@ export default function HomeScreen() {
         <SafeAreaView style={styles.container}>
             {/* Top Navigation */}
             <View style={styles.topNav}>
-                <Text style={styles.logo}>Yumigo</Text>
+                <View style={styles.logoContainer}>
+                    <Text style={styles.logoText}>Yumigo</Text>
+                    <Image 
+                        source={require('../../assets/Yumigo_Logo.png')} 
+                        style={styles.logoImage}
+                        resizeMode="contain"
+                    />
+                </View>
                 <View style={styles.topNavIcons}>
                     <TouchableOpacity style={styles.createButton} onPress={handleCreatePress}>
-                        <Ionicons name="add" size={24} color={theme.colors.buttonText} />
+                        <Ionicons name="add" size={24} color="#FFFFFF" />
                         <Text style={styles.createText}>Create</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.notificationIcon}>
@@ -187,7 +194,7 @@ export default function HomeScreen() {
                     style={styles.filterButton}
                     onPress={() => setShowFilterModal(true)}
                 >
-                    <Ionicons name="options" size={20} color={theme.colors.text} />
+                    <Ionicons name="options" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
             </View>
 
@@ -323,16 +330,16 @@ export default function HomeScreen() {
                                 <Ionicons 
                                     name="compass" 
                                     size={20} 
-                                    color={activeTab === 'discover' ? theme.colors.buttonText : theme.colors.button} 
+                                    color={activeTab === 'discover' ? theme.colors.primary : theme.colors.textSecondary} 
                                 />
                                 <Text style={[
                                     styles.filterOptionText, 
-                                    { color: activeTab === 'discover' ? theme.colors.buttonText : theme.colors.text }
+                                    { color: activeTab === 'discover' ? theme.colors.primary : theme.colors.text }
                                 ]}>
                                     Discover - All Recipes
                                 </Text>
                                 {activeTab === 'discover' && (
-                                    <Ionicons name="checkmark" size={20} color={theme.colors.buttonText} />
+                                    <Ionicons name="checkmark" size={20} color={theme.colors.primary} />
                                 )}
                             </TouchableOpacity>
                             
@@ -349,16 +356,16 @@ export default function HomeScreen() {
                                 <Ionicons 
                                     name="people" 
                                     size={20} 
-                                    color={activeTab === 'following' ? theme.colors.buttonText : theme.colors.button} 
+                                    color={activeTab === 'following' ? theme.colors.primary : theme.colors.textSecondary} 
                                 />
                                 <Text style={[
                                     styles.filterOptionText, 
-                                    { color: activeTab === 'following' ? theme.colors.buttonText : theme.colors.text }
+                                    { color: activeTab === 'following' ? theme.colors.primary : theme.colors.text }
                                 ]}>
                                     Following - From People You Follow
                                 </Text>
                                 {activeTab === 'following' && (
-                                    <Ionicons name="checkmark" size={20} color={theme.colors.buttonText} />
+                                    <Ionicons name="checkmark" size={20} color={theme.colors.primary} />
                                 )}
                             </TouchableOpacity>
                         </View>
@@ -393,6 +400,24 @@ const createStyles = (theme) => StyleSheet.create({
         paddingVertical: 15,
         borderBottomWidth: 1,
         borderBottomColor: theme.colors.border,
+        backgroundColor: theme.colors.background,
+    },
+    logoContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingLeft: 10,
+        gap: 0,
+    },
+    logoText: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#000000',
+    },
+    logoImage: {
+        height: 40,
+        width: 130,
+        marginLeft: -50,
     },
     logo: {
         fontSize: 24,
@@ -407,19 +432,21 @@ const createStyles = (theme) => StyleSheet.create({
     createButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.colors.button,
+        backgroundColor: theme.colors.primary,
         paddingHorizontal: 12,
         paddingVertical: 8,
         borderRadius: 20,
         gap: 5,
     },
     createText: {
-        color: theme.colors.buttonText,
+        color: '#FFFFFF',
         fontSize: 14,
         fontWeight: '600',
     },
     notificationIcon: {
         padding: 5,
+        borderRadius: 20,
+        backgroundColor: theme.colors.cardAccent,
     },
     feed: {
         flex: 1,
@@ -503,7 +530,7 @@ const createStyles = (theme) => StyleSheet.create({
     searchContainer: {
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.colors.cardAccent,
         flexDirection: 'row',
         gap: 12,
         alignItems: 'center',
@@ -517,8 +544,13 @@ const createStyles = (theme) => StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 10,
         borderWidth: 1,
-        borderColor: theme.colors.border,
+        borderColor: theme.colors.primary,
         gap: 10,
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     searchInput: {
         flex: 1,
@@ -527,10 +559,15 @@ const createStyles = (theme) => StyleSheet.create({
     },
     filterButton: {
         padding: 10,
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.primary,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: theme.colors.border,
+        borderColor: theme.colors.primary,
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
     },
     modalTitle: {
         fontSize: 18,
@@ -575,9 +612,12 @@ const createStyles = (theme) => StyleSheet.create({
         borderRadius: 12,
         marginBottom: 12,
         gap: 12,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     filterOptionActive: {
-        backgroundColor: theme.colors.button,
+        backgroundColor: theme.colors.accentBackground,
+        borderColor: theme.colors.primary,
     },
     filterOptionText: {
         fontSize: 16,
