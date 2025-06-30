@@ -21,6 +21,7 @@ import { logout } from '../../services/authService';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 import { useFollow } from '../../hooks/useFollow';
+import ShoppingListModal from '../../components/ShoppingListModal';
 
 const { width } = Dimensions.get('window');
 
@@ -34,6 +35,7 @@ export default function ProfileScreen({
   const { profile: userProfile, recipes: userRecipes, isLoading: profileLoading, refreshProfile } = useUserProfile();
   const { followingList, followersList, followingCount, followerCount, loadFollowingUsers, loadFollowers } = useFollow();
   const router = useRouter();
+  const [showShoppingList, setShowShoppingList] = useState(false);
 
   useEffect(() => {
     const unsubscribe = profileUpdateEmitter.subscribe(() => {
@@ -266,6 +268,12 @@ Join the Yumigo community and discover amazing recipes!`;
               <Ionicons name="share-outline" size={18} color={theme.colors.primary} />
               <Text style={styles.shareButtonText}>Share</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.shoppingListButton}
+              onPress={() => setShowShoppingList(true)}
+            >
+              <Ionicons name="basket-outline" size={18} color={theme.colors.primary} />
+            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.recipesSection}>
@@ -324,6 +332,12 @@ Join the Yumigo community and discover amazing recipes!`;
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Shopping List Modal */}
+      <ShoppingListModal
+        visible={showShoppingList}
+        onClose={() => setShowShoppingList(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -461,6 +475,17 @@ const createStyles = (theme) => StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: theme.colors.primary,
+  },
+  shoppingListButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 24,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    marginLeft: 8,
   },
   discoverButtonText: {
     fontSize: 14,

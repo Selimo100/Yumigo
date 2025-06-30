@@ -18,6 +18,8 @@ import { useUserProfile } from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
 import { deleteRecipe, isRecipeOwner, rateRecipe, getUserRating } from '../../services/recipeService';
 import { createCommentNotification } from '../../services/notificationService';
+import { addShoppingListItem } from '../../services/userService';
+import { showToast } from '../../utils/toast';
 
 const formatTime = (timestamp) => {
   try {
@@ -443,6 +445,26 @@ export default function RecipeDetailScreen() {
     }
   };
 
+  const handleAddToShoppingList = async () => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to add items to your shopping list.");
+      return;
+    }
+
+    try {
+      for (const ingredient of recipe.ingredients) {
+        const item = `${ingredient.amount} ${ingredient.ingredient}`.trim();
+        if (item) {
+          await addShoppingListItem(currentUser.uid, item);
+        }
+      }
+      showToast("Ingredients added to your shopping list!");
+    } catch (error) {
+      console.error('Error adding to shopping list:', error);
+      Alert.alert("Error", "Could not add ingredients to shopping list.");
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       if (global.recipeEditCompleted) {
@@ -609,7 +631,16 @@ export default function RecipeDetailScreen() {
 
           {/* Ingredients */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Ingredients</Text>
+              <TouchableOpacity 
+                style={styles.addToShoppingListButton}
+                onPress={handleAddToShoppingList}
+              >
+                <Ionicons name="basket-outline" size={16} color={theme.colors.primary} />
+                <Text style={styles.addToShoppingListText}>Add to List</Text>
+              </TouchableOpacity>
+            </View>
             {recipe.ingredients.map((item, index) => (
               <View key={index} style={styles.ingredientItem}>
                 <View style={styles.bulletPoint} />
@@ -978,11 +1009,32 @@ const createStyles = (theme) => StyleSheet.create({
   section: {
     marginBottom: 30,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: theme.colors.primary,
-    marginBottom: 20,
+  },
+  addToShoppingListButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    gap: 6,
+  },
+  addToShoppingListText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.primary,
   },
   ingredientItem: {
     flexDirection: 'row',

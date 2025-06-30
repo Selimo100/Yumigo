@@ -545,3 +545,75 @@ export const searchUsers = async (searchTerm, limit = 20) => {
     return [];
   }
 };
+
+// Shopping list functions
+export const getShoppingList = async (userId) => {
+  try {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    if (userDoc.exists()) {
+      return userDoc.data().shoppingList || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching shopping list:', error);
+    throw error;
+  }
+};
+
+export const updateShoppingList = async (userId, shoppingList) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      shoppingList,
+      updatedAt: serverTimestamp(),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error updating shopping list:', error);
+    throw error;
+  }
+};
+
+export const addShoppingListItem = async (userId, item) => {
+  try {
+    const currentList = await getShoppingList(userId);
+    const newItem = {
+      id: Date.now().toString(),
+      text: item.text,
+      completed: false,
+      addedAt: new Date().toISOString(),
+    };
+    const updatedList = [...currentList, newItem];
+    await updateShoppingList(userId, updatedList);
+    return newItem;
+  } catch (error) {
+    console.error('Error adding shopping list item:', error);
+    throw error;
+  }
+};
+
+export const toggleShoppingListItem = async (userId, itemId) => {
+  try {
+    const currentList = await getShoppingList(userId);
+    const updatedList = currentList.map(item => 
+      item.id === itemId ? { ...item, completed: !item.completed } : item
+    );
+    await updateShoppingList(userId, updatedList);
+    return updatedList;
+  } catch (error) {
+    console.error('Error toggling shopping list item:', error);
+    throw error;
+  }
+};
+
+export const removeShoppingListItem = async (userId, itemId) => {
+  try {
+    const currentList = await getShoppingList(userId);
+    const updatedList = currentList.filter(item => item.id !== itemId);
+    await updateShoppingList(userId, updatedList);
+    return updatedList;
+  } catch (error) {
+    console.error('Error removing shopping list item:', error);
+    throw error;
+  }
+};
