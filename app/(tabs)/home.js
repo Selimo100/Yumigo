@@ -154,6 +154,7 @@ export default function HomeScreen() {
             {/* Top Navigation */}
             <View style={styles.topNav}>
                 <View style={styles.logoContainer}>
+                    <Text style={styles.logoText}>Yumigo</Text>
                     <Image 
                         source={require('../../assets/Yumigo_Logo.png')} 
                         style={styles.logoImage}
@@ -162,7 +163,7 @@ export default function HomeScreen() {
                 </View>
                 <View style={styles.topNavIcons}>
                     <TouchableOpacity style={styles.createButton} onPress={handleCreatePress}>
-                        <Ionicons name="add" size={24} color={theme.colors.buttonText} />
+                        <Ionicons name="add" size={24} color="#FFFFFF" />
                         <Text style={styles.createText}>Create</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.notificationIcon}>
@@ -403,12 +404,20 @@ const createStyles = (theme) => StyleSheet.create({
     },
     logoContainer: {
         flex: 1,
-        alignItems: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingLeft: 10,
+        gap: 0,
+    },
+    logoText: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#000000',
     },
     logoImage: {
         height: 40,
-        width: 140,
+        width: 130,
+        marginLeft: -50,
     },
     logo: {
         fontSize: 24,
