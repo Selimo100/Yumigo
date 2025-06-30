@@ -39,9 +39,25 @@ export default function Login() {
                 if (!user.emailVerified) {
                     Alert.alert(
                         "E-Mail nicht bestätigt",
-                        "Bitte bestätige deine E-Mail-Adresse. Wir haben dir eine E-Mail gesendet."
+                        "Bitte bestätige deine E-Mail-Adresse. Wir haben dir eine neue E-Mail gesendet.",
+                        [
+                            {
+                                text: "E-Mail erneut senden",
+                                onPress: async () => {
+                                    try {
+                                        await sendVerificationEmail();
+                                        Alert.alert("E-Mail gesendet", "Überprüfe dein Postfach und den Spam-Ordner.");
+                                    } catch (error) {
+                                        Alert.alert("Fehler", "E-Mail konnte nicht gesendet werden: " + error.message);
+                                    }
+                                }
+                            },
+                            {
+                                text: "OK",
+                                style: "cancel"
+                            }
+                        ]
                     );
-                    await sendVerificationEmail();
                     await logout();
                     return;
                 }
