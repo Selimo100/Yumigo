@@ -191,8 +191,9 @@ export default function EditRecipeScreen() {
           {
             text: 'OK',
             onPress: () => {
-              // Set a flag to indicate edit was completed
+              // Set flags to indicate edit was completed for both detail and profile reload
               global.recipeEditCompleted = true;
+              global.profileNeedsReload = true;
               router.back();
             }
           }

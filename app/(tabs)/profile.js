@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import useAuth from "../../lib/useAuth";
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { logout } from '../../services/authService';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 import { useFollow } from '../../hooks/useFollow';
 
@@ -51,6 +51,16 @@ export default function ProfileScreen({
       loadFollowers();
     }
   }, [user?.uid, loadFollowingUsers, loadFollowers]);
+
+  // Listen for global flag to reload profile data after recipe deletion
+  useFocusEffect(
+    useCallback(() => {
+      if (global.profileNeedsReload && refreshProfile) {
+        refreshProfile();
+        global.profileNeedsReload = false; // Reset flag
+      }
+    }, [refreshProfile])
+  );
 
   if (profileLoading) {
     return (

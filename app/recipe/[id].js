@@ -350,6 +350,8 @@ export default function RecipeDetailScreen() {
           onPress: async () => {
             try {
               await deleteRecipe(id, recipe.authorId);
+              // Set global flag so profile page can reload to show updated recipe list
+              global.profileNeedsReload = true;
               Alert.alert("Recipe Deleted", "Your recipe has been deleted successfully.");
               router.back();
             } catch (error) {

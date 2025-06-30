@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { getUserProfile, getUserRecipes } from '../../services/userService';
 import FollowButton from '../../components/FollowButton';
 import RecipeCard from '../../components/RecipeCard';
@@ -32,6 +32,16 @@ export default function UserProfileScreen() {
   useEffect(() => {
     loadUserData();
   }, [userId]);
+
+  // Listen for global flag to reload profile data after recipe deletion
+  useFocusEffect(
+    useCallback(() => {
+      if (global.profileNeedsReload) {
+        loadUserData();
+        global.profileNeedsReload = false; // Reset flag
+      }
+    }, [])
+  );
 
   const loadUserData = async () => {
     if (!userId) return;
