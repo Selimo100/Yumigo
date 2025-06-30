@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,13 +11,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import useAuth from "../../lib/useAuth";
 import { useUserProfile } from '../../hooks/useUserProfile';
 import {logout} from '../../services/authService';
 import {useRouter} from 'expo-router';
+import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 
 const {width} = Dimensions.get('window');
 
@@ -30,6 +31,18 @@ export default function ProfileScreen({
     const {user} = useAuth();
     const { profile: userProfile, recipes: userRecipes, isLoading: profileLoading, refreshProfile } = useUserProfile();
     const router = useRouter();
+
+    // Listen for profile updates from settings
+    useEffect(() => {
+        const unsubscribe = profileUpdateEmitter.subscribe(() => {
+            console.log('Profile update event received, refreshing...');
+            if (refreshProfile) {
+                refreshProfile();
+            }
+        });
+
+        return unsubscribe;
+    }, [refreshProfile]);
 
     // Show loading state while profile is loading
     if (profileLoading) {

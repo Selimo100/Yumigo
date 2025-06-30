@@ -16,6 +16,7 @@ import {SettingItem, Section} from '../../components/Settings/SettingComponents'
 import {ProfileSection} from '../../components/Settings/ProfileSection';
 import {AccountSection} from '../../components/Settings/AccountSection';
 import {createStyles} from '../../components/Settings/SettingsStyles';
+import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 export default function SettingsScreen() {
     const {theme, toggleTheme, isDarkMode} = useTheme();
     const {
@@ -27,11 +28,11 @@ export default function SettingsScreen() {
         saveAllSettings
     } = useSettings();
     
-    const styles = createStyles(theme);
-
-    const saveProfile = async () => {
+    const styles = createStyles(theme);    const saveProfile = async () => {
         const success = await saveAllSettings();
         if (success) {
+            // Emit event to refresh profile screen
+            profileUpdateEmitter.emit();
             Alert.alert('Success', 'Profile updated successfully!');
             router.back();
         } else {
