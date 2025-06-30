@@ -137,7 +137,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     paddingVertical: 20,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
-    backgroundColor: '#FFFFFF', // White background for header
+    backgroundColor: '#FFFFFF',
   },
   title: {
     fontSize: 28,
