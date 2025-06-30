@@ -31,4 +31,55 @@ describe('SearchBar', () => {
     const input = getByPlaceholderText('Test');
     expect(input.props.style).toBeDefined();
   });
+
+  test('akzeptiert leeren Search-Text', () => {
+    const mockOnSearch = jest.fn();
+    const { getByPlaceholderText } = render(
+      <SearchBar placeholder="Suche..." onSearch={mockOnSearch} />
+    );
+    
+    const input = getByPlaceholderText('Suche...');
+    fireEvent.changeText(input, '');
+    
+    expect(mockOnSearch).toHaveBeenCalledWith('');
+  });
+
+  test('funktioniert ohne onSearch Callback', () => {
+    const { getByPlaceholderText } = render(
+      <SearchBar placeholder="Test ohne Callback" />
+    );
+    
+    const input = getByPlaceholderText('Test ohne Callback');
+    
+    // Sollte nicht crashen, auch ohne onSearch
+    expect(() => {
+      fireEvent.changeText(input, 'test');
+    }).not.toThrow();
+  });
+
+  test('behält Focus-Verhalten bei', () => {
+    const { getByPlaceholderText } = render(
+      <SearchBar placeholder="Focus Test" />
+    );
+    
+    const input = getByPlaceholderText('Focus Test');
+    
+    expect(() => {
+      fireEvent(input, 'focus');
+      fireEvent(input, 'blur');
+    }).not.toThrow();
+  });
+
+  test('verarbeitet Sonderzeichen korrekt', () => {
+    const mockOnSearch = jest.fn();
+    const { getByPlaceholderText } = render(
+      <SearchBar placeholder="Sonderzeichen" onSearch={mockOnSearch} />
+    );
+    
+    const input = getByPlaceholderText('Sonderzeichen');
+    const specialChars = 'äöü!@#$%^&*()';
+    
+    fireEvent.changeText(input, specialChars);
+    expect(mockOnSearch).toHaveBeenCalledWith(specialChars);
+  });
 });
