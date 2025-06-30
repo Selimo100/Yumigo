@@ -410,7 +410,7 @@ const createStyles = (theme) => StyleSheet.create({
         gap: 0,
     },
     logoText: {
-        fontSize: 22,
+        fontSize: 28,
         fontWeight: 'bold',
         color: '#000000',
     },
