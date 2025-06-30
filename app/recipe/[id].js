@@ -199,12 +199,12 @@ export default function RecipeDetailScreen() {
         // User is unliking
         await deleteDoc(recipeLikeDocRef);
         setIsLiked(false);
-        Alert.alert("Unliked", "Recipe removed from your liked items.");
+        // Alert entfernt - nur stille Bestätigung
       } else {
         // User is liking
         await setDoc(recipeLikeDocRef, { timestamp: serverTimestamp() }); // Add timestamp for potential future use (e.g., when it was liked)
         setIsLiked(true);
-        Alert.alert("Liked", "Recipe added to your liked items!");
+        // Alert entfernt - nur stille Bestätigung
       }
       // TODO: Consider updating the recipe's global like count field in Firestore here
       // (This would typically involve Cloud Functions or a transaction for atomic updates)
@@ -222,10 +222,7 @@ export default function RecipeDetailScreen() {
 
     try {
       await toggleFavorite(id);
-      Alert.alert(
-        isSaved ? 'Removed from Favorites' : 'Saved to Favorites',
-        isSaved ? 'Recipe removed from your favorites' : 'Recipe saved to your favorites'
-      );
+      // Alert entfernt - nur stille Bestätigung, visuelle Feedback durch Icon-Änderung
     } catch (error) {
       console.error('Error toggling favorite:', error);
       if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
@@ -242,10 +239,7 @@ export default function RecipeDetailScreen() {
   const handleRating = (rating) => {
     setUserRating(rating);
     setShowRating(false);
-    Alert.alert(
-      'Rating Submitted',
-      `You rated this recipe ${rating} star${rating !== 1 ? 's' : ''}!`
-    );
+    // Alert entfernt - nur stille Bestätigung
     // TODO: Implement saving user ratings to Firestore
   };
 
