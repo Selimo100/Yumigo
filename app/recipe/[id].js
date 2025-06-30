@@ -16,6 +16,8 @@ import { getAuth } from 'firebase/auth';
 import { serverTimestamp } from 'firebase/firestore';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
+import { deleteRecipe, isRecipeOwner } from '../../services/recipeService';
+import useAuth from '../../lib/useAuth';
 
 const formatTime = (timestamp) => {
   try {
@@ -91,7 +93,7 @@ export default function RecipeDetailScreen() {
               authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
             }
           }
-          setRecipe({ ...recipeData, authorName: authorDisplayName });
+          setRecipe({ ...recipeData, authorDisplayName });
           // --- END CHANGES HERE ---
 
           // Check if current user has liked this recipe
@@ -300,7 +302,9 @@ export default function RecipeDetailScreen() {
     if (!commentText.trim()) {
       Alert.alert("Empty Comment", "Please enter some text for your comment.");
       return;
-    }    try {
+    }
+
+    try {
       const newCommentData = {
         text: commentText,
         authorId: currentUser.uid, // Store UID for security/lookup
@@ -330,6 +334,42 @@ export default function RecipeDetailScreen() {
     }
   };
 
+  // Handle recipe deletion
+  const handleDeleteRecipe = () => {
+    Alert.alert(
+      "Delete Recipe",
+      "Are you sure you want to delete this recipe? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteRecipe(id, recipe.authorId);
+              Alert.alert("Recipe Deleted", "Your recipe has been deleted successfully.");
+              router.back();
+            } catch (error) {
+              console.error('Error deleting recipe:', error);
+              Alert.alert("Error", "Failed to delete recipe. Please try again.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  // Handle recipe editing
+  const handleEditRecipe = () => {
+    router.push(`/recipe/edit-recipe?id=${id}`);
+  };
+
+  // Check if current user is the recipe owner
+  const isOwner = isRecipeOwner(recipe, currentUser?.uid);
+
   if (loading || !recipe) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
@@ -345,9 +385,21 @@ export default function RecipeDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.shareButton}>
-          <Ionicons name="share-outline" size={24} color={theme.colors.text} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          {isOwner && (
+            <>
+              <TouchableOpacity style={styles.actionButton} onPress={handleEditRecipe}>
+                <Ionicons name="create-outline" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton} onPress={handleDeleteRecipe}>
+                <Ionicons name="trash-outline" size={24} color={theme.colors.error} />
+              </TouchableOpacity>
+            </>
+          )}
+          <TouchableOpacity style={styles.shareButton}>
+            <Ionicons name="share-outline" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -553,6 +605,18 @@ const createStyles = (theme) => StyleSheet.create({
       : 'rgba(255,255,255,0.9)',
   },
   backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionButton: {
     padding: 8,
     borderRadius: 20,
     backgroundColor: theme.colors.surface,
