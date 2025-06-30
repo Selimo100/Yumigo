@@ -14,6 +14,7 @@ import { db } from '../../lib/firebaseconfig';
 import { formatDistanceToNow } from 'date-fns';
 import { getAuth } from 'firebase/auth';
 import { serverTimestamp } from 'firebase/firestore';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
 const formatTime = (timestamp) => {
   try {
@@ -50,6 +51,7 @@ export default function RecipeDetailScreen() {
   const styles = createStyles(theme);
   const scrollViewRef = useRef(null);
   const commentsRef = useRef(null);
+  const { profile: userProfile } = useUserProfile();
 
   const [recipe, setRecipe] = useState(null);
   const [comments, setComments] = useState([]);
@@ -123,12 +125,10 @@ export default function RecipeDetailScreen() {
               const userCommentLikeDocRef = doc(commentLikesCollectionRef, currentUser.uid);
               const userCommentLikeSnap = await getDoc(userCommentLikeDocRef);
               isCommentLikedByUser = userCommentLikeSnap.exists();
-            }
-
-            return {
+            }            return {
               id: docSnapshot.id,
               user: commentAuthorName, // Use the fetched/resolved author name for comments
-              avatar: 'https://via.placeholder.com/40x40', // Fallback, implement real avatars later
+              avatar: data.authorAvatar || null, // Use the stored avatar from comment data
               comment: data.text || '',
               time: formatTime(data.createdAt?.toDate?.() || new Date()),
               likes: commentLikesCount,
@@ -280,13 +280,12 @@ export default function RecipeDetailScreen() {
     if (!commentText.trim()) {
       Alert.alert("Empty Comment", "Please enter some text for your comment.");
       return;
-    }
-
-    try {
+    }    try {
       const newCommentData = {
         text: commentText,
         authorId: currentUser.uid, // Store UID for security/lookup
-        authorName: currentUser.displayName || currentUser.email || 'Anonymous', // Store display name for UI
+        authorName: userProfile?.username || currentUser.displayName || currentUser.email || 'Anonymous', // Store display name for UI
+        authorAvatar: userProfile?.avatar || null, // Store user's profile picture
         createdAt: serverTimestamp(),
       };
 
@@ -296,7 +295,7 @@ export default function RecipeDetailScreen() {
       const localComment = {
         id: docRef.id,
         user: newCommentData.authorName, // Use the display name for UI
-        avatar: 'https://via.placeholder.com/40x40', // Fallback avatar
+        avatar: newCommentData.authorAvatar, // Use user's actual avatar
         comment: commentText, // Corrected: This must be 'comment' for CommentsSection
         time: 'just now', // Will be updated on next fetch
         likes: 0,
