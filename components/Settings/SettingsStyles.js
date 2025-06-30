@@ -118,8 +118,7 @@ export const createStyles = (theme) => StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: theme.colors.text,
-  },
-  bioInput: {
+  },  bioInput: {
     height: 80,
     textAlignVertical: 'top',
   },

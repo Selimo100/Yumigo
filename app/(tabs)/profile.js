@@ -8,60 +8,60 @@ import {
   Dimensions,
   StatusBar,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import useAuth from "../../lib/useAuth";
+import { useUserProfile } from '../../hooks/useUserProfile';
 import {logout} from '../../services/authService';
 import {useRouter} from 'expo-router';
 
 const {width} = Dimensions.get('window');
 
 export default function ProfileScreen({
-                                          recipes = [],
                                           onEditProfile,
                                           onShareProfile,
                                           onRecipePress,
                                       }) {
     const {theme, toggleTheme, isDarkMode} = useTheme();
     const {user} = useAuth();
+    const { profile: userProfile, recipes: userRecipes, isLoading: profileLoading, refreshProfile } = useUserProfile();
     const router = useRouter();
 
+    // Show loading state while profile is loading
+    if (profileLoading) {
+        return (
+            <SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={theme.colors.button} />
+                    <Text style={[styles.loadingText, {color: theme.colors.textSecondary}]}>
+                        Loading profile...
+                    </Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
 
-    const defaultUser = {
-        id: '1',
-        username: "Username",
-        bio: 'Food enthusiast | 15-min recipe creator | Making cooking simple',
-        following: 89,
-        followers: 125,
-        recipes: 2,
+    // Use the real user profile data or fallback only if no profile exists
+    const currentUser = userProfile || {
+        username: user?.email?.split('@')[0] || 'User',
+        bio: 'Food enthusiast | Making cooking simple',
+        followerCount: 0,
+        followingCount: 0,
+        recipeCount: 0,
+        avatar: null,
     };
-
-    const defaultRecipes = [
-        {
-            id: '1',
-            title: 'Quick Pasta Carbonara',
-            time: '15 min',
-            rating: 4.8,
-            likes: 99,
-            chef: 'Chef Mario',
-        },
-        {
-            id: '2',
-            title: 'Quick Pasta Carbonara',
-            time: '15 min',
-            rating: 4.8,
-            likes: 99,
-            chef: 'Chef Mario',
-        },
-    ];
-
-    const currentUser = user || defaultUser;
-    const recipeList = recipes.length > 0 ? recipes : defaultRecipes;
-
-    const renderRecipeCard = (recipe) => (
+      // Use real user recipes
+    const recipeList = userRecipes || [];
+    
+    console.log('Profile Screen Debug:');
+    console.log('- userProfile:', userProfile);
+    console.log('- userRecipes length:', userRecipes?.length || 0);
+    console.log('- recipeList length:', recipeList.length);
+    console.log('- profileLoading:', profileLoading);const renderRecipeCard = (recipe) => (
         <TouchableOpacity
             key={recipe.id}
             style={[
@@ -71,17 +71,21 @@ export default function ProfileScreen({
             onPress={() => onRecipePress?.(recipe)}
         >
             <View style={styles.recipeImageContainer}>
-                <View
-                    style={[
-                        styles.recipeImagePlaceholder,
-                        {backgroundColor: theme.colors.border},
-                    ]}
-                >
-                    <Ionicons name="restaurant" size={40} color="#999"/>
-                </View>
+                {recipe.imageUrl ? (
+                    <Image source={{ uri: recipe.imageUrl }} style={styles.recipeImagePlaceholder} />
+                ) : (
+                    <View
+                        style={[
+                            styles.recipeImagePlaceholder,
+                            {backgroundColor: theme.colors.border},
+                        ]}
+                    >
+                        <Ionicons name="restaurant" size={40} color="#999"/>
+                    </View>
+                )}
                 <View style={styles.timeTag}>
                     <Ionicons name="time-outline" size={12} color="#fff"/>
-                    <Text style={styles.timeText}>{recipe.time}</Text>
+                    <Text style={styles.timeText}>{recipe.cookingTime || recipe.time || '-- min'}</Text>
                 </View>
             </View>
 
@@ -90,21 +94,21 @@ export default function ProfileScreen({
                     {recipe.title}
                 </Text>
                 <Text style={[styles.chefName, {color: theme.colors.textSecondary}]}>
-                    by {recipe.chef}
+                    by {recipe.authorName || 'You'}
                 </Text>
 
                 <View style={styles.recipeStats}>
                     <View style={styles.ratingContainer}>
                         <Ionicons name="star" size={14} color="#ffc107"/>
                         <Text style={[styles.ratingText, {color: theme.colors.text}]}>
-                            {recipe.rating}
+                            {recipe.rating || '4.5'}
                         </Text>
                     </View>
 
                     <View style={styles.likesContainer}>
                         <Ionicons name="heart-outline" size={14} color="#6c757d"/>
                         <Text style={[styles.likesText, {color: theme.colors.textSecondary}]}>
-                            {recipe.likes}
+                            {recipe.likes || '0'}
                         </Text>
                     </View>
                 </View>
@@ -134,28 +138,27 @@ export default function ProfileScreen({
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                <View style={[styles.profileHeader, {backgroundColor: theme.colors.surface}]}>
-                    <View
+                <View style={[styles.profileHeader, {backgroundColor: theme.colors.surface}]}>                    <View
                         style={[
                             styles.profilePicture,
                             {backgroundColor: theme.colors.border, borderColor: theme.colors.surface},
                         ]}
                     >
-                        {currentUser.profileImage ? (
-                            <Image source={{uri: currentUser.profileImage}} style={styles.profileImage}/>
+                        {currentUser.avatar ? (
+                            <Image source={{uri: currentUser.avatar}} style={styles.profileImage}/>
                         ) : (
                             <Ionicons name="person" size={50} color={theme.colors.textSecondary}/>
                         )}
                     </View>
 
                     <Text style={[styles.username, {color: theme.colors.text}]}>
-                        {currentUser.username }
+                        {currentUser.username}
                     </Text>
 
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
                 <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                  {currentUser.following}
+                  {currentUser.followingCount || 0}
                 </Text>
                 <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
                   Following
@@ -163,7 +166,7 @@ export default function ProfileScreen({
               </View>
               <View style={styles.statItem}>
                 <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                  {currentUser.followers}
+                  {currentUser.followerCount || 0}
                 </Text>
                 <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
                   Followers
@@ -171,8 +174,8 @@ export default function ProfileScreen({
               </View>
               <View style={styles.statItem}>
                 <Text style={[styles.statNumber, { color: theme.colors.text }]}>
-                  {currentUser.recipes}
-                </Text>                <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+                  {currentUser.recipeCount || 0}
+                </Text><Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
                   Recipes
                 </Text>
               </View>
@@ -207,14 +210,40 @@ export default function ProfileScreen({
                     <Text style={[styles.buttonText, {color: theme.colors.textOnAccent}]}>Logout</Text>
                 </TouchableOpacity>
             </View>
-          </View>
-
-                <View style={styles.recipesSection}>
+          </View>                <View style={styles.recipesSection}>
                     <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-                        Your Recipes
+                        Your Recipes ({currentUser.recipeCount || 0})
                     </Text>
 
-                    <View style={styles.recipesGrid}>{recipeList.map(renderRecipeCard)}</View>
+                    {profileLoading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color={theme.colors.button} />
+                            <Text style={[styles.loadingText, {color: theme.colors.textSecondary}]}>
+                                Loading recipes...
+                            </Text>
+                        </View>
+                    ) : recipeList.length > 0 ? (
+                        <View style={styles.recipesGrid}>{recipeList.map(renderRecipeCard)}</View>
+                    ) : (
+                        <View style={styles.emptyContainer}>
+                            <Ionicons name="restaurant-outline" size={48} color={theme.colors.textSecondary} />
+                            <Text style={[styles.emptyTitle, {color: theme.colors.text}]}>
+                                No recipes yet
+                            </Text>
+                            <Text style={[styles.emptySubtitle, {color: theme.colors.textSecondary}]}>
+                                Start creating delicious recipes to share with the community!
+                            </Text>
+                            <TouchableOpacity 
+                                style={[styles.createButton, {backgroundColor: theme.colors.button}]}
+                                onPress={() => router.push('/recipe/create-recipe')}
+                            >
+                                <Ionicons name="add" size={20} color={theme.colors.buttonText} />
+                                <Text style={[styles.createButtonText, {color: theme.colors.buttonText}]}>
+                                    Create Recipe
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -388,18 +417,78 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-  likesText: {
+  },  likesText: {
     fontSize: 14,
     fontWeight: '500',
   },
-    logoutButton: {
+    emptyContainer: {
+        alignItems: 'center',
+        paddingVertical: 40,
+    },
+    emptyTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginTop: 16,
+        marginBottom: 8,
+    },
+    emptySubtitle: {
+        fontSize: 14,
+        textAlign: 'center',
+        marginBottom: 24,
+        paddingHorizontal: 20,
+    },
+    createButton: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 24,
         gap: 8,
-        marginLeft: 12,
     },
+    createButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    gap: 8,
+    marginLeft: 12,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  createRecipeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    gap: 8,
+  },
 });
