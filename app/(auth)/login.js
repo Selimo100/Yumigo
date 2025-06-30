@@ -7,7 +7,8 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
+    Platform,
 } from "react-native"
 import {SafeAreaView} from "react-native-safe-area-context";
 import React, {useState} from 'react';
@@ -39,9 +40,25 @@ export default function Login() {
                 if (!user.emailVerified) {
                     Alert.alert(
                         "E-Mail nicht bestätigt",
-                        "Bitte bestätige deine E-Mail-Adresse. Wir haben dir eine E-Mail gesendet."
+                        "Bitte bestätige deine E-Mail-Adresse. Wir haben dir eine neue E-Mail gesendet.",
+                        [
+                            {
+                                text: "E-Mail erneut senden",
+                                onPress: async () => {
+                                    try {
+                                        await sendVerificationEmail();
+                                        Alert.alert("E-Mail gesendet", "Überprüfe dein Postfach und den Spam-Ordner.");
+                                    } catch (error) {
+                                        Alert.alert("Fehler", "E-Mail konnte nicht gesendet werden: " + error.message);
+                                    }
+                                }
+                            },
+                            {
+                                text: "OK",
+                                style: "cancel"
+                            }
+                        ]
                     );
-                    await sendVerificationEmail();
                     await logout();
                     return;
                 }
@@ -78,8 +95,14 @@ export default function Login() {
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView
                 style={styles.container}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
             >
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <ScrollView 
+                    contentContainerStyle={styles.scrollContainer}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
                     <View style={styles.headerContainer}>
                         <Image source={require('../../assets/icon.png')} style={styles.logo}/>
                         <Text style={styles.title}>Yumigo</Text>
@@ -161,6 +184,7 @@ const createStyles = (theme) => StyleSheet.create({
         justifyContent: 'center',
         paddingHorizontal: 24,
         paddingVertical: 32,
+        minHeight: '100%',
     },
     headerContainer: {
         alignItems: 'center',

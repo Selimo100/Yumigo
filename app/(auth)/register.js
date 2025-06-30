@@ -9,10 +9,11 @@ import {
     TouchableOpacity,
     View,
     Image,
+    Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../../contexts/ThemeContext";
-import { register, sendVerificationEmail } from "../../services/authService";
+import { register } from "../../services/authService";
 import { useRouter } from "expo-router";
 
 export default function Register() {
@@ -30,13 +31,11 @@ export default function Register() {
         }
 
         try {
-            // Falls dein register-Service einen username mit braucht,
-            // passe das hier entsprechend an, sonst nur email und password
-            await register(email, password, username);
-            await sendVerificationEmail();
+            // Register user (verification email is sent automatically)
+            const user = await register(email, password, username);
             Alert.alert(
                 "Registrierung erfolgreich",
-                "Bitte überprüfe deine E-Mail-Adresse zur Verifizierung."
+                "Bitte überprüfe deine E-Mail-Adresse zur Verifizierung. Du wirst zur Home-Seite weitergeleitet."
             );
             router.replace("/home");
         } catch (error) {
@@ -55,8 +54,16 @@ export default function Register() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView style={styles.container}>
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <KeyboardAvoidingView 
+                style={styles.container}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <ScrollView 
+                    contentContainerStyle={styles.scrollContainer}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
                     <View style={styles.headerContainer}>
                         <Image source={require("../../assets/icon.png")} style={styles.logo} />
                         <Text style={styles.title}>Yumigo</Text>
@@ -142,6 +149,7 @@ const createStyles = (theme) =>
             justifyContent: "center",
             paddingHorizontal: 24,
             paddingVertical: 32,
+            minHeight: '100%',
         },
         headerContainer: {
             alignItems: "center",
