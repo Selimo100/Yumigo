@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, router } from 'expo-router';
-import { useState, useEffect, useRef } from 'react';
+import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StarRating } from '../../components/CommentComponents';
 import { CommentInput } from '../../components/CommentInput';
@@ -16,6 +16,8 @@ import { getAuth } from 'firebase/auth';
 import { serverTimestamp } from 'firebase/firestore';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
+import { deleteRecipe, isRecipeOwner } from '../../services/recipeService';
+import useAuth from '../../lib/useAuth';
 
 const formatTime = (timestamp) => {
   try {
@@ -91,7 +93,7 @@ export default function RecipeDetailScreen() {
               authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
             }
           }
-          setRecipe({ ...recipeData, authorName: authorDisplayName });
+          setRecipe({ ...recipeData, authorDisplayName });
           // --- END CHANGES HERE ---
 
           // Check if current user has liked this recipe
@@ -300,7 +302,9 @@ export default function RecipeDetailScreen() {
     if (!commentText.trim()) {
       Alert.alert("Empty Comment", "Please enter some text for your comment.");
       return;
-    }    try {
+    }
+
+    try {
       const newCommentData = {
         text: commentText,
         authorId: currentUser.uid, // Store UID for security/lookup
@@ -330,6 +334,85 @@ export default function RecipeDetailScreen() {
     }
   };
 
+  // Handle recipe deletion
+  const handleDeleteRecipe = () => {
+    Alert.alert(
+      "Delete Recipe",
+      "Are you sure you want to delete this recipe? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteRecipe(id, recipe.authorId);
+              // Set global flag so profile page can reload to show updated recipe list
+              global.profileNeedsReload = true;
+              Alert.alert("Recipe Deleted", "Your recipe has been deleted successfully.");
+              router.back();
+            } catch (error) {
+              console.error('Error deleting recipe:', error);
+              Alert.alert("Error", "Failed to delete recipe. Please try again.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  // Function to reload recipe data
+  const reloadRecipeData = async () => {
+    try {
+      setLoading(true);
+      const recipeDocRef = doc(db, 'recipes', id);
+      const recipeDocSnap = await getDoc(recipeDocRef);
+
+      if (recipeDocSnap.exists()) {
+        const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
+
+        // Fetch author's display name
+        let authorDisplayName = 'Anonymous';
+        if (recipeData.authorId) {
+          const userDocRef = doc(db, 'users', recipeData.authorId);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            authorDisplayName = userDocSnap.data().displayName || userDocSnap.data().email || 'Anonymous';
+          } else if (currentUser && currentUser.uid === recipeData.authorId) {
+            authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
+          }
+        }
+        setRecipe({ ...recipeData, authorDisplayName });
+      }
+    } catch (error) {
+      console.error('Error reloading recipe:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle recipe editing with callback
+  const handleEditRecipe = () => {
+    router.push(`/recipe/edit-recipe?id=${id}`);
+  };
+
+  // Listen for navigation back from edit screen using useFocusEffect
+  useFocusEffect(
+    useCallback(() => {
+      // Check if edit was completed
+      if (global.recipeEditCompleted) {
+        reloadRecipeData();
+        global.recipeEditCompleted = false; // Reset flag
+      }
+    }, [])
+  );
+
+  // Check if current user is the recipe owner
+  const isOwner = isRecipeOwner(recipe, currentUser?.uid);
+
   if (loading || !recipe) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
@@ -345,9 +428,21 @@ export default function RecipeDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.shareButton}>
-          <Ionicons name="share-outline" size={24} color={theme.colors.text} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          {isOwner && (
+            <>
+              <TouchableOpacity style={styles.actionButton} onPress={handleEditRecipe}>
+                <Ionicons name="create-outline" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton} onPress={handleDeleteRecipe}>
+                <Ionicons name="trash-outline" size={24} color={theme.colors.error} />
+              </TouchableOpacity>
+            </>
+          )}
+          <TouchableOpacity style={styles.shareButton}>
+            <Ionicons name="share-outline" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -553,6 +648,18 @@ const createStyles = (theme) => StyleSheet.create({
       : 'rgba(255,255,255,0.9)',
   },
   backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionButton: {
     padding: 8,
     borderRadius: 20,
     backgroundColor: theme.colors.surface,

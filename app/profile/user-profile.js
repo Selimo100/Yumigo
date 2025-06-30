@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { getUserProfile, getUserRecipes } from '../../services/userService';
 import FollowButton from '../../components/FollowButton';
 import RecipeCard from '../../components/RecipeCard';
@@ -32,6 +32,16 @@ export default function UserProfileScreen() {
   useEffect(() => {
     loadUserData();
   }, [userId]);
+
+  // Listen for global flag to reload profile data after recipe deletion
+  useFocusEffect(
+    useCallback(() => {
+      if (global.profileNeedsReload) {
+        loadUserData();
+        global.profileNeedsReload = false; // Reset flag
+      }
+    }, [])
+  );
 
   const loadUserData = async () => {
     if (!userId) return;
@@ -253,6 +263,17 @@ export default function UserProfileScreen() {
                     : `${userProfile.username} hasn't shared any recipes yet.`
                   }
                 </Text>
+                {isCurrentUser && (
+                  <TouchableOpacity
+                    style={[styles.createRecipeButton, { backgroundColor: theme.colors.button }]}
+                    onPress={() => router.push('/recipe/create-recipe')}
+                  >
+                    <Ionicons name="add" size={20} color={theme.colors.buttonText} />
+                    <Text style={[styles.createRecipeButtonText, { color: theme.colors.buttonText }]}>
+                      Create Your First Recipe
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             ) : (
               userRecipes.map((recipe) => (
@@ -436,6 +457,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  createRecipeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    marginTop: 20,
+    gap: 8,
+  },
+  createRecipeButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   aboutContainer: {
     paddingHorizontal: 16,

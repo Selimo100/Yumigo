@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import useAuth from "../../lib/useAuth";
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { logout } from '../../services/authService';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 import { useFollow } from '../../hooks/useFollow';
 
@@ -51,6 +51,16 @@ export default function ProfileScreen({
       loadFollowers();
     }
   }, [user?.uid, loadFollowingUsers, loadFollowers]);
+
+  // Listen for global flag to reload profile data after recipe deletion
+  useFocusEffect(
+    useCallback(() => {
+      if (global.profileNeedsReload && refreshProfile) {
+        refreshProfile();
+        global.profileNeedsReload = false; // Reset flag
+      }
+    }, [refreshProfile])
+  );
 
   if (profileLoading) {
     return (
@@ -87,7 +97,7 @@ export default function ProfileScreen({
         styles.recipeCard,
         { backgroundColor: theme.colors.surface },
       ]}
-      onPress={() => onRecipePress?.(recipe)}
+      onPress={() => router.push(`/recipe/${recipe.id}`)}
     >
       <View style={styles.recipeImageContainer}>
         {recipe.imageUrl ? (
@@ -234,9 +244,19 @@ export default function ProfileScreen({
           </View>
         </View>
         <View style={styles.recipesSection}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Your Recipes ({currentUser.recipeCount || 0})
-          </Text>
+          <View style={styles.recipesSectionHeader}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              My Recipes ({recipeList.length})
+            </Text>
+            {recipeList.length > 0 && (
+              <TouchableOpacity
+                style={styles.addRecipeButton}
+                onPress={() => router.push('/recipe/create-recipe')}
+              >
+                <Ionicons name="add" size={20} color={theme.colors.text} />
+              </TouchableOpacity>
+            )}
+          </View>
 
           {profileLoading ? (
             <View style={styles.loadingContainer}>
@@ -385,9 +405,20 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   sectionTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  recipesSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  addRecipeButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   recipesGrid: {
     flexDirection: 'row',

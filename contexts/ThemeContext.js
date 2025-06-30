@@ -52,6 +52,7 @@ export const ThemeProvider = ({ children }) => {
       tabBarInactive: isDarkMode ? '#666666' : '#999999',
       button: isDarkMode ? '#333333' : '#E0E0E0',
       buttonText: isDarkMode ? '#FFFFFF' : '#000000',
+      error: '#FF6B6B',
     },
   };
 
