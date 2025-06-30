@@ -1,22 +1,23 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState, useCallback } from 'react'; // Added useCallback
+import { useState, useCallback } from 'react'; 
 import RecipeCard from '../../components/RecipeCard';
 import RecipeForm from '../../components/RecipeForm/RecipeForm';
 import { useTheme } from '../../contexts/ThemeContext';
 import useAuth from "../../lib/useAuth";
-import { Redirect } from 'expo-router'; // No Stack needed here directly
+import { Redirect } from 'expo-router'; 
 import { db } from '../../lib/firebaseconfig';
-import { getDocs, collection, doc, getDoc } from 'firebase/firestore'; // Added getDoc
-import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
+import { getDocs, collection, doc, getDoc } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native'; 
 import { useFollow } from '../../hooks/useFollow';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);
     const [error, setError] = useState(null);
     const [isLoadingRecipes, setIsLoadingRecipes] = useState(true);
-    const [activeTab, setActiveTab] = useState('discover'); // 'discover' or 'following'
+    const [activeTab, setActiveTab] = useState('discover'); 
+    const [searchQuery, setSearchQuery] = useState('');
 
     const { theme } = useTheme();
     const styles = createStyles(theme);
@@ -25,9 +26,43 @@ export default function HomeScreen() {
     const { user, isLoading: isLoadingAuth } = useAuth();
     const { followingFeed, loadFollowingFeed, isLoading: isLoadingFeed } = useFollow();
 
-    // Memoize getRecipes to prevent unnecessary re-creations
+    // Simple filter function for recipes
+    const getFilteredRecipes = useCallback(() => {
+        const currentRecipes = activeTab === 'discover' ? recipeList : followingFeed;
+        
+        if (!searchQuery.trim()) {
+            return currentRecipes;
+        }
+        
+        const query = searchQuery.toLowerCase();
+        
+        return currentRecipes.filter(recipe => {
+            if (recipe.title?.toLowerCase().includes(query)) {
+                return true;
+            }
+            
+            if (recipe.description?.toLowerCase().includes(query)) {
+                return true;
+            }
+            
+            if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+                return recipe.ingredients.some(ingredient => {
+                    if (typeof ingredient === 'string') {
+                        return ingredient.toLowerCase().includes(query);
+                    }
+                    if (ingredient && typeof ingredient === 'object' && ingredient.name) {
+                        return ingredient.name.toLowerCase().includes(query);
+                    }
+                    return false;
+                });
+            }
+            
+            return false;
+        });
+    }, [recipeList, followingFeed, activeTab, searchQuery]);
+
     const getRecipes = useCallback(async () => {
-        if (!user) { // Only fetch if user is logged in
+        if (!user) { 
             console.log('[HomeScreen] User not authenticated yet, skipping recipe fetch.');
             setIsLoadingRecipes(false);
             return;
@@ -44,12 +79,10 @@ export default function HomeScreen() {
                 data.docs.map(async (docSnapshot) => {
                     const recipeData = { id: docSnapshot.id, ...docSnapshot.data() };
 
-                    // Fetch the likes count for each recipe from its subcollection
                     const likesCollectionRef = collection(db, 'recipes', docSnapshot.id, 'likes');
                     const likesSnapshot = await getDocs(likesCollectionRef);
                     const likesCount = likesSnapshot.size;
 
-                    // Check if the current user has liked this recipe
                     let isLikedByCurrentUser = false;
                     if (user && user.uid) { // Ensure user and uid exist before checking
                         const userLikeDocRef = doc(db, 'recipes', docSnapshot.id, 'likes', user.uid);
@@ -131,6 +164,25 @@ export default function HomeScreen() {
                 </View>
             </View>
 
+            {/* Search Bar */}
+            <View style={styles.searchContainer}>
+                <View style={styles.searchInputContainer}>
+                    <Ionicons name="search" size={20} color={theme.colors.textSecondary} />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search recipes..."
+                        placeholderTextColor={theme.colors.textSecondary}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                    />
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity onPress={() => setSearchQuery('')}>
+                            <Ionicons name="close" size={20} color={theme.colors.textSecondary} />
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </View>
+
             {/* Tab Navigation */}
             <View style={styles.tabContainer}>
                 <TouchableOpacity
@@ -204,20 +256,23 @@ export default function HomeScreen() {
                         <Text style={styles.retryButtonText}>Tap to Retry</Text>
                     </TouchableOpacity>
                 </View>
-            ) : (activeTab === 'discover' ? recipeList : followingFeed).length === 0 ? (
+            ) : getFilteredRecipes().length === 0 ? (
                 <View style={styles.emptyContainer}>
                     <Ionicons 
-                        name={activeTab === 'discover' ? "pizza-outline" : "people-outline"} 
+                        name={searchQuery ? "search-outline" : (activeTab === 'discover' ? "pizza-outline" : "people-outline")} 
                         size={80} 
                         color={theme.colors.textSecondary} 
                     />
                     <Text style={styles.emptyText}>
-                        {activeTab === 'discover' 
-                            ? 'No recipes yet! Be the first to create one.'
-                            : 'No recipes from following users yet. Follow some users to see their recipes here!'
+                        {searchQuery 
+                            ? `No recipes found for "${searchQuery}"`
+                            : (activeTab === 'discover' 
+                                ? 'No recipes yet! Be the first to create one.'
+                                : 'No recipes from following users yet. Follow some users to see their recipes here!'
+                            )
                         }
                     </Text>
-                    {activeTab === 'following' && (
+                    {activeTab === 'following' && !searchQuery && (
                         <TouchableOpacity 
                             style={[styles.discoverUsersButton, { backgroundColor: theme.colors.button }]}
                             onPress={() => setActiveTab('discover')}
@@ -230,7 +285,7 @@ export default function HomeScreen() {
                 </View>
             ) : (
                 <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
-                    {(activeTab === 'discover' ? recipeList : followingFeed).map((recipe) => (
+                    {getFilteredRecipes().map((recipe) => (
                         // Pass the recipe object which now contains likesCount and isLikedByCurrentUser
                         <RecipeCard key={recipe.id} recipe={recipe} />
                     ))}
@@ -406,5 +461,26 @@ const createStyles = (theme) => StyleSheet.create({
     discoverUsersButtonText: {
         fontSize: 16,
         fontWeight: '600',
+    },
+    searchContainer: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: theme.colors.surface,
+    },
+    searchInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: theme.colors.background,
+        borderRadius: 25,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        gap: 10,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        color: theme.colors.text,
     },
 });

@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useState, useCallback } from 'react';
 import RecipeCard from '../../components/RecipeCard';
 import { useTheme } from '../../contexts/ThemeContext';
 import useFavorites from '../../hooks/useFavorites';
@@ -9,6 +10,43 @@ export default function FavoritesScreen() {
   const { theme } = useTheme();
   const { favorites, isLoading } = useFavorites();
   const styles = createStyles(theme);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Simple filter function for favorites
+  const getFilteredFavorites = useCallback(() => {
+    if (!searchQuery.trim()) {
+      return favorites;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    
+    return favorites.filter(recipe => {
+      // Check title
+      if (recipe.title?.toLowerCase().includes(query)) {
+        return true;
+      }
+      
+      // Check description
+      if (recipe.description?.toLowerCase().includes(query)) {
+        return true;
+      }
+      
+      // Check ingredients (handle different data structures)
+      if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+        return recipe.ingredients.some(ingredient => {
+          if (typeof ingredient === 'string') {
+            return ingredient.toLowerCase().includes(query);
+          }
+          if (ingredient && typeof ingredient === 'object' && ingredient.name) {
+            return ingredient.name.toLowerCase().includes(query);
+          }
+          return false;
+        });
+      }
+      
+      return false;
+    });
+  }, [favorites, searchQuery]);
 
   if (isLoading) {
     return (
@@ -37,12 +75,39 @@ export default function FavoritesScreen() {
         )}
       </View>
 
-      {favorites.length > 0 ? (
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputContainer}>
+          <Ionicons name="search" size={20} color={theme.colors.textSecondary} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search favorites..."
+            placeholderTextColor={theme.colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {getFilteredFavorites().length > 0 ? (
         <ScrollView style={styles.feed} showsVerticalScrollIndicator={false}>
-          {favorites.map((recipe) => (
+          {getFilteredFavorites().map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </ScrollView>
+      ) : favorites.length > 0 ? (
+        <View style={styles.emptyState}>
+          <Ionicons name="search-outline" size={80} color={theme.colors.button} />
+          <Text style={styles.emptyText}>No results found</Text>
+          <Text style={styles.emptySubtext}>
+            No favorites match "{searchQuery}"
+          </Text>
+        </View>
       ) : (
         <View style={styles.emptyState}>
           <Ionicons name="heart-outline" size={80} color={theme.colors.button} />
@@ -109,5 +174,26 @@ const createStyles = (theme) => StyleSheet.create({
     color: theme.colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: theme.colors.surface,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: theme.colors.text,
   },
 });
