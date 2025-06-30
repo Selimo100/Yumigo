@@ -33,9 +33,7 @@ export default function ProfileScreen({
     const router = useRouter();
 
     // Listen for profile updates from settings
-    useEffect(() => {
-        const unsubscribe = profileUpdateEmitter.subscribe(() => {
-            console.log('Profile update event received, refreshing...');
+    useEffect(() => {        const unsubscribe = profileUpdateEmitter.subscribe(() => {
             if (refreshProfile) {
                 refreshProfile();
             }
@@ -66,15 +64,10 @@ export default function ProfileScreen({
         followingCount: 0,
         recipeCount: 0,
         avatar: null,
-    };
-      // Use real user recipes
+    };    // Use real user recipes
     const recipeList = userRecipes || [];
-    
-    console.log('Profile Screen Debug:');
-    console.log('- userProfile:', userProfile);
-    console.log('- userRecipes length:', userRecipes?.length || 0);
-    console.log('- recipeList length:', recipeList.length);
-    console.log('- profileLoading:', profileLoading);const renderRecipeCard = (recipe) => (
+
+    const renderRecipeCard = (recipe) => (
         <TouchableOpacity
             key={recipe.id}
             style={[

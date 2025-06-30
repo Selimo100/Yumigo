@@ -7,17 +7,14 @@ export const useUserProfile = () => {
   const [profile, setProfile] = useState(null);
   const [recipes, setRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const loadUserData = async (user) => {
+  const [error, setError] = useState(null);  const loadUserData = async (user) => {
     try {
-      console.log('[useUserProfile] Loading data for user:', user.uid);
       setIsLoading(true);
       setError(null);
       
       // Load user profile
       const userProfile = await getUserProfile(user.uid);
       if (userProfile) {
-        console.log('[useUserProfile] Profile loaded:', userProfile.username, userProfile.bio);
         setProfile(userProfile);
       } else {
         // Fallback to auth user data if no profile found
@@ -34,9 +31,7 @@ export const useUserProfile = () => {
         setProfile(fallbackProfile);
       }      // Load user recipes
       try {
-        const userRecipes = await getUserRecipes(user.uid);
-        console.log('[useUserProfile] Recipes loaded:', userRecipes.length);
-        setRecipes(userRecipes);
+        const userRecipes = await getUserRecipes(user.uid);        setRecipes(userRecipes);
       } catch (recipeError) {
         console.error('Error loading user recipes:', recipeError);
         setRecipes([]);
@@ -73,15 +68,10 @@ export const useUserProfile = () => {
     });
 
     return unsubscribe;
-  }, []);
-  const refreshProfile = async () => {
-    console.log('[useUserProfile] Manual refresh triggered');
+  }, []);  const refreshProfile = async () => {
     const user = auth.currentUser;
     if (user) {
-      console.log('[useUserProfile] Reloading data for user:', user.uid);
       await loadUserData(user);
-    } else {
-      console.log('[useUserProfile] No current user found for refresh');
     }
   };
 
