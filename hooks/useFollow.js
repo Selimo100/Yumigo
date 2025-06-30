@@ -9,6 +9,7 @@ import {
   searchUsers,
   getFollowingFeed
 } from '../services/userService';
+import { createFollowNotification } from '../services/notificationService';
 import useAuth from '../lib/useAuth';
 import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
 import { showToast } from '../utils/toast';
@@ -61,6 +62,15 @@ export const useFollow = () => {
       setFollowingCount(prev => (prev !== null ? prev + 1 : (followingList?.length || 0) + 1));
       
       const success = await followUser(user.uid, targetUserId);
+      
+      // Create follow notification if follow was successful
+      if (success) {
+        try {
+          await createFollowNotification(user.uid, targetUserId);
+        } catch (notificationError) {
+          // Don't show error to user for notification failures
+        }
+      }
       
       // Always emit follow change event and trigger profile update
       profileUpdateEmitter.emitFollowChange(targetUserId, true);

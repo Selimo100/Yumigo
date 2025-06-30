@@ -17,6 +17,7 @@ import { serverTimestamp } from 'firebase/firestore';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
 import { deleteRecipe, isRecipeOwner, rateRecipe, getUserRating } from '../../services/recipeService';
+import { createCommentNotification } from '../../services/notificationService';
 
 const formatTime = (timestamp) => {
   try {
@@ -311,6 +312,16 @@ export default function RecipeDetailScreen() {
       };
 
       const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newCommentData);
+
+      // Create notification for recipe owner if commenter is not the owner
+      if (recipe.authorId && recipe.authorId !== currentUser.uid) {
+        try {
+          await createCommentNotification(id, currentUser.uid, recipe.authorId, commentText);
+        } catch (notificationError) {
+          console.error('Error creating comment notification:', notificationError);
+          // Don't show error to user for notification failures
+        }
+      }
 
       const localComment = {
         id: docRef.id,
