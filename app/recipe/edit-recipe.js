@@ -190,7 +190,11 @@ export default function EditRecipeScreen() {
         [
           {
             text: 'OK',
-            onPress: () => router.back()
+            onPress: () => {
+              // Set a flag to indicate edit was completed
+              global.recipeEditCompleted = true;
+              router.back();
+            }
           }
         ]
       );

@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, router } from 'expo-router';
-import { useState, useEffect, useRef } from 'react';
+import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StarRating } from '../../components/CommentComponents';
 import { CommentInput } from '../../components/CommentInput';
@@ -362,10 +362,51 @@ export default function RecipeDetailScreen() {
     );
   };
 
-  // Handle recipe editing
+  // Function to reload recipe data
+  const reloadRecipeData = async () => {
+    try {
+      setLoading(true);
+      const recipeDocRef = doc(db, 'recipes', id);
+      const recipeDocSnap = await getDoc(recipeDocRef);
+
+      if (recipeDocSnap.exists()) {
+        const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
+
+        // Fetch author's display name
+        let authorDisplayName = 'Anonymous';
+        if (recipeData.authorId) {
+          const userDocRef = doc(db, 'users', recipeData.authorId);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            authorDisplayName = userDocSnap.data().displayName || userDocSnap.data().email || 'Anonymous';
+          } else if (currentUser && currentUser.uid === recipeData.authorId) {
+            authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
+          }
+        }
+        setRecipe({ ...recipeData, authorDisplayName });
+      }
+    } catch (error) {
+      console.error('Error reloading recipe:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle recipe editing with callback
   const handleEditRecipe = () => {
     router.push(`/recipe/edit-recipe?id=${id}`);
   };
+
+  // Listen for navigation back from edit screen using useFocusEffect
+  useFocusEffect(
+    useCallback(() => {
+      // Check if edit was completed
+      if (global.recipeEditCompleted) {
+        reloadRecipeData();
+        global.recipeEditCompleted = false; // Reset flag
+      }
+    }, [])
+  );
 
   // Check if current user is the recipe owner
   const isOwner = isRecipeOwner(recipe, currentUser?.uid);
