@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Share } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Share, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
@@ -12,7 +12,6 @@ import { ALLERGENS, CATEGORIES } from '../../utils/constants';
 import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebaseconfig';
 import { formatDistanceToNow } from 'date-fns';
-import { getAuth } from 'firebase/auth';
 import { serverTimestamp } from 'firebase/firestore';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
@@ -20,6 +19,7 @@ import { deleteRecipe, isRecipeOwner, rateRecipe, getUserRating } from '../../se
 import { createCommentNotification } from '../../services/notificationService';
 import { addShoppingListItem } from '../../services/userService';
 import { showToast } from '../../utils/toast';
+import useAuth from '../../lib/useAuth';
 
 const formatTime = (timestamp) => {
   try {
@@ -53,6 +53,7 @@ const categoryConfig = CATEGORIES.reduce((acc, category) => {
 export default function RecipeDetailScreen() {
   const { id, scrollToComments, created } = useLocalSearchParams();
   const { theme } = useTheme();
+  const { user: currentUser } = useAuth(); // Use useAuth instead of getAuth
   const styles = createStyles(theme);
   const scrollViewRef = useRef(null);
   const commentsRef = useRef(null);
@@ -68,9 +69,6 @@ export default function RecipeDetailScreen() {
 
   // Check if this recipe is in favorites
   const isSaved = isFavorite(id);
-
-  const auth = getAuth();
-  const currentUser = auth.currentUser;
 
   useEffect(() => {
     const fetchRecipeAndData = async () => {
@@ -464,17 +462,55 @@ export default function RecipeDetailScreen() {
     }
 
     try {
+      let addedCount = 0;
+      
+      // Add each ingredient individually and count successful additions
       for (const ingredient of recipe.ingredients) {
-        const item = `${ingredient.amount} ${ingredient.ingredient}`.trim();
-        if (item) {
-          await addShoppingListItem(currentUser.uid, item);
+        const itemText = `${ingredient.amount} ${ingredient.ingredient}`.trim();
+        if (itemText) {
+          try {
+            // Pass an object with text property as expected by addShoppingListItem
+            await addShoppingListItem(currentUser.uid, { text: itemText });
+            addedCount++;
+          } catch (itemError) {
+            console.error(`Error adding ingredient "${itemText}":`, itemError);
+            // Continue with other ingredients even if one fails
+          }
         }
       }
-      showToast("Ingredients added to your shopping list!");
+      
+      // Only show success alert if at least one item was added
+      if (addedCount > 0) {
+        Alert.alert(
+          "Success! 🛒", 
+          `${addedCount} ingredient${addedCount > 1 ? 's' : ''} ${addedCount > 1 ? 'have' : 'has'} been added to your shopping list!`,
+          [
+            { 
+              text: "OK", 
+              style: "default"
+            }
+          ]
+        );
+        
+        showToast(`${addedCount} ingredients added to your shopping list!`);
+      } else {
+        Alert.alert("Error", "No ingredients could be added to your shopping list. Please try again.");
+      }
+      
     } catch (error) {
       console.error('Error adding to shopping list:', error);
-      Alert.alert("Error", "Could not add ingredients to shopping list.");
+      Alert.alert("Error", "Could not add ingredients to shopping list. Please try again.");
     }
+  };
+
+  const handleCommentInputFocus = () => {
+    // Kleine Verzögerung um sicherzustellen, dass die Keyboard-Animation startet
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        // Einfach zum Ende scrollen, da die Kommentare am Ende sind
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }, 100);
   };
 
   useFocusEffect(
@@ -520,12 +556,13 @@ export default function RecipeDetailScreen() {
         </View>
       </View>
 
-      <ScrollView
-        ref={scrollViewRef}
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 120 }}
-      >
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          ref={scrollViewRef}
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
+        >
         {/* Recipe Image with Category Tags */}
         <View style={styles.imageContainer}>
           <Image source={{ uri: recipe.imageUrl }} style={styles.recipeImage} />
@@ -696,7 +733,12 @@ export default function RecipeDetailScreen() {
       </ScrollView>
 
       {/* Comment Input */}
-      <CommentInput onAddComment={handleAddComment} theme={theme} />
+      <CommentInput 
+        onAddComment={handleAddComment} 
+        theme={theme} 
+        onFocus={handleCommentInputFocus}
+      />
+      </View>
 
       {/* Rating Modal */}
       <RatingModal

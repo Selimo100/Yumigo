@@ -167,7 +167,7 @@ export default function ProfileScreen({
           <View style={styles.ratingContainer}>
             <Ionicons name="star" size={14} color="#ffc107" />
             <Text style={[styles.ratingText, { color: theme.colors.text }]}>
-              {recipe.rating || '4.5'}
+              {recipe.rating || '0.0'}
             </Text>
           </View>
 

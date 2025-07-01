@@ -589,7 +589,9 @@ export const getShoppingList = async (userId) => {
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (userDoc.exists()) {
-      return userDoc.data().shoppingList || [];
+      const data = userDoc.data();
+      const shoppingList = data.shoppingList || [];
+      return shoppingList;
     }
     return [];
   } catch (error) {
@@ -600,11 +602,23 @@ export const getShoppingList = async (userId) => {
 
 export const updateShoppingList = async (userId, shoppingList) => {
   try {
+    // Ensure we have valid data
+    if (!userId) {
+      const error = new Error('Invalid userId');
+      throw error;
+    }
+
+    // Ensure shoppingList is always an array and filter out invalid items
+    const safeShoppingList = Array.isArray(shoppingList) ? 
+      shoppingList.filter(item => item && item.text && item.id) : [];
+
     const userRef = doc(db, 'users', userId);
+    
     await updateDoc(userRef, {
-      shoppingList,
+      shoppingList: safeShoppingList,
       updatedAt: serverTimestamp(),
     });
+    
     return true;
   } catch (error) {
     console.error('Error updating shopping list:', error);
@@ -614,15 +628,30 @@ export const updateShoppingList = async (userId, shoppingList) => {
 
 export const addShoppingListItem = async (userId, item) => {
   try {
+    // Ensure we have valid input
+    if (!userId || !item || (!item.text && typeof item !== 'string')) {
+      const error = new Error('Invalid input: userId and item with text are required');
+      throw error;
+    }
+
     const currentList = await getShoppingList(userId);
+    
+    // Handle both string and object input for backward compatibility
+    const itemText = typeof item === 'string' ? item : item.text;
+    
     const newItem = {
       id: Date.now().toString(),
-      text: item.text,
+      text: itemText,
       completed: false,
       addedAt: new Date().toISOString(),
     };
-    const updatedList = [...currentList, newItem];
+    
+    // Ensure currentList is always an array
+    const safeCurrentList = Array.isArray(currentList) ? currentList : [];
+    const updatedList = [...safeCurrentList, newItem];
+    
     await updateShoppingList(userId, updatedList);
+    
     return newItem;
   } catch (error) {
     console.error('Error adding shopping list item:', error);
@@ -632,10 +661,17 @@ export const addShoppingListItem = async (userId, item) => {
 
 export const toggleShoppingListItem = async (userId, itemId) => {
   try {
+    if (!userId || !itemId) {
+      throw new Error('Invalid userId or itemId');
+    }
+
     const currentList = await getShoppingList(userId);
-    const updatedList = currentList.map(item => 
-      item.id === itemId ? { ...item, completed: !item.completed } : item
-    );
+    const safeCurrentList = Array.isArray(currentList) ? currentList : [];
+    
+    const updatedList = safeCurrentList.map(item => 
+      item && item.id === itemId ? { ...item, completed: !item.completed } : item
+    ).filter(item => item); // Remove any invalid items
+    
     await updateShoppingList(userId, updatedList);
     return updatedList;
   } catch (error) {
@@ -646,8 +682,14 @@ export const toggleShoppingListItem = async (userId, itemId) => {
 
 export const removeShoppingListItem = async (userId, itemId) => {
   try {
+    if (!userId || !itemId) {
+      throw new Error('Invalid userId or itemId');
+    }
+
     const currentList = await getShoppingList(userId);
-    const updatedList = currentList.filter(item => item.id !== itemId);
+    const safeCurrentList = Array.isArray(currentList) ? currentList : [];
+    
+    const updatedList = safeCurrentList.filter(item => item && item.id !== itemId);
     await updateShoppingList(userId, updatedList);
     return updatedList;
   } catch (error) {
