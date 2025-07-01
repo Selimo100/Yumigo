@@ -51,7 +51,7 @@ const categoryConfig = CATEGORIES.reduce((acc, category) => {
 }, {});
 
 export default function RecipeDetailScreen() {
-  const { id, scrollToComments } = useLocalSearchParams();
+  const { id, scrollToComments, created } = useLocalSearchParams();
   const { theme } = useTheme();
   const styles = createStyles(theme);
   const scrollViewRef = useRef(null);
@@ -176,6 +176,18 @@ export default function RecipeDetailScreen() {
     if (id) fetchRecipeAndData();
   }, [id, currentUser]);
 
+  // Show success alert when recipe is newly created
+  useEffect(() => {
+    if (created === 'true') {
+      setTimeout(() => {
+        Alert.alert(
+          'Success!', 
+          'Your recipe has been published successfully!',
+          [{ text: 'OK' }]
+        );
+      }, 500); // Small delay to ensure the page is loaded
+    }
+  }, [created]);
 
   useEffect(() => {
     if (scrollToComments === 'true') {

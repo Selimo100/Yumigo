@@ -82,19 +82,9 @@ export default function RecipeForm({ onSuccess, onCancel }) {
       // Save to Firebase
       const recipeId = await saveRecipe(recipeData);
       
-      Alert.alert(
-        'Success!', 
-        'Your recipe has been published successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              resetForm();
-              onSuccess && onSuccess(recipeId);
-            }
-          }
-        ]
-      );
+      // Reset form and navigate first
+      resetForm();
+      onSuccess && onSuccess(recipeId);
     } catch (error) {
       console.error('Error publishing recipe:', error);
       Alert.alert('Error', 'Failed to publish recipe. Please try again.');
