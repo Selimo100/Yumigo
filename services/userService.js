@@ -16,7 +16,6 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 // Get user profile data from Firestore
 export const getUserProfile = async (userId) => {
   try {
-    console.log('getUserProfile called with userId:', userId);
     
     if (!userId) {
       throw new Error('userId is required');
@@ -26,20 +25,14 @@ export const getUserProfile = async (userId) => {
       throw new Error('Firestore database not initialized');
     }
     
-    console.log('Attempting to get user document from Firestore...');
     const userDoc = await getDoc(doc(db, 'users', userId));
     
     if (userDoc.exists()) {
-      console.log('User document found');
       return userDoc.data();
     }
     
-    console.log('User document does not exist');
     return null;
   } catch (error) {
-    console.error('Error fetching user profile:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
     throw error;
   }
 };
@@ -140,6 +133,34 @@ export const updateUserRecipeCount = async (userId, increment = true) => {
     return 0;
   } catch (error) {
     console.error('Error updating recipe count:', error);
+    throw error;
+  }
+};
+
+// Sync user recipe count with actual recipes in database
+export const syncUserRecipeCount = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    
+    // Get actual count of recipes from database
+    const recipesQuery = query(
+      collection(db, 'recipes'),
+      where('authorId', '==', userId)
+    );
+    
+    const querySnapshot = await getDocs(recipesQuery);
+    const actualCount = querySnapshot.size;
+    
+    // Update user profile with correct count
+    await updateDoc(userRef, {
+      recipeCount: actualCount,
+      updatedAt: serverTimestamp(),
+    });
+    
+    console.log(`Synced recipe count for user ${userId}: ${actualCount} recipes`);
+    return actualCount;
+  } catch (error) {
+    console.error('Error syncing recipe count:', error);
     throw error;
   }
 };

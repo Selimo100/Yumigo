@@ -16,6 +16,7 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage
 import { db, storage } from '../lib/firebaseconfig';
 import { updateUserRecipeCount } from './userService';
 import { createLikeNotification } from './notificationService';
+import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
 
 // Get a specific recipe by ID
 export const getRecipe = async (recipeId) => {
@@ -124,6 +125,11 @@ export const deleteRecipe = async (recipeId, authorId) => {
     // Update user's recipe count
     if (authorId) {
       await updateUserRecipeCount(authorId, false);
+      
+      // Emit profile update to refresh UI
+      setTimeout(() => {
+        profileUpdateEmitter.emit();
+      }, 100);
     }
 
     return true;

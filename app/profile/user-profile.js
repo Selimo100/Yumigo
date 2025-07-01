@@ -13,10 +13,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { getUserProfile, getUserRecipes } from '../../services/userService';
+import { getUserProfile, getUserRecipes, syncUserRecipeCount } from '../../services/userService';
 import FollowButton from '../../components/FollowButton';
 import RecipeCard from '../../components/RecipeCard';
 import useAuth from '../../lib/useAuth';
+import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 
 export default function UserProfileScreen() {
   const { theme, isDarkMode } = useTheme();
@@ -31,6 +32,15 @@ export default function UserProfileScreen() {
 
   useEffect(() => {
     loadUserData();
+  }, [userId]);
+
+  // Listen for profile update events (e.g., when recipes are deleted)
+  useEffect(() => {
+    const unsubscribe = profileUpdateEmitter.subscribe(() => {
+      loadUserData();
+    });
+
+    return unsubscribe;
   }, [userId]);
 
   // Listen for global flag to reload profile data after recipe deletion
@@ -62,6 +72,20 @@ export default function UserProfileScreen() {
       
       setUserProfile(profile);
       setUserRecipes(recipes);
+      
+      // Sync recipe count if there's a mismatch
+      if (profile && recipes && profile.recipeCount !== recipes.length) {
+        console.log(`Recipe count mismatch: profile shows ${profile.recipeCount}, actual recipes: ${recipes.length}`);
+        try {
+          await syncUserRecipeCount(userId);
+          // Reload profile to get updated count
+          const updatedProfile = await getUserProfile(userId);
+          setUserProfile(updatedProfile);
+          console.log('Recipe count synchronized');
+        } catch (syncError) {
+          console.warn('Failed to sync recipe count:', syncError);
+        }
+      }
     } catch (error) {
       console.error('Error initializing user profile:', error);
       console.error('Error details:', {
