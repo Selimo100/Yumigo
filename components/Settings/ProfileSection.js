@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,11 +6,16 @@ import {
   TextInput,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { uploadProfileImage } from '../../services/userService';
+import { auth } from '../../lib/firebaseconfig';
 
 export const ProfileSection = ({ profile, updateProfile, styles, theme }) => {
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
   const pickProfileImage = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -27,26 +32,53 @@ export const ProfileSection = ({ profile, updateProfile, styles, theme }) => {
         quality: 0.8,
       });
 
-      if (!result.canceled) {
-        updateProfile({ profileImage: result.assets[0].uri });
+      if (!result.canceled && result.assets[0]) {
+        setIsUploadingImage(true);
+        try {
+          const currentUser = auth.currentUser;
+          if (!currentUser) {
+            Alert.alert('Error', 'No authenticated user found');
+            return;
+          }
+
+          // Upload image to Firebase Storage
+          const imageUrl = await uploadProfileImage(result.assets[0].uri, currentUser.uid);
+          
+          // Update profile with new image URL
+          updateProfile({ avatar: imageUrl });
+          
+        } catch (error) {
+          console.error('Error uploading profile image:', error);
+          Alert.alert('Error', 'Failed to upload image. Please try again.');
+        } finally {
+          setIsUploadingImage(false);
+        }
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to pick image');
+      setIsUploadingImage(false);
     }
   };
 
   return (
-    <View style={styles.profileSection}>
-      <TouchableOpacity style={styles.profileImageContainer} onPress={pickProfileImage}>
-        {profile.profileImage ? (
-          <Image source={{ uri: profile.profileImage }} style={styles.profileImage} />
+    <View style={styles.profileSection}>      <TouchableOpacity 
+        style={styles.profileImageContainer} 
+        onPress={pickProfileImage}
+        disabled={isUploadingImage}
+      >
+        {profile.avatar ? (
+          <Image source={{ uri: profile.avatar }} style={styles.profileImage} />
         ) : (
           <View style={styles.profileImagePlaceholder}>
             <Ionicons name="person" size={40} color={theme.colors.textSecondary} />
           </View>
         )}
         <View style={styles.cameraIcon}>
-          <Ionicons name="camera" size={16} color="#fff" />
+          {isUploadingImage ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Ionicons name="camera" size={16} color="#fff" />
+          )}
         </View>
       </TouchableOpacity>
 

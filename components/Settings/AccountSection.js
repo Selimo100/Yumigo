@@ -1,32 +1,24 @@
 import React from 'react';
-import { TouchableOpacity, View, Text } from 'react-native';
+import { TouchableOpacity, View, Text, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export const AccountSection = ({ styles, theme }) => {
+  
+  const handleExportData = () => {
+    Alert.alert(
+      'Export Data',
+      'This feature will be available soon. You will be able to download all your recipes and data.',
+      [{ text: 'OK' }]
+    );
+  };
   return (
     <>
-      <TouchableOpacity style={styles.settingItem}>
-        <View style={styles.settingInfo}>
-          <Text style={styles.settingTitle}>Change Password</Text>
-          <Text style={styles.settingSubtitle}>Update your account password</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.settingItem}>
+      <TouchableOpacity style={styles.settingItem} onPress={handleExportData}>
         <View style={styles.settingInfo}>
           <Text style={styles.settingTitle}>Export Data</Text>
           <Text style={styles.settingSubtitle}>Download your recipes and data</Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
-      </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.settingItem, styles.dangerItem]}>
-        <View style={styles.settingInfo}>
-          <Text style={[styles.settingTitle, styles.dangerText]}>Delete Account</Text>
-          <Text style={styles.settingSubtitle}>Permanently delete your account</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color="#DC3545" />
       </TouchableOpacity>
     </>
   );

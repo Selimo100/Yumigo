@@ -53,10 +53,17 @@ export const CommentItem = ({ comment, onLike, theme }) => {
       fontWeight: '500',
     },
   });
-
   return (
     <View style={styles.commentContainer}>
-      <Image source={{ uri: comment.avatar }} style={styles.avatar} />
+      <View style={styles.avatar}>
+        {comment.avatar ? (
+          <Image source={{ uri: comment.avatar }} style={styles.avatar} />
+        ) : (
+          <View style={[styles.avatar, { alignItems: 'center', justifyContent: 'center' }]}>
+            <Ionicons name="person" size={16} color={theme.colors.textSecondary} />
+          </View>
+        )}
+      </View>
       <View style={styles.commentContent}>
         <View style={styles.commentHeader}>
           <Text style={styles.username}>{comment.user}</Text>

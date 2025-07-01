@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Keyboard, P
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useUserProfile } from '../hooks/useUserProfile';
 
 export const CommentInput = ({ onAddComment, theme }) => {
   const [newComment, setNewComment] = useState('');
@@ -10,6 +11,7 @@ export const CommentInput = ({ onAddComment, theme }) => {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const inputRef = useRef(null);
   const insets = useSafeAreaInsets();
+  const { profile: userProfile } = useUserProfile();
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
@@ -109,14 +111,17 @@ export const CommentInput = ({ onAddComment, theme }) => {
   const dismissKeyboard = () => {
     Keyboard.dismiss();
     inputRef.current?.blur();
-  };
-
-  return (
+  };    return (
     <View style={styles.commentInputContainer}>
-      <Image 
-        source={{ uri: 'https://via.placeholder.com/40x40' }} 
-        style={styles.userAvatar} 
-      />
+      <View style={styles.userAvatar}>
+        {userProfile?.avatar ? (
+          <Image source={{ uri: userProfile.avatar }} style={styles.userAvatar} />
+        ) : (
+          <View style={[styles.userAvatar, { alignItems: 'center', justifyContent: 'center' }]}>
+            <Ionicons name="person" size={16} color={theme.colors.textSecondary} />
+          </View>
+        )}
+      </View>
       
       <View style={styles.inputContainer}>
         <TextInput

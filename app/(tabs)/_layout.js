@@ -7,6 +7,9 @@ export default function TabLayout() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
 
+  // Calculate the total height of the tab bar
+  const tabBarHeight = 60 + (insets.bottom > 0 ? insets.bottom : 8);
+
   return (
     <Tabs
       screenOptions={{
@@ -14,12 +17,12 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: theme.colors.tabBarBackground,
           borderTopColor: theme.colors.border,
-          height: 60 + insets.bottom, 
+          height: tabBarHeight, 
           paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
           paddingTop: 8,
           position: 'absolute',
         },
-        tabBarActiveTintColor: theme.colors.tabBarActive,
+        tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.tabBarInactive,
         tabBarLabelStyle: {
           fontSize: 12,
