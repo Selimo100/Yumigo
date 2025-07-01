@@ -12,8 +12,8 @@ export default function CreateRecipeScreen() {
 
   const handleRecipeSuccess = (recipeId) => {
     console.log('Recipe created with ID:', recipeId);
-    // Navigate back to home
-    router.push('/(tabs)');
+    // Navigate to the newly created recipe's detail page with success flag
+    router.push(`/recipe/${recipeId}?created=true`);
   };
 
   const handleCancel = () => {

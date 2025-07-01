@@ -8,7 +8,6 @@ import {
   ScrollView, 
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
   Platform
 } from 'react-native';
 import { useRecipeForm } from '../../hooks/useRecipeForm';
@@ -19,7 +18,7 @@ import AllergenSelector from './AllergenSelector';
 import DietarySelector from './DietarySelector';
 import IngredientInput from './IngredientInput';
 import InstructionInput from './InstructionInput';
-import TimePicker from './TimePicker'; // Add this import
+import TimePicker from './TimePicker';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function RecipeForm({ onSuccess, onCancel }) {
@@ -65,7 +64,9 @@ export default function RecipeForm({ onSuccess, onCancel }) {
       const recipeData = {
         title: recipe.title.trim(),
         description: recipe.description.trim(),
-        time: `${recipe.time} min${recipe.time !== 1 ? 's' : ''}`, // Format time
+        // *** FIX APPLIED HERE: Use recipe.time directly ***
+        time: recipe.time, // TimePicker should already return "X min" or "X mins"
+        // **************************************************
         categories: recipe.categories,
         allergens: recipe.allergens,
         dietary: recipe.dietary,
@@ -81,19 +82,9 @@ export default function RecipeForm({ onSuccess, onCancel }) {
       // Save to Firebase
       const recipeId = await saveRecipe(recipeData);
       
-      Alert.alert(
-        'Success!', 
-        'Your recipe has been published successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              resetForm();
-              onSuccess && onSuccess(recipeId);
-            }
-          }
-        ]
-      );
+      // Reset form and navigate first
+      resetForm();
+      onSuccess && onSuccess(recipeId);
     } catch (error) {
       console.error('Error publishing recipe:', error);
       Alert.alert('Error', 'Failed to publish recipe. Please try again.');
@@ -103,15 +94,13 @@ export default function RecipeForm({ onSuccess, onCancel }) {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-    >
+    <View style={styles.container}>
       <ScrollView 
         style={styles.scrollContainer} 
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardDismissMode="on-drag"
       >
         <View style={styles.form}>
           <ImageUpload
@@ -164,6 +153,7 @@ export default function RecipeForm({ onSuccess, onCancel }) {
           <AllergenSelector
             selectedAllergens={recipe.allergens}
             onToggleAllergen={toggleAllergen}
+            error={errors.allergens}
           />
 
           <DietarySelector
@@ -210,7 +200,7 @@ export default function RecipeForm({ onSuccess, onCancel }) {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -242,8 +232,13 @@ const createStyles = (theme) => StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 16,
-    backgroundColor: theme.colors.inputBackground,
+    backgroundColor: theme.colors.surface,
     color: theme.colors.text,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   textArea: {
     borderWidth: 1,
@@ -285,8 +280,13 @@ const createStyles = (theme) => StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   disabledButton: {
     opacity: 0.6,
@@ -299,6 +299,6 @@ const createStyles = (theme) => StyleSheet.create({
   publishButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme.colors.text,
+    color: '#FFFFFF',
   },
 });

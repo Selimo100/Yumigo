@@ -1,8 +1,14 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Animated, Share } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTheme } from '../contexts/ThemeContext';
 import { ALLERGENS, CATEGORIES } from '../utils/constants';
+import FollowButton from './FollowButton';
+import useAuth from '../lib/useAuth';
+import useFavorites from '../hooks/useFavorites';
+import { useState, useRef } from 'react';
+import { toggleRecipeLike, rateRecipe, getUserRating } from '../services/recipeService';
+import { RatingModal } from './RatingModal';
 
 // mockCommentCounts is still here, as per your previous code.
 // If you want real comment counts, you'd fetch them in HomeScreen.js
@@ -40,16 +46,24 @@ const categoryConfig = CATEGORIES.reduce((acc, category) => {
 }, {});
 
 // Accept the new isLikedByCurrentUser prop
-export default function RecipeCard({ recipe }) {
+export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
     const { theme } = useTheme();
+    const { user } = useAuth();
+    const { isFavorite, toggleFavorite } = useFavorites();
     const styles = createStyles(theme);
 
-    // Use the likesCount from the recipe object, defaulting to 0 if not present
-    // This now comes from HomeScreen's Firestore query
-    const likesCount = recipe.likesCount || 0;
+    // State for like and rating functionality
+    const [isLiked, setIsLiked] = useState(recipe.isLikedByCurrentUser || false);
+    const [likesCount, setLikesCount] = useState(recipe.likesCount || 0);
+    const [isLiking, setIsLiking] = useState(false);
+    const [showRatingModal, setShowRatingModal] = useState(false);
+    const [userRating, setUserRating] = useState(0);
+    
+    // Animation for like button
+    const likeAnimation = useRef(new Animated.Value(1)).current;
 
-    // Access the new isLikedByCurrentUser prop
-    const isLiked = recipe.isLikedByCurrentUser || false;
+    // Check if this recipe is in favorites
+    const isRecipeFavorite = isFavorite(recipe.id);
 
     // Use mockCommentCounts as per your original code for comments
     const commentCount = mockCommentCounts[recipe.id] || 0;
@@ -62,6 +76,107 @@ export default function RecipeCard({ recipe }) {
     const handleCommentPress = (e) => {
         e.stopPropagation();
         router.push(`/recipe/${recipe.id}?scrollToComments=true`);
+    };
+
+    const handleAuthorPress = (e) => {
+        e.stopPropagation();
+        if (recipe.authorId && recipe.authorId !== user?.uid) {
+            // Navigate to author profile
+            router.push(`/profile/user-profile?userId=${recipe.authorId}`);
+        }
+    };
+
+    const handleLikePress = async (e) => {
+        e.stopPropagation();
+        
+        if (!user) {
+            Alert.alert("Login Required", "You need to be logged in to like recipes.");
+            return;
+        }
+
+        if (isLiking) return; // Prevent double clicks
+
+        // Animate like button
+        Animated.sequence([
+            Animated.timing(likeAnimation, {
+                toValue: 1.2,
+                duration: 100,
+                useNativeDriver: true,
+            }),
+            Animated.timing(likeAnimation, {
+                toValue: 1,
+                duration: 100,
+                useNativeDriver: true,
+            })
+        ]).start();
+
+        setIsLiking(true);
+        try {
+            const newLikedState = await toggleRecipeLike(recipe.id, user.uid);
+            setIsLiked(newLikedState);
+            setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+            
+            if (onLikeUpdate) {
+                onLikeUpdate(recipe.id, newLikedState, newLikedState ? likesCount + 1 : likesCount - 1);
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+            Alert.alert("Error", "Could not update like status.");
+        } finally {
+            setIsLiking(false);
+        }
+    };
+
+    const handleRatingPress = (e) => {
+        e.stopPropagation();
+        
+        if (!user) {
+            Alert.alert("Login Required", "You need to be logged in to rate recipes.");
+            return;
+        }
+
+        setShowRatingModal(true);
+        // Load user's current rating
+        getUserRating(recipe.id, user.uid).then(rating => {
+            setUserRating(rating);
+        }).catch(console.error);
+    };
+
+    const handleRating = async (rating) => {
+        try {
+            await rateRecipe(recipe.id, user.uid, rating);
+            setUserRating(rating);
+            setShowRatingModal(false);
+            
+            if (onRatingUpdate) {
+                onRatingUpdate(recipe.id);
+            }
+            
+            // Alert entfernt - nur stille Bestätigung
+        } catch (error) {
+            console.error('Error rating recipe:', error);
+            Alert.alert("Error", "Could not save your rating.");
+        }
+    };
+
+    const handleShare = async (e) => {
+        e.stopPropagation();
+        
+        try {
+            const shareText = `🍽️ ${recipe.title}\n\n⏱️ ${recipe.time} min\n⭐ ${recipe.rating || '0.0'} rating\n👨‍🍳 by ${recipe.authorName}\n\nCheck out this delicious recipe!`;
+            
+            const result = await Share.share({
+                message: shareText,
+                title: recipe.title,
+            });
+            
+            if (result.action === Share.sharedAction) {
+                console.log('Recipe shared successfully from card!');
+            }
+        } catch (error) {
+            console.error('Error sharing recipe:', error);
+            Alert.alert('Error', 'Could not share recipe. Please try again.');
+        }
     };
 
     return (
@@ -87,12 +202,34 @@ export default function RecipeCard({ recipe }) {
                     <Text style={styles.title}>{recipe.title}</Text>
                     <TouchableOpacity
                         style={styles.saveButton}
-                        onPress={(e) => {
+                        onPress={async (e) => {
                             e.stopPropagation();
-                            console.log('Save recipe');
+                            if (!user) {
+                                Alert.alert("Login Required", "You need to be logged in to save recipes to favorites.");
+                                return;
+                            }
+                            try {
+                                await toggleFavorite(recipe.id);
+                                // No need to show alert here as user gets visual feedback
+                                // from the icon change
+                            } catch (error) {
+                                console.error('Error toggling favorite:', error);
+                                if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
+                                    Alert.alert(
+                                        "Setup Required", 
+                                        "Favorites feature requires Firestore rules setup. Check UPDATE_FIRESTORE_RULES.md in your project."
+                                    );
+                                } else {
+                                    Alert.alert("Error", "Could not update favorite status.");
+                                }
+                            }
                         }}
                     >
-                        <Ionicons name="bookmark-outline" size={20} color={theme.colors.text} />
+                        <Ionicons 
+                            name={isRecipeFavorite ? "bookmark" : "bookmark-outline"} 
+                            size={20} 
+                            color={isRecipeFavorite ? theme.colors.primary : theme.colors.textSecondary} 
+                        />
                     </TouchableOpacity>
                 </View>
 
@@ -124,39 +261,67 @@ export default function RecipeCard({ recipe }) {
                         <Text style={styles.time}>{recipe.time} min</Text>
                     </View>
 
-                    <View style={styles.ratingContainer}>
+                    <TouchableOpacity style={styles.ratingContainer} onPress={handleRatingPress}>
                         <Ionicons name="star" size={16} color="#ffc107" />
-                        <Text style={styles.rating}>{recipe.rating}</Text>
-                        <Text style={styles.reviews}>({recipe.reviews})</Text>
-                    </View>
+                        <Text style={styles.rating}>{recipe.rating || '0.0'}</Text>
+                        <Text style={styles.reviews}>({recipe.reviews || 0})</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.footer}>
-                    <Text style={styles.author}>by {recipe.authorName}</Text>
+                    <TouchableOpacity onPress={handleAuthorPress} style={styles.authorContainer}>
+                        <Text style={styles.author}>by {recipe.authorName}</Text>
+                    </TouchableOpacity>
 
                     <View style={styles.engagement}>
-                        {/* Display Likes Count Here */}
-                        <View style={styles.likeButton}>
-                            {/* Conditional rendering for heart icon and color */}
-                            <Ionicons
-                                name={isLiked ? "heart" : "heart-outline"}
-                                size={18}
-                                color={isLiked ? "red" : theme.colors.text}
-                            />
-                            <Text style={styles.likesCountText}>{likesCount}</Text>
-                        </View>
+                        {/* Like Button */}
+                        <TouchableOpacity 
+                            style={[styles.likeButton, isLiking && styles.likeButtonDisabled]} 
+                            onPress={handleLikePress} 
+                            disabled={isLiking}
+                        >
+                            <Animated.View style={{ transform: [{ scale: likeAnimation }] }}>
+                                <Ionicons
+                                    name={isLiked ? "heart" : "heart-outline"}
+                                    size={18}
+                                    color={isLiked ? theme.colors.primary : theme.colors.textSecondary}
+                                />
+                            </Animated.View>
+                            <Text style={[styles.likesCountText, { color: isLiked ? theme.colors.primary : theme.colors.textSecondary }]}>
+                                {likesCount}
+                            </Text>
+                        </TouchableOpacity>
 
                         <TouchableOpacity style={styles.commentButton} onPress={handleCommentPress}>
-                            <Ionicons name="chatbubble-outline" size={18} color={theme.colors.text} />
-                            {commentCount > 0 && <Text style={styles.commentCount}>{commentCount}</Text>}
+                            <Ionicons name="chatbubble-outline" size={18} color={theme.colors.textSecondary} />
+                            {commentCount > 0 && <Text style={[styles.commentCount, { color: theme.colors.textSecondary }]}>{commentCount}</Text>}
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.followButton}>
-                            <Text style={styles.followText}>Follow</Text>
+                        {/* Share Button */}
+                        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+                            <Ionicons name="share-outline" size={18} color={theme.colors.textSecondary} />
                         </TouchableOpacity>
+
+                        {/* Use the FollowButton component instead of custom follow button */}
+                        {recipe.authorId && recipe.authorId !== user?.uid && (
+                            <FollowButton 
+                                userId={recipe.authorId} 
+                                size="small"
+                            />
+                        )}
                     </View>
                 </View>
             </View>
+
+            {/* Rating Modal */}
+            <RatingModal
+                visible={showRatingModal}
+                onClose={() => setShowRatingModal(false)}
+                onRating={handleRating}
+                userRating={userRating}
+                recipeTitle={recipe.title}
+                theme={theme}
+            />
         </TouchableOpacity>
     );
 }
@@ -168,6 +333,13 @@ const createStyles = (theme) => StyleSheet.create({
         marginBottom: 20,
         borderRadius: 16,
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: theme.colors.cardAccent,
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 3,
     },
     imageContainer: {
         position: 'relative',
@@ -291,6 +463,9 @@ const createStyles = (theme) => StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
+    authorContainer: {
+        flex: 1,
+    },
     author: {
         fontSize: 14,
         color: theme.colors.textSecondary,
@@ -305,6 +480,10 @@ const createStyles = (theme) => StyleSheet.create({
         alignItems: 'center',
         gap: 4,
         padding: 4,
+        opacity: 1,
+    },
+    likeButtonDisabled: {
+        opacity: 0.6,
     },
     likesCountText: {
         fontSize: 12,
@@ -322,15 +501,10 @@ const createStyles = (theme) => StyleSheet.create({
         color: theme.colors.text,
         fontWeight: '500',
     },
-    followButton: {
-        backgroundColor: theme.colors.button,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-    },
-    followText: {
-        color: theme.colors.buttonText,
-        fontSize: 12,
-        fontWeight: '600',
+    shareButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        padding: 4,
     },
 });

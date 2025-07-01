@@ -1,0 +1,107 @@
+import { useState, useEffect } from 'react';
+import { auth } from '../lib/firebaseconfig';
+import { getUserProfile, getUserRecipes } from '../services/userService';
+import { onAuthStateChanged } from 'firebase/auth';
+import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
+
+export const useUserProfile = () => {
+    const [profile, setProfile] = useState(null);
+    const [recipes, setRecipes] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null); const loadUserData = async (user) => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const userProfile = await getUserProfile(user.uid);
+            if (userProfile) {
+                setProfile(userProfile);
+            } else {
+                const fallbackProfile = {
+                    uid: user.uid,
+                    email: user.email,
+                    username: user.email?.split('@')[0] || 'User',
+                    bio: 'Food enthusiast | Making cooking simple',
+                    avatar: null,
+                    followerCount: 0,
+                    followingCount: 0,
+                    recipeCount: 0,
+                };
+                setProfile(fallbackProfile);
+            }
+            try {
+                const userRecipes = await getUserRecipes(user.uid, user.uid); // Pass current user ID for like status
+                setRecipes(userRecipes);
+            } catch (recipeError) {
+                console.error('Error loading user recipes:', recipeError);
+                setRecipes([]);
+            }
+        } catch (err) {
+            console.error('Error loading user data:', err);
+            setError(err);
+            setProfile({
+                uid: user.uid,
+                email: user.email,
+                username: user.email?.split('@')[0] || 'User',
+                bio: 'Food enthusiast | Making cooking simple',
+                avatar: null,
+                followerCount: 0,
+                followingCount: 0,
+                recipeCount: 0,
+            });
+            setRecipes([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await loadUserData(user);
+            } else {
+                setProfile(null);
+                setRecipes([]);
+                setIsLoading(false);
+            }
+        });
+
+        return unsubscribe;
+    }, []);
+
+    // Listen for profile updates (like follow/unfollow changes)
+    useEffect(() => {
+        const unsubscribe = profileUpdateEmitter.subscribe(async () => {
+            const user = auth.currentUser;
+            if (user && !isLoading) { // Prevent multiple simultaneous updates
+                // Refresh both profile data and recipes
+                try {
+                    setIsLoading(true);
+                    const userProfile = await getUserProfile(user.uid);
+                    if (userProfile) {
+                        setProfile(userProfile);
+                    }
+                    
+                    // Also refresh recipes when profile updates
+                    const userRecipes = await getUserRecipes(user.uid, user.uid);
+                    setRecipes(userRecipes);
+                } catch (error) {
+                    console.error('Error refreshing profile:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        });
+
+        return unsubscribe;
+    }, [isLoading]); // Add isLoading dependency
+
+    const refreshProfile = async () => {
+        const user = auth.currentUser;
+        if (user) {
+            await loadUserData(user);
+        }
+    };
+
+    return { profile, recipes, isLoading, error, refreshProfile };
+};

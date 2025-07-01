@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     View,
     Text,
@@ -7,31 +6,29 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {Stack, router} from 'expo-router';
-import {Ionicons} from '@expo/vector-icons';
-import {useTheme} from '../../contexts/ThemeContext';
-import {useSettings} from '../../hooks/useSettings';
-import {SettingItem, Section} from '../../components/Settings/SettingComponents';
-import {ProfileSection} from '../../components/Settings/ProfileSection';
-import {AccountSection} from '../../components/Settings/AccountSection';
-import {createStyles} from '../../components/Settings/SettingsStyles';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Stack, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useSettings } from '../../hooks/useSettings';
+import { SettingItem, Section } from '../../components/Settings/SettingComponents';
+import { ProfileSection } from '../../components/Settings/ProfileSection';
+import { AccountSection } from '../../components/Settings/AccountSection';
+import { createStyles } from '../../components/Settings/SettingsStyles';
+import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 export default function SettingsScreen() {
-    const {theme, toggleTheme, isDarkMode} = useTheme();
+    const { theme, toggleTheme, isDarkMode } = useTheme();
     const {
         profile,
-        notifications,
         isLoading,
         updateProfile,
-        updateNotification,
         saveAllSettings
     } = useSettings();
-    
-    const styles = createStyles(theme);
 
-    const saveProfile = async () => {
+    const styles = createStyles(theme); const saveProfile = async () => {
         const success = await saveAllSettings();
         if (success) {
+            profileUpdateEmitter.emit();
             Alert.alert('Success', 'Profile updated successfully!');
             router.back();
         } else {
@@ -43,7 +40,7 @@ export default function SettingsScreen() {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={theme.colors.button} />
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
                     <Text style={styles.loadingText}>Loading settings...</Text>
                 </View>
             </SafeAreaView>
@@ -66,11 +63,11 @@ export default function SettingsScreen() {
                 borderBottomColor: theme.colors.border
             }]}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.modalCloseButton}>
-                    <Ionicons name="arrow-back" size={24} color={theme.colors.text}/>
+                    <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
-                <Text style={[styles.modalHeaderTitle, {color: theme.colors.text}]}>Settings</Text>
+                <Text style={[styles.modalHeaderTitle, { color: theme.colors.text }]}>Settings</Text>
                 <TouchableOpacity onPress={saveProfile} style={styles.saveButton}>
-                    <Text style={[styles.saveButtonText, {color: theme.colors.button}]}>Save</Text>
+                    <Text style={[styles.saveButtonText, { color: theme.colors.primary }]}>Save</Text>
                 </TouchableOpacity>
             </View>
 
@@ -78,9 +75,9 @@ export default function SettingsScreen() {
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
-            >                {/* Profile => Username, Email, Bio */}
+            >
                 <Section title="Profile" styles={styles}>
-                    <ProfileSection 
+                    <ProfileSection
                         profile={profile}
                         updateProfile={updateProfile}
                         styles={styles}
@@ -88,7 +85,6 @@ export default function SettingsScreen() {
                     />
                 </Section>
 
-                {/* Appearance => Light-Dark Mode wechseln */}
                 <Section title="Appearance" styles={styles}>
                     <SettingItem
                         title="Dark Mode"
@@ -98,42 +94,8 @@ export default function SettingsScreen() {
                         styles={styles}
                         theme={theme}
                     />
-                </Section>                {/* Notifications Section */}
-                <Section title="Notifications" styles={styles}>
-                    <SettingItem
-                        title="Push Notifications"
-                        subtitle="Receive notifications on your device"
-                        value={notifications.pushNotifications}
-                        onValueChange={(value) => updateNotification('pushNotifications', value)}
-                         styles={styles}
-                             theme={theme}
-                    />
-                    <SettingItem
-                        title="Email Notifications"
-                        subtitle="Receive updates via email"
-                        value={notifications.emailNotifications}
-                        onValueChange={(value) => updateNotification('emailNotifications', value)}
-                         styles={styles}
-                             theme={theme}
-                    />
-                    <SettingItem
-                        title="Recipe Recommendations"
-                        subtitle="Get personalized recipe suggestions"
-                        value={notifications.recipeRecommendations}
-                        onValueChange={(value) => updateNotification('recipeRecommendations', value)}
-                         styles={styles}
-                             theme={theme}
-                    />
-                    <SettingItem
-                        title="Social Updates"
-                        subtitle="Updates from people you follow"
-                        value={notifications.socialUpdates}
-                        onValueChange={(value) => updateNotification('socialUpdates', value)}
-                         styles={styles}
-                             theme={theme}
-                    />
-                </Section>                {/* Account Actions */}
-                <Section title="Account"  styles={styles}>
+                </Section>
+                <Section title="Account" styles={styles}>
                     <AccountSection styles={styles} theme={theme} />
                 </Section>
             </ScrollView>        </SafeAreaView>
