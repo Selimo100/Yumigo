@@ -16,13 +16,30 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 // Get user profile data from Firestore
 export const getUserProfile = async (userId) => {
   try {
+    console.log('getUserProfile called with userId:', userId);
+    
+    if (!userId) {
+      throw new Error('userId is required');
+    }
+    
+    if (!db) {
+      throw new Error('Firestore database not initialized');
+    }
+    
+    console.log('Attempting to get user document from Firestore...');
     const userDoc = await getDoc(doc(db, 'users', userId));
+    
     if (userDoc.exists()) {
+      console.log('User document found');
       return userDoc.data();
     }
+    
+    console.log('User document does not exist');
     return null;
   } catch (error) {
     console.error('Error fetching user profile:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     throw error;
   }
 };

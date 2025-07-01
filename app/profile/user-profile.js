@@ -44,19 +44,31 @@ export default function UserProfileScreen() {
   );
 
   const loadUserData = async () => {
-    if (!userId) return;
+    if (!userId) {
+      console.error('No userId provided to user-profile');
+      return;
+    }
     
+    console.log('Loading user data for userId:', userId);
     setIsLoading(true);
     try {
-      const [profile, recipes] = await Promise.all([
-        getUserProfile(userId),
-        getUserRecipes(userId)
-      ]);
+      console.log('Attempting to fetch user profile...');
+      const profile = await getUserProfile(userId);
+      console.log('User profile fetched:', profile);
+      
+      console.log('Attempting to fetch user recipes...');
+      const recipes = await getUserRecipes(userId);
+      console.log('User recipes fetched:', recipes?.length || 0, 'recipes');
       
       setUserProfile(profile);
       setUserRecipes(recipes);
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('Error initializing user profile:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        userId: userId
+      });
     } finally {
       setIsLoading(false);
     }
