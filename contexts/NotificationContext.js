@@ -27,16 +27,20 @@ export const NotificationProvider = ({ children }) => {
     }
 
     setIsLoading(true);
+    console.log('Setting up notifications listener for user:', user.uid);
 
     // Listen to real-time notifications
     const notificationsRef = collection(db, 'notifications');
+    
+    // Simplified query without ordering until index is created
     const q = query(
       notificationsRef,
-      where('recipientId', '==', user.uid),
-      orderBy('createdAt', 'desc')
+      where('recipientId', '==', user.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      console.log('Notifications snapshot received, docs count:', snapshot.docs.length);
+      
       const notificationsList = [];
       let unreadCounter = 0;
 
@@ -49,10 +53,19 @@ export const NotificationProvider = ({ children }) => {
         }
       });
 
+      // Sort notifications manually by creation date (newest first)
+      notificationsList.sort((a, b) => {
+        const dateA = a.createdAt?.toDate?.() || new Date(0);
+        const dateB = b.createdAt?.toDate?.() || new Date(0);
+        return dateB - dateA;
+      });
+
+      console.log('Processed notifications:', notificationsList.length, 'unread:', unreadCounter);
       setNotifications(notificationsList);
       setUnreadCount(unreadCounter);
       setIsLoading(false);
     }, (error) => {
+      console.error('Error in notifications listener:', error);
       setIsLoading(false);
     });
 

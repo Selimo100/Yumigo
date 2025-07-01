@@ -4,14 +4,19 @@ import { db } from '../lib/firebaseconfig';
 // Create a notification
 export const createNotification = async (notificationData) => {
   try {
+    console.log('Creating notification in Firestore:', notificationData);
+    
     const notification = {
       ...notificationData,
       createdAt: serverTimestamp(),
       read: false,
     };
 
-    await addDoc(collection(db, 'notifications'), notification);
+    const docRef = await addDoc(collection(db, 'notifications'), notification);
+    console.log('Notification created successfully with ID:', docRef.id);
+    return docRef.id;
   } catch (error) {
+    console.error('Error creating notification:', error);
     throw error;
   }
 };
@@ -21,6 +26,8 @@ export const createLikeNotification = async (recipeId, likerUserId, recipeOwnerI
   if (likerUserId === recipeOwnerId) return; // Don't notify yourself
 
   try {
+    console.log('Creating like notification (fallback service):', { recipeId, likerUserId, recipeOwnerId });
+    
     // Get liker's info
     const likerDoc = await getDoc(doc(db, 'users', likerUserId));
     const likerData = likerDoc.exists() ? likerDoc.data() : {};
@@ -29,20 +36,22 @@ export const createLikeNotification = async (recipeId, likerUserId, recipeOwnerI
     const recipeDoc = await getDoc(doc(db, 'recipes', recipeId));
     const recipeData = recipeDoc.exists() ? recipeDoc.data() : {};
 
-    await createNotification({
+    const notificationId = await createNotification({
       type: 'like',
       recipientId: recipeOwnerId,
       senderId: likerUserId,
-      senderName: likerData.displayName || likerData.email || 'Someone',
+      senderName: likerData.displayName || likerData.username || likerData.email || 'Someone',
       senderAvatar: likerData.avatar || null,
       title: 'New Like! ❤️',
-      message: `${likerData.displayName || 'Someone'} liked your recipe "${recipeData.title || 'your recipe'}"`,
+      message: `${likerData.displayName || likerData.username || 'Someone'} liked your recipe "${recipeData.title || 'your recipe'}"`,
       recipeId,
       recipeTitle: recipeData.title,
       actionUrl: `/recipe/${recipeId}`,
     });
+    
+    console.log('Like notification created successfully (fallback):', notificationId);
   } catch (error) {
-    console.error('Error creating like notification:', error);
+    console.error('Error creating like notification (fallback):', error);
   }
 };
 
