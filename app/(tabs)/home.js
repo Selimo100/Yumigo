@@ -14,6 +14,7 @@ import { getDocs, collection, doc, getDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native'; 
 import { useFollow } from '../../hooks/useFollow';
 import { useTabBarHeight } from '../../hooks/useTabBarHeight';
+import * as Location from 'expo-location';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);
@@ -23,6 +24,7 @@ export default function HomeScreen() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [showNotificationModal, setShowNotificationModal] = useState(false);
+    const [countryName, setCountryName] = useState('');
 
     const { theme } = useTheme();
     const { notifications, unreadCount } = useNotifications();
@@ -142,6 +144,30 @@ export default function HomeScreen() {
             if (activeTab === 'following') {
                 loadFollowingFeed();
             }
+
+            (async () => {
+                try {
+                    let { status } = await Location.requestForegroundPermissionsAsync();
+                    if (status !== 'granted') {
+                        console.log('Standortberechtigung nicht erteilt');
+                        setCountryName('');
+                        return;
+                    }
+                    let location = await Location.getCurrentPositionAsync({});
+                    let geocode = await Location.reverseGeocodeAsync({
+                        latitude: location.coords.latitude,
+                        longitude: location.coords.longitude,
+                    });
+                    if (geocode && geocode.length > 0) {
+                        setCountryName(geocode[0].country || '');
+                    } else {
+                        setCountryName('');
+                    }
+                } catch (err) {
+                    console.error('Fehler beim Standort oder Reverse-Geocoding:', err);
+                    setCountryName('');
+                }
+            })();
             // Optional: return a cleanup function if you had listeners that needed unsubscribing
             return () => {
                 console.log('[HomeScreen] Screen unfocused. No specific cleanup needed for getDocs.');
