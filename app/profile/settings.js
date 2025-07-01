@@ -20,10 +20,8 @@ export default function SettingsScreen() {
     const { theme, toggleTheme, isDarkMode } = useTheme();
     const {
         profile,
-        notifications,
         isLoading,
         updateProfile,
-        updateNotification,
         saveAllSettings
     } = useSettings();
 
@@ -93,40 +91,6 @@ export default function SettingsScreen() {
                         subtitle="Switch between light and dark theme"
                         value={isDarkMode}
                         onValueChange={toggleTheme}
-                        styles={styles}
-                        theme={theme}
-                    />
-                </Section>
-                <Section title="Notifications" styles={styles}>
-                    <SettingItem
-                        title="Push Notifications"
-                        subtitle="Receive notifications on your device"
-                        value={notifications.pushNotifications}
-                        onValueChange={(value) => updateNotification('pushNotifications', value)}
-                        styles={styles}
-                        theme={theme}
-                    />
-                    <SettingItem
-                        title="Follow Notifications"
-                        subtitle="Get notified when someone follows you"
-                        value={notifications.followNotifications}
-                        onValueChange={(value) => updateNotification('followNotifications', value)}
-                        styles={styles}
-                        theme={theme}
-                    />
-                    <SettingItem
-                        title="Like Notifications"
-                        subtitle="Get notified when someone likes your recipes"
-                        value={notifications.likeNotifications}
-                        onValueChange={(value) => updateNotification('likeNotifications', value)}
-                        styles={styles}
-                        theme={theme}
-                    />
-                    <SettingItem
-                        title="Comment Notifications"
-                        subtitle="Get notified about new comments on your recipes"
-                        value={notifications.commentNotifications}
-                        onValueChange={(value) => updateNotification('commentNotifications', value)}
                         styles={styles}
                         theme={theme}
                     />
