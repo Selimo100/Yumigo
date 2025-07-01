@@ -497,7 +497,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     logoText: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: '#000000',
+        color: theme.colors.text,
     },
     logoImage: {
         height: 40,

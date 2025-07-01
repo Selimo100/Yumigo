@@ -25,12 +25,20 @@ export const ShoppingListModal = ({ visible, onClose }) => {
     toggleItem,
     removeItem,
     clearCompleted,
+    refreshList,
     completedCount,
     pendingCount,
   } = useShoppingList();
 
   const [newItemText, setNewItemText] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+
+  // Refresh shopping list when modal becomes visible
+  React.useEffect(() => {
+    if (visible) {
+      refreshList();
+    }
+  }, [visible]); // Remove refreshList from dependencies to prevent infinite loop
 
   const handleAddItem = async () => {
     if (!newItemText.trim()) return;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import useAuth from '../lib/useAuth';
 import {
   getShoppingList,
@@ -10,21 +10,28 @@ import {
 export const useShoppingList = () => {
   const { user } = useAuth();
   const [shoppingList, setShoppingList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading state
 
-  const loadShoppingList = async () => {
-    if (!user?.uid) return;
+  const loadShoppingList = useCallback(async () => {
+    if (!user?.uid) {
+      setIsLoading(false);
+      return;
+    }
     
     setIsLoading(true);
     try {
       const list = await getShoppingList(user.uid);
-      setShoppingList(list);
+      
+      // Ensure we always set an array
+      const safeList = Array.isArray(list) ? list : [];
+      setShoppingList(safeList);
     } catch (error) {
       console.error('Error loading shopping list:', error);
+      setShoppingList([]); // Set empty array on error
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.uid]);
 
   const addItem = async (text) => {
     if (!user?.uid || !text.trim()) return;
@@ -79,8 +86,13 @@ export const useShoppingList = () => {
   };
 
   useEffect(() => {
-    loadShoppingList();
-  }, [user?.uid]);
+    if (user?.uid) {
+      loadShoppingList();
+    } else {
+      setShoppingList([]);
+      setIsLoading(false);
+    }
+  }, [loadShoppingList]); // Use loadShoppingList as dependency since it's memoized with useCallback
 
   const completedCount = shoppingList.filter(item => item.completed).length;
   const pendingCount = shoppingList.filter(item => !item.completed).length;
@@ -92,7 +104,7 @@ export const useShoppingList = () => {
     toggleItem,
     removeItem,
     clearCompleted,
-    refreshList: loadShoppingList,
+    refreshList: loadShoppingList, // Use the memoized function
     completedCount,
     pendingCount,
     totalCount: shoppingList.length,
