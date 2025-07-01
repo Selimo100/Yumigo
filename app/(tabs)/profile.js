@@ -136,12 +136,14 @@ export default function ProfileScreen({
       </View>
 
       <View style={styles.recipeInfo}>
-        <Text style={[styles.recipeTitle, { color: theme.colors.text }]}>
-          {recipe.title}
-        </Text>
-        <Text style={[styles.chefName, { color: theme.colors.textSecondary }]}>
-          by {recipe.authorName || 'You'}
-        </Text>
+        <View style={styles.recipeContent}>
+          <Text style={[styles.recipeTitle, { color: theme.colors.text }]}>
+            {recipe.title}
+          </Text>
+          <Text style={[styles.chefName, { color: theme.colors.textSecondary }]}>
+            by {recipe.authorName || 'You'}
+          </Text>
+        </View>
 
         <View style={styles.recipeStats}>
           <View style={styles.ratingContainer}>
@@ -577,6 +579,11 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
   },
   recipeInfo: {
     padding: 12,
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  recipeContent: {
+    flex: 1,
   },
   recipeTitle: {
     fontSize: 16,
@@ -587,7 +594,6 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
   },
   chefName: {
     fontSize: 12,
-    marginBottom: 8,
     fontWeight: '500',
     color: theme.colors.textSecondary,
   },
