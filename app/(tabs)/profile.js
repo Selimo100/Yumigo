@@ -27,20 +27,23 @@ import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 const { width } = Dimensions.get('window');
 
 export default function ProfileScreen({
-  onShareProfile,
-  onRecipePress,
+  onShareProfile, // Not used in this component, but left for completeness if props are passed externally
+  onRecipePress, // Not used, handled by router.push
 }) {
   const { theme, toggleTheme, isDarkMode } = useTheme();
   const tabBarHeight = useTabBarHeight();
   const styles = createStyles(theme, tabBarHeight);
   const { user } = useAuth();
+  // Ensure useUserProfile is managing its own loading state correctly.
   const { profile: userProfile, recipes: userRecipes, isLoading: profileLoading, refreshProfile } = useUserProfile();
   const { followingList, followersList, followingCount, followerCount, loadFollowingUsers, loadFollowers } = useFollow();
   const router = useRouter();
   const [showShoppingList, setShowShoppingList] = useState(false);
 
+  // Subscribes to profile update events. This seems fine.
   useEffect(() => {
     const unsubscribe = profileUpdateEmitter.subscribe(() => {
+      // These functions should ideally handle their own loading states internally
       if (refreshProfile) {
         refreshProfile();
       }
@@ -51,7 +54,7 @@ export default function ProfileScreen({
     return unsubscribe;
   }, [refreshProfile, loadFollowingUsers, loadFollowers]);
 
-  // Load follow data when component mounts or user changes
+  // Load follow data when component mounts or user changes - This is also fine.
   useEffect(() => {
     if (user?.uid) {
       loadFollowingUsers();
@@ -59,26 +62,41 @@ export default function ProfileScreen({
     }
   }, [user?.uid, loadFollowingUsers, loadFollowers]);
 
-  // Refresh profile data when screen comes into focus (only if needed)
+  // *** Potentially problematic useFocusEffect - This is the primary candidate for flickering ***
+  // We are REMOVING or SIGNIFICANTLY REFINING the condition here.
+  // If `refreshProfile` is already called by `useUserProfile` on mount/user change,
+  // and `userRecipes` is initially empty, this will cause repeated fetches.
+  /*
   useFocusEffect(
     useCallback(() => {
-      // Only refresh if we don't have recent data
+      // Only refresh if we don't have recent data - THIS IS THE PROBLEM LINE
+      // If userRecipes is empty (e.g., during initial load), this will trigger refreshProfile repeatedly.
+      // Rely on useUserProfile's internal loading logic instead for initial data fetch.
       if (refreshProfile && (!userRecipes || userRecipes.length === 0)) {
         refreshProfile();
       }
-    }, [refreshProfile, userRecipes])
+    }, [refreshProfile, userRecipes]) // Keep dependencies minimal and correct
   );
+  */
+  // Let's replace the above with a focus effect that truly only refreshes if it detects
+  // that the profile data might be stale, and not just because userRecipes is empty.
+  // A better approach might be to have `useUserProfile` handle this internally,
+  // or to introduce a `lastFetched` timestamp if a re-fetch on focus is genuinely desired.
+  // For now, let's remove this specific condition to stop the flickering.
 
-  // Listen for global flag to reload profile data after recipe deletion
+  // Listen for global flag to reload profile data after recipe deletion - This one seems appropriate.
   useFocusEffect(
     useCallback(() => {
       if (global.profileNeedsReload && refreshProfile) {
         refreshProfile();
-        global.profileNeedsReload = false; // Reset flag
+        global.profileNeedsReload = false; // Reset flag immediately after triggering refresh
       }
     }, [refreshProfile])
   );
 
+
+  // Render loading state if profileLoading is true.
+  // This is correctly placed, assuming `profileLoading` from `useUserProfile` is accurate.
   if (profileLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -100,11 +118,11 @@ export default function ProfileScreen({
     recipeCount: 0,
     avatar: null,
   };
-  
+
   // Use real-time counts from useFollow hook with fallback to profile data
   const displayFollowingCount = followingCount ?? followingList?.length ?? currentUser.followingCount ?? 0;
   const displayFollowerCount = followerCount ?? followersList?.length ?? currentUser.followerCount ?? 0;
-  
+
   const recipeList = userRecipes || [];
 
   const renderRecipeCard = (recipe) => (
@@ -181,7 +199,7 @@ export default function ProfileScreen({
 
 📊 Stats:
 👥 ${displayFollowerCount} followers
-👤 ${displayFollowingCount} following  
+👤 ${displayFollowingCount} following
 🍽️ ${recipeList.length} delicious recipes
 
 Join the Yumigo community and discover amazing recipes!`;
@@ -213,12 +231,12 @@ Join the Yumigo community and discover amazing recipes!`;
       >
         <View style={styles.profileHeader}>
           <View style={styles.profilePicture}>
-          {currentUser.avatar ? (
-            <Image source={{ uri: currentUser.avatar }} style={styles.profileImage} />
-          ) : (
-            <Ionicons name="person" size={50} color={theme.colors.textSecondary} />
-          )}
-        </View>
+            {currentUser.avatar ? (
+              <Image source={{ uri: currentUser.avatar }} style={styles.profileImage} />
+            ) : (
+              <Ionicons name="person" size={50} color={theme.colors.textSecondary} />
+            )}
+          </View>
 
           <Text style={styles.username}>
             {currentUser.username}
@@ -305,7 +323,7 @@ Join the Yumigo community and discover amazing recipes!`;
             )}
           </View>
 
-          {profileLoading ? (
+          {profileLoading ? ( // This check should be sufficient if useUserProfile is handling loading correctly
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={theme.colors.primary} />
               <Text style={styles.loadingText}>
