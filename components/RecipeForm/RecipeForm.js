@@ -8,7 +8,6 @@ import {
   ScrollView, 
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
   Platform
 } from 'react-native';
 import { useRecipeForm } from '../../hooks/useRecipeForm';
@@ -105,15 +104,13 @@ export default function RecipeForm({ onSuccess, onCancel }) {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-    >
+    <View style={styles.container}>
       <ScrollView 
         style={styles.scrollContainer} 
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardDismissMode="on-drag"
       >
         <View style={styles.form}>
           <ImageUpload
@@ -213,7 +210,7 @@ export default function RecipeForm({ onSuccess, onCancel }) {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
