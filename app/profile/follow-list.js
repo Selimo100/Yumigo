@@ -112,8 +112,13 @@ export default function FollowListScreen() {
   };
 
   const handleUserPress = (user) => {
-    // Navigate to user profile (you can implement this later)
-    console.log('Navigate to user profile:', user.id);
+    // Navigate to user profile
+    console.log('Navigating to user profile:', user);
+    if (user && user.id) {
+      router.push(`/profile/user-profile?userId=${user.id}`);
+    } else {
+      console.error('User object or user.id is missing:', user);
+    }
   };
 
   const renderHeader = () => (
