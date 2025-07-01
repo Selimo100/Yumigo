@@ -27,6 +27,7 @@ export const NotificationProvider = ({ children }) => {
     }
 
     setIsLoading(true);
+    console.log('Setting up notifications listener for user:', user.uid);
 
     // Listen to real-time notifications
     const notificationsRef = collection(db, 'notifications');
@@ -37,6 +38,8 @@ export const NotificationProvider = ({ children }) => {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      console.log('Notifications snapshot received, docs count:', snapshot.docs.length);
+      
       const notificationsList = [];
       let unreadCounter = 0;
 
@@ -49,10 +52,12 @@ export const NotificationProvider = ({ children }) => {
         }
       });
 
+      console.log('Processed notifications:', notificationsList.length, 'unread:', unreadCounter);
       setNotifications(notificationsList);
       setUnreadCount(unreadCounter);
       setIsLoading(false);
     }, (error) => {
+      console.error('Error in notifications listener:', error);
       setIsLoading(false);
     });
 
