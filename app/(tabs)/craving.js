@@ -48,7 +48,7 @@ export default function CravingSelection() {
 
     const handleNextButton = () => {
         router.push({
-            pathname: '/craving/mealTypeSelection',
+            pathname: '/craving/allergySelection',
             params: { cravings: JSON.stringify(selectedCravings) },
         });
     };

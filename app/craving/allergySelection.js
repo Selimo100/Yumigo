@@ -15,8 +15,10 @@ const ALLERGIES = [
     { id: 'gluten', label: 'Gluten', iconName: 'bread-slice' },
     { id: 'dairy', label: 'Dairy', iconName: 'cheese' },
     { id: 'nuts', label: 'Nuts', iconName: 'peanut' },
+    { id: 'eggs', label: 'Eggs', iconName: 'egg'},
     { id: 'soy', label: 'Soy', iconName: 'soy-sauce' },
     { id: 'shellfish', label: 'Shellfish', iconName: 'fish' },
+    { id: 'fish', label: 'Fish', iconName: 'fish' },
     { id: 'none', label: 'None', iconName: 'check-circle' },
 ];
 
@@ -37,7 +39,7 @@ export default function AllergySelection() {
 
     const handleNext = () => {
         router.push({
-            pathname: '/craving/preferencesSelections',
+            pathname: '/craving/preferencesSelection',
             params: { allergies: JSON.stringify(selectedAllergies) },
         });
     };
