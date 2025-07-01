@@ -17,6 +17,11 @@ const PREFERENCES = [
     { id: 'lowcarb', label: 'Low-Carb', iconName: 'food-apple' },
     { id: 'glutenfree', label: 'Gluten-Free', iconName: 'bread-slice-off' },
     { id: 'dairyfree', label: 'Dairy-Free', iconName: 'cheese-off' },
+    { id: 'keto', label: 'Keto', iconName: 'avocado' },
+    { id: 'paleo', label: 'Paleo', iconName: 'paleo' },
+    { id: 'high-protein', label: 'High Protein', iconName: 'high-protein' },
+    { id: 'none', label: 'None', iconName: 'check-circle' },
+
 ];
 
 export default function PreferencesSelection() {
@@ -26,14 +31,17 @@ export default function PreferencesSelection() {
     const router = useRouter();
 
     const togglePreference = (id) => {
-        setSelectedPreferences((prev) =>
-            prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-        );
+        setSelectedPreferences((prev) => {
+            if (id === 'none') return ['none']; // Only none if selected
+            if (prev.includes('none')) return [id]; // Replace none with other
+            if (prev.includes(id)) return prev.filter((a) => a !== id);
+            return [...prev, id];
+        });
     };
 
     const handleNext = () => {
         router.push({
-            pathname: '/results',
+            pathname: '/craving/cravingResults',
             params: { preferences: JSON.stringify(selectedPreferences) },
         });
     };
