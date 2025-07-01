@@ -1,15 +1,15 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState, useCallback } from 'react'; // Added useCallback
+import { useEffect, useState, useCallback } from 'react';
 import RecipeCard from '../../components/RecipeCard';
 import RecipeForm from '../../components/RecipeForm/RecipeForm';
 import { useTheme } from '../../contexts/ThemeContext';
 import useAuth from "../../lib/useAuth";
-import { Redirect } from 'expo-router'; // No Stack needed here directly
+import { Redirect } from 'expo-router';
 import { db } from '../../lib/firebaseconfig';
-import { getDocs, collection, doc, getDoc } from 'firebase/firestore'; // Added getDoc
-import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
+import { getDocs, collection, doc, getDoc } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);

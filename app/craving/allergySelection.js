@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-    Image,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -9,47 +8,37 @@ import {
     View,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from '../../contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 
-const CRAVINGS = [
-    { id: 'sweet', label: 'Sweet', iconName: 'cupcake' },
-    { id: 'salty', label: 'Salty', iconName: 'shaker' },
-    { id: 'spicy', label: 'Spicy', iconName: 'fire' },
-    { id: 'sour', label: 'Sour', iconName: 'fruit-citrus' },
-    { id: 'cold', label: 'Cold', iconName: 'ice-cream' },
-    { id: 'hot', label: 'Hot', iconName: 'coffee' },
+const ALLERGIES = [
+    { id: 'gluten', label: 'Gluten', iconName: 'bread-slice' },
+    { id: 'dairy', label: 'Dairy', iconName: 'cheese' },
+    { id: 'nuts', label: 'Nuts', iconName: 'peanut' },
+    { id: 'soy', label: 'Soy', iconName: 'soy-sauce' },
+    { id: 'shellfish', label: 'Shellfish', iconName: 'fish' },
+    { id: 'none', label: 'None', iconName: 'check-circle' },
 ];
 
-export default function CravingSelection() {
-    const [selectedCravings, setSelectedCravings] = useState([]);
+export default function AllergySelection() {
+    const [selectedAllergies, setSelectedAllergies] = useState([]);
     const { theme } = useTheme();
     const styles = createStyles(theme);
-    const [error, setError] = useState('');
     const router = useRouter();
 
-    const toggleCraving = (id) => {
-        setSelectedCravings((prev) => {
-            let newSelection = prev.includes(id)
-                ? prev.filter((c) => c !== id)
-                : [...prev, id];
-
-            if (newSelection.includes('hot') && newSelection.includes('cold')) {
-                setError('"Cold" and "Hot"cannot be selected together.');
-            } else if (newSelection.length > 2) {
-                setError('Please select up to 2 cravings only.');
-            } else {
-                setError('');
-            }
-
-            return newSelection;
+    const toggleAllergy = (id) => {
+        setSelectedAllergies((prev) => {
+            if (id === 'none') return ['none']; // Only none if selected
+            if (prev.includes('none')) return [id]; // Replace none with other
+            if (prev.includes(id)) return prev.filter((a) => a !== id);
+            return [...prev, id];
         });
     };
 
-    const handleNextButton = () => {
+    const handleNext = () => {
         router.push({
-            pathname: '/craving/mealTypeSelection',
-            params: { cravings: JSON.stringify(selectedCravings) },
+            pathname: '/craving/preferencesSelections',
+            params: { allergies: JSON.stringify(selectedAllergies) },
         });
     };
 
@@ -57,36 +46,34 @@ export default function CravingSelection() {
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
-                    <Image source={require('../../assets/icon.png')} style={styles.logoImage} />
-                    <Text style={styles.title}>What are you craving for today?</Text>
-                    <Text style={styles.subsubtitle}>Tell us your mood, we'll find your food</Text>
+                    <Text style={styles.title}>Any allergies or intolerances?</Text>
+                    <Text style={styles.subsubtitle}>Select all that apply</Text>
                 </View>
 
                 <View style={styles.grid}>
-                    {CRAVINGS.map((craving) => {
-                        const isSelected = selectedCravings.includes(craving.id);
+                    {ALLERGIES.map((allergy) => {
+                        const isSelected = selectedAllergies.includes(allergy.id);
                         return (
                             <TouchableOpacity
-                                key={craving.id}
+                                key={allergy.id}
                                 style={[
                                     styles.cravingButton,
                                     {
                                         backgroundColor: isSelected ? '#0D6159' : '#DDE6D5',
-                                        borderColor: '#0D6159',
                                         shadowOpacity: isSelected ? 0.8 : 0.3,
                                         transform: [{ scale: isSelected ? 1.05 : 1 }],
                                     },
                                 ]}
-                                onPress={() => toggleCraving(craving.id)}
+                                onPress={() => toggleAllergy(allergy.id)}
                             >
                                 <View style={styles.cravingContent}>
                                     <MaterialCommunityIcons
-                                        name={craving.iconName}
+                                        name={allergy.iconName}
                                         size={40}
                                         color={isSelected ? '#DDE6D5' : '#0D6159'}
                                     />
                                     <Text style={[styles.cravingLabel, { color: isSelected ? '#DDE6D5' : '#0D6159' }]}>
-                                        {craving.label}
+                                        {allergy.label}
                                     </Text>
                                 </View>
                                 {isSelected && (
@@ -100,24 +87,15 @@ export default function CravingSelection() {
                 </View>
 
                 <View style={styles.buttonsContainer}>
-                    {error ? (
-                        <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>{error}</Text>
-                        </View>
-                    ) : (
-                        <TouchableOpacity
-                            style={[
-                                styles.submitButton,
-                                { backgroundColor: selectedCravings.length === 0 ? '#7a9a97' : '#0D6159' },
-                            ]}
-                            onPress={handleNextButton}
-                            disabled={selectedCravings.length === 0}
-                        >
-                            <Text style={styles.submitButtonText}>
-                                {selectedCravings.length === 0 ? 'Please select at least one craving' : 'Next →'}
-                            </Text>
-                        </TouchableOpacity>
-                    )}
+                    <TouchableOpacity
+                        style={[styles.submitButton, { backgroundColor: selectedAllergies.length === 0 ? '#7a9a97' : '#0D6159' }]}
+                        onPress={handleNext}
+                        disabled={selectedAllergies.length === 0}
+                    >
+                        <Text style={styles.submitButtonText}>
+                            {selectedAllergies.length === 0 ? 'Please select at least one option' : 'Next →'}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -128,12 +106,6 @@ const createStyles = (theme) => StyleSheet.create({
     container: { flex: 1, backgroundColor: 'white' },
     scrollContent: { padding: 20, paddingBottom: 40, alignItems: 'center' },
     header: { alignItems: 'center', marginBottom: 30 },
-    logoImage: {
-        width: 120,
-        height: 120,
-        marginTop: 30,
-    },
-
     title: { fontSize: 23.8, fontWeight: 'bold', color: '#0D6159', marginBottom: 4, marginTop: -5 },
     subsubtitle: { fontSize: 14, color: '#0D6159', opacity: 0.8 },
 
@@ -152,13 +124,11 @@ const createStyles = (theme) => StyleSheet.create({
         shadowRadius: 4,
         shadowOpacity: 0.3,
     },
-
     cravingContent: {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
     },
-
     cravingLabel: {
         fontSize: 16,
         fontWeight: '700',
@@ -181,7 +151,6 @@ const createStyles = (theme) => StyleSheet.create({
         color: '#0D6159',
         fontWeight: '700',
     },
-
     buttonsContainer: {
         width: '100%',
         alignItems: 'center',
@@ -196,28 +165,6 @@ const createStyles = (theme) => StyleSheet.create({
         color: '#DDE6D5',
         fontWeight: '700',
         fontSize: 16,
-        textAlign: 'center',
-    },
-
-    errorContainer: {
-        width: '100%',
-        backgroundColor: '#fce8e8',
-        borderColor: '#e05656',
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        marginTop: 12,
-        shadowColor: '#a71d2a',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.15,
-        shadowRadius: 3,
-        alignSelf: 'center',
-    },
-    errorText: {
-        color: '#a71d2a',
-        fontSize: 14,
-        fontWeight: '600',
         textAlign: 'center',
     },
 });
