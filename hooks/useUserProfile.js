@@ -73,21 +73,30 @@ export const useUserProfile = () => {
     useEffect(() => {
         const unsubscribe = profileUpdateEmitter.subscribe(async () => {
             const user = auth.currentUser;
-            if (user) {
-                // Only refresh profile data, not recipes to avoid unnecessary loading
+            if (user && !isLoading) { // Prevent multiple simultaneous updates
+                // Refresh both profile data and recipes
                 try {
+                    setIsLoading(true);
                     const userProfile = await getUserProfile(user.uid);
                     if (userProfile) {
                         setProfile(userProfile);
                     }
+                    
+                    // Also refresh recipes when profile updates
+                    const userRecipes = await getUserRecipes(user.uid, user.uid);
+                    setRecipes(userRecipes);
                 } catch (error) {
                     console.error('Error refreshing profile:', error);
+                } finally {
+                    setIsLoading(false);
                 }
             }
         });
 
         return unsubscribe;
-    }, []); const refreshProfile = async () => {
+    }, [isLoading]); // Add isLoading dependency
+
+    const refreshProfile = async () => {
         const user = auth.currentUser;
         if (user) {
             await loadUserData(user);
