@@ -59,6 +59,16 @@ export default function ProfileScreen({
     }
   }, [user?.uid, loadFollowingUsers, loadFollowers]);
 
+  // Refresh profile data when screen comes into focus (only if needed)
+  useFocusEffect(
+    useCallback(() => {
+      // Only refresh if we don't have recent data
+      if (refreshProfile && (!userRecipes || userRecipes.length === 0)) {
+        refreshProfile();
+      }
+    }, [refreshProfile, userRecipes])
+  );
+
   // Listen for global flag to reload profile data after recipe deletion
   useFocusEffect(
     useCallback(() => {

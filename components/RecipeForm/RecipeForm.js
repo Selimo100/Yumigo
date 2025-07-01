@@ -8,7 +8,6 @@ import {
   ScrollView, 
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
   Platform
 } from 'react-native';
 import { useRecipeForm } from '../../hooks/useRecipeForm';
@@ -83,19 +82,9 @@ export default function RecipeForm({ onSuccess, onCancel }) {
       // Save to Firebase
       const recipeId = await saveRecipe(recipeData);
       
-      Alert.alert(
-        'Success!', 
-        'Your recipe has been published successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              resetForm();
-              onSuccess && onSuccess(recipeId);
-            }
-          }
-        ]
-      );
+      // Reset form and navigate first
+      resetForm();
+      onSuccess && onSuccess(recipeId);
     } catch (error) {
       console.error('Error publishing recipe:', error);
       Alert.alert('Error', 'Failed to publish recipe. Please try again.');
@@ -105,15 +94,13 @@ export default function RecipeForm({ onSuccess, onCancel }) {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-    >
+    <View style={styles.container}>
       <ScrollView 
         style={styles.scrollContainer} 
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardDismissMode="on-drag"
       >
         <View style={styles.form}>
           <ImageUpload
@@ -213,7 +200,7 @@ export default function RecipeForm({ onSuccess, onCancel }) {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
