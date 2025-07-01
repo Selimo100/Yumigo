@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Share } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Share, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
@@ -477,6 +477,16 @@ export default function RecipeDetailScreen() {
     }
   };
 
+  const handleCommentInputFocus = () => {
+    // Kleine Verzögerung um sicherzustellen, dass die Keyboard-Animation startet
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        // Einfach zum Ende scrollen, da die Kommentare am Ende sind
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }, 100);
+  };
+
   useFocusEffect(
     useCallback(() => {
       if (global.recipeEditCompleted) {
@@ -520,12 +530,13 @@ export default function RecipeDetailScreen() {
         </View>
       </View>
 
-      <ScrollView
-        ref={scrollViewRef}
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 120 }}
-      >
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          ref={scrollViewRef}
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
+        >
         {/* Recipe Image with Category Tags */}
         <View style={styles.imageContainer}>
           <Image source={{ uri: recipe.imageUrl }} style={styles.recipeImage} />
@@ -696,7 +707,12 @@ export default function RecipeDetailScreen() {
       </ScrollView>
 
       {/* Comment Input */}
-      <CommentInput onAddComment={handleAddComment} theme={theme} />
+      <CommentInput 
+        onAddComment={handleAddComment} 
+        theme={theme} 
+        onFocus={handleCommentInputFocus}
+      />
+      </View>
 
       {/* Rating Modal */}
       <RatingModal

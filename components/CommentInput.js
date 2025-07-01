@@ -1,17 +1,19 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Keyboard, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Keyboard, Platform, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserProfile } from '../hooks/useUserProfile';
 
-export const CommentInput = ({ onAddComment, theme }) => {
+export const CommentInput = ({ onAddComment, theme, onFocus: onParentFocus }) => {
   const [newComment, setNewComment] = useState('');
   const [inputHeight, setInputHeight] = useState(40);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
   const insets = useSafeAreaInsets();
   const { profile: userProfile } = useUserProfile();
+  const animatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
@@ -19,14 +21,26 @@ export const CommentInput = ({ onAddComment, theme }) => {
       (e) => {
         setKeyboardHeight(e.endCoordinates.height);
         setIsKeyboardVisible(true);
+        
+        Animated.timing(animatedValue, {
+          toValue: 1,
+          duration: Platform.OS === 'ios' ? e.duration || 250 : 250,
+          useNativeDriver: false,
+        }).start();
       }
     );
 
     const keyboardWillHide = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => {
+      (e) => {
         setKeyboardHeight(0);
         setIsKeyboardVisible(false);
+        
+        Animated.timing(animatedValue, {
+          toValue: 0,
+          duration: Platform.OS === 'ios' ? e.duration || 250 : 250,
+          useNativeDriver: false,
+        }).start();
       }
     );
 
@@ -35,6 +49,11 @@ export const CommentInput = ({ onAddComment, theme }) => {
       keyboardWillHide.remove();
     };
   }, []);
+
+  const animatedBottomValue = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -keyboardHeight + insets.bottom - 32], // -40 für mehr Abstand nach oben
+  });
 
   const styles = StyleSheet.create({
     commentInputContainer: {
@@ -49,10 +68,17 @@ export const CommentInput = ({ onAddComment, theme }) => {
       gap: 12,
       minHeight: 64,
       position: 'absolute',
-      bottom: isKeyboardVisible ? keyboardHeight : 0,
+      bottom: 0,
       left: 0,
       right: 0,
       zIndex: 1000,
+      // Für iOS: sanfte Animation nach oben
+      // Für Android: direkte Positionierung über Tastatur
+      ...(Platform.OS === 'ios' ? {
+        transform: [{ translateY: animatedBottomValue }],
+      } : {
+        transform: isKeyboardVisible ? [{ translateY: -keyboardHeight + insets.bottom - 40 }] : [], // -40 für mehr Abstand nach oben
+      }),
     },
     userAvatar: {
       width: 32,
@@ -68,6 +94,8 @@ export const CommentInput = ({ onAddComment, theme }) => {
       paddingHorizontal: 16,
       paddingVertical: 8,
       maxHeight: 120,
+      borderWidth: isFocused ? 2 : 1,
+      borderColor: isFocused ? theme.colors.primary : theme.colors.border,
     },
     commentInput: {
       fontSize: 16,
@@ -109,10 +137,24 @@ export const CommentInput = ({ onAddComment, theme }) => {
   };
 
   const dismissKeyboard = () => {
+    setNewComment('');
+    setInputHeight(40);
+    setIsFocused(false);
     Keyboard.dismiss();
     inputRef.current?.blur();
-  };    return (
-    <View style={styles.commentInputContainer}>
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+    onParentFocus?.();
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+  };
+
+  return (
+    <Animated.View style={styles.commentInputContainer}>
       <View style={styles.userAvatar}>
         {userProfile?.avatar ? (
           <Image source={{ uri: userProfile.avatar }} style={styles.userAvatar} />
@@ -134,6 +176,8 @@ export const CommentInput = ({ onAddComment, theme }) => {
           multiline
           maxLength={500}
           onContentSizeChange={handleContentSizeChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           scrollEnabled={inputHeight >= 96}
         />
       </View>
@@ -154,6 +198,6 @@ export const CommentInput = ({ onAddComment, theme }) => {
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </Animated.View>
   );
 };
