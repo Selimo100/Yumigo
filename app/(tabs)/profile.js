@@ -22,7 +22,6 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 import { useFollow } from '../../hooks/useFollow';
 import ShoppingListModal from '../../components/ShoppingListModal';
-import NotificationDebug from '../../components/NotificationDebug';
 import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 
 const { width } = Dimensions.get('window');
@@ -354,9 +353,6 @@ Join the Yumigo community and discover amazing recipes!`;
             </View>
           )}
         </View>
-
-        {/* Debug Component - Remove this in production */}
-        <NotificationDebug />
 
         <View style={styles.logoutSection}>
           <TouchableOpacity

@@ -107,26 +107,26 @@ export default function SettingsScreen() {
                         theme={theme}
                     />
                     <SettingItem
-                        title="Email Notifications"
-                        subtitle="Receive updates via email"
-                        value={notifications.emailNotifications}
-                        onValueChange={(value) => updateNotification('emailNotifications', value)}
+                        title="Follow Notifications"
+                        subtitle="Get notified when someone follows you"
+                        value={notifications.followNotifications}
+                        onValueChange={(value) => updateNotification('followNotifications', value)}
                         styles={styles}
                         theme={theme}
                     />
                     <SettingItem
-                        title="Recipe Recommendations"
-                        subtitle="Get personalized recipe suggestions"
-                        value={notifications.recipeRecommendations}
-                        onValueChange={(value) => updateNotification('recipeRecommendations', value)}
+                        title="Like Notifications"
+                        subtitle="Get notified when someone likes your recipes"
+                        value={notifications.likeNotifications}
+                        onValueChange={(value) => updateNotification('likeNotifications', value)}
                         styles={styles}
                         theme={theme}
                     />
                     <SettingItem
-                        title="Social Updates"
-                        subtitle="Updates from people you follow"
-                        value={notifications.socialUpdates}
-                        onValueChange={(value) => updateNotification('socialUpdates', value)}
+                        title="Comment Notifications"
+                        subtitle="Get notified about new comments on your recipes"
+                        value={notifications.commentNotifications}
+                        onValueChange={(value) => updateNotification('commentNotifications', value)}
                         styles={styles}
                         theme={theme}
                     />

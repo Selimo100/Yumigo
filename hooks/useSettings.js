@@ -17,9 +17,9 @@ export const useSettings = () => {
 
   const [notifications, setNotifications] = useState({
     pushNotifications: true,
-    emailNotifications: false,
-    recipeRecommendations: true,
-    socialUpdates: true,
+    followNotifications: true,
+    likeNotifications: true,
+    commentNotifications: true,
   });
 
   const [isLoading, setIsLoading] = useState(true);

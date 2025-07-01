@@ -1,5 +1,25 @@
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebaseconfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const STORAGE_KEYS = {
+  NOTIFICATIONS: 'notification_settings',
+};
+
+// Check if notifications are enabled for a specific type
+const areNotificationsEnabled = async (notificationType) => {
+  try {
+    const savedNotifications = await AsyncStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
+    if (savedNotifications) {
+      const settings = JSON.parse(savedNotifications);
+      return settings[notificationType] !== false; // Default to true if not set
+    }
+    return true; // Default to enabled
+  } catch (error) {
+    console.error('Error checking notification settings:', error);
+    return true; // Default to enabled on error
+  }
+};
 
 // Create a notification
 export const createNotification = async (notificationData) => {
@@ -24,6 +44,13 @@ export const createNotification = async (notificationData) => {
 // Create notification when someone likes a recipe
 export const createLikeNotification = async (recipeId, likerUserId, recipeOwnerId) => {
   if (likerUserId === recipeOwnerId) return; // Don't notify yourself
+
+  // Check if like notifications are enabled
+  const likeNotificationsEnabled = await areNotificationsEnabled('likeNotifications');
+  if (!likeNotificationsEnabled) {
+    console.log('Like notifications are disabled');
+    return;
+  }
 
   try {
     console.log('Creating like notification (fallback service):', { recipeId, likerUserId, recipeOwnerId });
@@ -89,6 +116,13 @@ export const createCommentNotification = async (recipeId, commenterUserId, recip
 // Create notification when someone follows you
 export const createFollowNotification = async (followerId, followedUserId) => {
   if (followerId === followedUserId) return; // Don't notify yourself
+
+  // Check if follow notifications are enabled
+  const followNotificationsEnabled = await areNotificationsEnabled('followNotifications');
+  if (!followNotificationsEnabled) {
+    console.log('Follow notifications are disabled');
+    return;
+  }
 
   try {
     // Get follower's info
