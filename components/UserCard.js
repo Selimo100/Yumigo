@@ -21,38 +21,40 @@ export default function UserCard({
   if (!user) return null;
 
   return (
-    <TouchableOpacity
-      style={[styles.container, { backgroundColor: theme.colors.surface }]}
-      onPress={() => onPress?.(user)}
-    >
-      <View style={styles.userInfo}>
-        <View
-          style={[
-            styles.avatar,
-            { backgroundColor: theme.colors.border }
-          ]}
-        >
-          {user.avatar ? (
-            <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
-          ) : (
-            <Ionicons name="person" size={24} color={theme.colors.textSecondary} />
-          )}
-        </View>
+    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+      <TouchableOpacity
+        style={styles.userInfoContainer}
+        onPress={() => onPress?.(user)}
+      >
+        <View style={styles.userInfo}>
+          <View
+            style={[
+              styles.avatar,
+              { backgroundColor: theme.colors.border }
+            ]}
+          >
+            {user.avatar ? (
+              <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+            ) : (
+              <Ionicons name="person" size={24} color={theme.colors.textSecondary} />
+            )}
+          </View>
 
-        <View style={styles.details}>
-          <Text style={[styles.username, { color: theme.colors.text }]}>
-            {user.username}
-          </Text>
-          <Text style={[styles.bio, { color: theme.colors.textSecondary }]} numberOfLines={1}>
-            {user.bio || 'Food enthusiast'}
-          </Text>
-          <View style={styles.stats}>
-            <Text style={[styles.statText, { color: theme.colors.textSecondary }]}>
-              {user.recipeCount || 0} recipes • {user.followerCount || 0} followers
+          <View style={styles.details}>
+            <Text style={[styles.username, { color: theme.colors.text }]}>
+              {user.username}
             </Text>
+            <Text style={[styles.bio, { color: theme.colors.textSecondary }]} numberOfLines={1}>
+              {user.bio || 'Food enthusiast'}
+            </Text>
+            <View style={styles.stats}>
+              <Text style={[styles.statText, { color: theme.colors.textSecondary }]}>
+                {user.recipeCount || 0} recipes • {user.followerCount || 0} followers
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
       {showFollowButton && (
         <FollowButton
@@ -61,7 +63,7 @@ export default function UserCard({
           onFollowChange={onFollowChange}
         />
       )}
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -82,6 +84,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 2,
+  },
+  userInfoContainer: {
+    flex: 1,
   },
   userInfo: {
     flexDirection: 'row',

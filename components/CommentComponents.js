@@ -1,8 +1,18 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import useAuth from '../lib/useAuth';
 
 export const CommentItem = ({ comment, onLike, theme }) => {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const handleUserPress = () => {
+    if (comment.userId && comment.userId !== user?.uid) {
+      router.push(`/profile/user-profile?userId=${comment.userId}`);
+    }
+  };
   const styles = StyleSheet.create({
     commentContainer: {
       flexDirection: 'row',
@@ -66,7 +76,9 @@ export const CommentItem = ({ comment, onLike, theme }) => {
       </View>
       <View style={styles.commentContent}>
         <View style={styles.commentHeader}>
-          <Text style={styles.username}>{comment.user}</Text>
+          <TouchableOpacity onPress={handleUserPress}>
+            <Text style={styles.username}>{comment.user}</Text>
+          </TouchableOpacity>
           <Text style={styles.time}>{comment.time}</Text>
         </View>
         <Text style={styles.commentText}>{comment.comment}</Text>

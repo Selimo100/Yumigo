@@ -20,10 +20,8 @@ export default function SettingsScreen() {
     const { theme, toggleTheme, isDarkMode } = useTheme();
     const {
         profile,
-        notifications,
         isLoading,
         updateProfile,
-        updateNotification,
         saveAllSettings
     } = useSettings();
 
@@ -93,40 +91,6 @@ export default function SettingsScreen() {
                         subtitle="Switch between light and dark theme"
                         value={isDarkMode}
                         onValueChange={toggleTheme}
-                        styles={styles}
-                        theme={theme}
-                    />
-                </Section>
-                <Section title="Notifications" styles={styles}>
-                    <SettingItem
-                        title="Push Notifications"
-                        subtitle="Receive notifications on your device"
-                        value={notifications.pushNotifications}
-                        onValueChange={(value) => updateNotification('pushNotifications', value)}
-                        styles={styles}
-                        theme={theme}
-                    />
-                    <SettingItem
-                        title="Email Notifications"
-                        subtitle="Receive updates via email"
-                        value={notifications.emailNotifications}
-                        onValueChange={(value) => updateNotification('emailNotifications', value)}
-                        styles={styles}
-                        theme={theme}
-                    />
-                    <SettingItem
-                        title="Recipe Recommendations"
-                        subtitle="Get personalized recipe suggestions"
-                        value={notifications.recipeRecommendations}
-                        onValueChange={(value) => updateNotification('recipeRecommendations', value)}
-                        styles={styles}
-                        theme={theme}
-                    />
-                    <SettingItem
-                        title="Social Updates"
-                        subtitle="Updates from people you follow"
-                        value={notifications.socialUpdates}
-                        onValueChange={(value) => updateNotification('socialUpdates', value)}
                         styles={styles}
                         theme={theme}
                     />

@@ -222,7 +222,7 @@ export default function HomeScreen() {
                 <View style={styles.topNavIcons}>
                     <TouchableOpacity style={styles.createButton} onPress={handleCreatePress}>
                         <Ionicons name="add" size={24} color="#FFFFFF" />
-                        <Text style={styles.createText}>Create</Text>
+                        <Text style={styles.createText}>Create </Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={styles.notificationIcon}

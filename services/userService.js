@@ -16,13 +16,23 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 // Get user profile data from Firestore
 export const getUserProfile = async (userId) => {
   try {
+    
+    if (!userId) {
+      throw new Error('userId is required');
+    }
+    
+    if (!db) {
+      throw new Error('Firestore database not initialized');
+    }
+    
     const userDoc = await getDoc(doc(db, 'users', userId));
+    
     if (userDoc.exists()) {
       return userDoc.data();
     }
+    
     return null;
   } catch (error) {
-    console.error('Error fetching user profile:', error);
     throw error;
   }
 };
@@ -123,6 +133,34 @@ export const updateUserRecipeCount = async (userId, increment = true) => {
     return 0;
   } catch (error) {
     console.error('Error updating recipe count:', error);
+    throw error;
+  }
+};
+
+// Sync user recipe count with actual recipes in database
+export const syncUserRecipeCount = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    
+    // Get actual count of recipes from database
+    const recipesQuery = query(
+      collection(db, 'recipes'),
+      where('authorId', '==', userId)
+    );
+    
+    const querySnapshot = await getDocs(recipesQuery);
+    const actualCount = querySnapshot.size;
+    
+    // Update user profile with correct count
+    await updateDoc(userRef, {
+      recipeCount: actualCount,
+      updatedAt: serverTimestamp(),
+    });
+    
+    console.log(`Synced recipe count for user ${userId}: ${actualCount} recipes`);
+    return actualCount;
+  } catch (error) {
+    console.error('Error syncing recipe count:', error);
     throw error;
   }
 };

@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 import { auth } from '../lib/firebaseconfig';
 import { getUserProfile, updateUserProfile } from '../services/userService';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const STORAGE_KEYS = {
-  NOTIFICATIONS: 'notification_settings',
-};
 
 export const useSettings = () => {
   const [profile, setProfile] = useState({
@@ -13,13 +8,6 @@ export const useSettings = () => {
     bio: '',
     email: '',
     avatar: null,
-  });
-
-  const [notifications, setNotifications] = useState({
-    pushNotifications: true,
-    emailNotifications: false,
-    recipeRecommendations: true,
-    socialUpdates: true,
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -60,30 +48,16 @@ export const useSettings = () => {
           });
         }
       }
-
-      const savedNotifications = await AsyncStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
-      if (savedNotifications) {
-        setNotifications(JSON.parse(savedNotifications));
-      }
     } catch (error) {
       console.error('Failed to load settings:', error);
     } finally {
       setIsLoading(false);
     }
   };
+  
   const updateProfile = (updates) => {
     const newProfile = { ...profile, ...updates };
     setProfile(newProfile);
-  };
-
-  const updateNotification = async (key, value) => {
-    try {
-      const newNotifications = { ...notifications, [key]: value };
-      setNotifications(newNotifications);
-      await AsyncStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(newNotifications));
-    } catch (error) {
-      console.error('Failed to save notification setting:', error);
-    }
   };
   const saveAllSettings = async () => {
     try {
@@ -98,8 +72,6 @@ export const useSettings = () => {
         email: profile.email,
         avatar: profile.avatar,
       });
-
-      await AsyncStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
       
       await loadSettings();
       
@@ -112,10 +84,8 @@ export const useSettings = () => {
 
   return {
     profile,
-    notifications,
     isLoading,
     updateProfile,
-    updateNotification,
     saveAllSettings,
   };
 };

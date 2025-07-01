@@ -81,8 +81,8 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
     const handleAuthorPress = (e) => {
         e.stopPropagation();
         if (recipe.authorId && recipe.authorId !== user?.uid) {
-            // Navigate to author profile (can be implemented later)
-            console.log('Navigate to author profile:', recipe.authorId);
+            // Navigate to author profile
+            router.push(`/profile/user-profile?userId=${recipe.authorId}`);
         }
     };
 
