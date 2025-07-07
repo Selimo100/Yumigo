@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput, Image, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useCallback } from 'react'; 
@@ -14,9 +14,6 @@ import { getDocs, collection, doc, getDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native'; 
 import { useFollow } from '../../hooks/useFollow';
 import { useTabBarHeight } from '../../hooks/useTabBarHeight';
-import { recipeHasSeasonalIngredient } from '../../utils/seasonalUtils';
-import * as Location from 'expo-location';
-import ingredientsData from '../../utils/ingredients.json';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);
@@ -26,9 +23,6 @@ export default function HomeScreen() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [showNotificationModal, setShowNotificationModal] = useState(false);
-    const [seasonalFilterActive, setSeasonalFilterActive] = useState(false);
-    const [countryName, setCountryName] = useState('Switzerland'); // Default fallback
-    const [currentMonth, setCurrentMonth] = useState(() => new Date().toLocaleString('en-US', { month: 'long' }));
 
     const { theme } = useTheme();
     const { notifications, unreadCount } = useNotifications();
@@ -38,63 +32,42 @@ export default function HomeScreen() {
 
     const { user, isLoading: isLoadingAuth } = useAuth();
     const { followingFeed, loadFollowingFeed, isLoading: isLoadingFeed } = useFollow();
-
-    // Hilfsfunktion: Name zu ID (für Gemüse und Früchte)
-    function getIngredientIdByName(name) {
-        const lower = name.trim().toLowerCase();
-        const found = ingredientsData.find(ing => ing.names.some(n => n.toLowerCase() === lower));
-        return found ? found.id : null;
-    }
-    // Hilfsfunktion: Prüft, ob eine ID oder ein Name saisonal ist
-    function isAnyIngredientSeasonal(ingredient, country, month) {
-        let id = null;
-        if (typeof ingredient === 'string') {
-            id = getIngredientIdByName(ingredient) || ingredient;
-        } else if (ingredient && typeof ingredient === 'object') {
-            id = ingredient.id || getIngredientIdByName(ingredient.ingredient || ingredient.name || '');
-        }
-        if (!id) return false;
-        // Prüfe auf saisonal für Gemüse und Früchte
-        return recipeHasSeasonalIngredient({ ingredients: [id] }, country, month);
-    }
+    const [refreshing, setRefreshing] = useState(false);
 
     // Simple filter function for recipes
-    // Filterfunktion mit saisonalem Toggle
-    // Debug: Logge Zutaten-IDs und Filter-Entscheidung
     const getFilteredRecipes = useCallback(() => {
         const currentRecipes = activeTab === 'discover' ? recipeList : followingFeed;
-        let filtered = currentRecipes;
-        if (seasonalFilterActive) {
-            filtered = filtered.filter(recipe => {
-                const isSeasonal = (recipe.ingredients || []).some(ing => isAnyIngredientSeasonal(ing, countryName, currentMonth));
-                console.log('[SEASONAL FILTER]', {
-                    recipeId: recipe.id,
-                    title: recipe.title,
-                    countryName,
-                    currentMonth,
-                    ingredients: recipe.ingredients,
-                    isSeasonal
-                });
-                return isSeasonal;
-            });
-        }
+        
         if (!searchQuery.trim()) {
-            return filtered;
+            return currentRecipes;
         }
+        
         const query = searchQuery.toLowerCase();
-        return filtered.filter(recipe => {
-            if (recipe.title?.toLowerCase().includes(query)) return true;
-            if (recipe.description?.toLowerCase().includes(query)) return true;
+        
+        return currentRecipes.filter(recipe => {
+            if (recipe.title?.toLowerCase().includes(query)) {
+                return true;
+            }
+            
+            if (recipe.description?.toLowerCase().includes(query)) {
+                return true;
+            }
+            
             if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
                 return recipe.ingredients.some(ingredient => {
-                    if (typeof ingredient === 'string') return ingredient.toLowerCase().includes(query);
-                    if (ingredient && typeof ingredient === 'object' && ingredient.name) return ingredient.name.toLowerCase().includes(query);
+                    if (typeof ingredient === 'string') {
+                        return ingredient.toLowerCase().includes(query);
+                    }
+                    if (ingredient && typeof ingredient === 'object' && ingredient.name) {
+                        return ingredient.name.toLowerCase().includes(query);
+                    }
                     return false;
                 });
             }
+            
             return false;
         });
-    }, [recipeList, followingFeed, activeTab, searchQuery, seasonalFilterActive, countryName, currentMonth]);
+    }, [recipeList, followingFeed, activeTab, searchQuery]);
 
     const getRecipes = useCallback(async () => {
         if (!user) { 
@@ -166,33 +139,15 @@ export default function HomeScreen() {
     // Use useFocusEffect to re-fetch recipes when the screen comes into focus
     useFocusEffect(
         useCallback(() => {
-            (async () => {
-                try {
-                    let { status } = await Location.requestForegroundPermissionsAsync();
-                    if (status !== 'granted') {
-                        setCountryName('Switzerland'); // fallback
-                        return;
-                    }
-                    let location = await Location.getCurrentPositionAsync({});
-                    let geocode = await Location.reverseGeocodeAsync({
-                        latitude: location.coords.latitude,
-                        longitude: location.coords.longitude,
-                    });
-                    if (geocode && geocode.length > 0) {
-                        setCountryName(mapCountryName(geocode[0].country));
-                    } else {
-                        setCountryName('Switzerland');
-                    }
-                } catch (err) {
-                    setCountryName('Switzerland');
-                }
-            })();
             getRecipes();
             if (activeTab === 'following') {
                 loadFollowingFeed();
             }
-            return () => {};
-        }, [getRecipes, activeTab, loadFollowingFeed])
+            // Optional: return a cleanup function if you had listeners that needed unsubscribing
+            return () => {
+                console.log('[HomeScreen] Screen unfocused. No specific cleanup needed for getDocs.');
+            };
+        }, [getRecipes, activeTab, loadFollowingFeed]) // Depend on getRecipes and activeTab to re-run when they change
     );
 
 
@@ -239,6 +194,104 @@ export default function HomeScreen() {
         console.log('Unread count:', unreadCount);
         setShowNotificationModal(true);
     };
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await getRecipes();
+        setRefreshing(false);
+    }, [getRecipes]);
+
+    // --- Personalized Recipe Ranking Algorithm ---
+    function getRecipeScore(recipe, user, weights) {
+        // Engagement score
+        const engagement =
+            (recipe.likesCount || 0) * weights.likes +
+            (recipe.commentsCount || 0) * weights.comments +
+            (recipe.sharesCount || 0) * weights.shares +
+            (recipe.savesCount || 0) * weights.saves;
+
+        // Freshness: exponential decay (half-life in days)
+        const now = Date.now();
+        const created = recipe.createdAt ? new Date(recipe.createdAt).getTime() : now;
+        const daysOld = (now - created) / (1000 * 60 * 60 * 24);
+        const freshness = Math.exp(-daysOld / weights.freshnessHalfLife);
+
+        // Personalization: boost for matching user interests
+        let personalization = 0;
+        if (user) {
+            if (user.preferredCuisines && recipe.cuisine && user.preferredCuisines.includes(recipe.cuisine)) {
+                personalization += weights.cuisineBoost;
+            }
+            if (user.dietaryPreferences && recipe.dietary && user.dietaryPreferences.some(d => recipe.dietary.includes(d))) {
+                personalization += weights.dietaryBoost;
+            }
+            if (user.savedIngredients && recipe.ingredients) {
+                const matchCount = recipe.ingredients.filter(ing => user.savedIngredients.includes(ing)).length;
+                if (matchCount > 0) {
+                    personalization += weights.ingredientBoost * matchCount;
+                }
+            }
+        }
+
+        // Trending: boost for sudden popularity
+        const trending = (recipe.trendingScore || 0) * weights.trendingBoost;
+
+        // Final score
+        return engagement + freshness * weights.freshness + personalization + trending;
+    }
+
+    function rankRecipes(recipes, user, customWeights = {}) {
+        const weights = {
+            likes: 1,
+            comments: 2,
+            shares: 3,
+            saves: 4,
+            freshness: 10,
+            freshnessHalfLife: 7, // days
+            cuisineBoost: 10,
+            dietaryBoost: 8,
+            ingredientBoost: 2,
+            trendingBoost: 5,
+            ...customWeights
+        };
+        // Calculate scores
+        let scored = recipes.map(recipe => ({
+            ...recipe,
+            _score: getRecipeScore(recipe, user, weights)
+        }));
+        // Sort by score descending
+        scored.sort((a, b) => b._score - a._score);
+        // Add randomization for recipes with similar scores (±5 points)
+        const margin = 5;
+        let i = 0;
+        while (i < scored.length) {
+            let j = i + 1;
+            // Find group of recipes within margin
+            while (j < scored.length && Math.abs(scored[j]._score - scored[i]._score) <= margin) {
+                j++;
+            }
+            // Shuffle this group in place
+            if (j - i > 1) {
+                const group = scored.slice(i, j);
+                // Fisher-Yates shuffle for the group
+                for (let k = group.length - 1; k > 0; k--) {
+                    const rand = Math.floor(Math.random() * (k + 1));
+                    [group[k], group[rand]] = [group[rand], group[k]];
+                }
+                // Replace in scored
+                for (let k = 0; k < group.length; k++) {
+                    scored[i + k] = group[k];
+                }
+            }
+            i = j;
+        }
+        return scored;
+    }
+
+    const getRankedFilteredRecipes = useCallback(() => {
+        const filtered = getFilteredRecipes();
+        return rankRecipes(filtered, user);
+    }, [getFilteredRecipes, user]);
 
     if (isLoadingAuth) {
         return (
@@ -361,9 +414,15 @@ export default function HomeScreen() {
                     style={styles.feed} 
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.feedContent}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            tintColor={theme.colors.primary}
+                        />
+                    }
                 >
-                    {getFilteredRecipes().map((recipe) => (
-                        // Pass the recipe object which now contains likesCount and isLikedByCurrentUser
+                    {getRankedFilteredRecipes().map((recipe) => (
                         <RecipeCard 
                             key={recipe.id} 
                             recipe={recipe} 
@@ -406,9 +465,9 @@ export default function HomeScreen() {
                 presentationStyle="pageSheet"
                 onRequestClose={() => setShowFilterModal(false)}
             >
-                <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}> 
+                <SafeAreaView style={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
                     {/* Modal Header */}
-                    <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}> 
+                    <View style={[styles.modalHeader, { borderBottomColor: theme.colors.border }]}>
                         <TouchableOpacity 
                             onPress={() => setShowFilterModal(false)} 
                             style={styles.modalCloseButton}
@@ -495,45 +554,6 @@ export default function HomeScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        {/* Seasonal Filter Section */}
-                        <View style={styles.modalSection}>
-                            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Saisonale Filter</Text>
-                            <TouchableOpacity
-                                style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, marginBottom: 10 }}
-                                onPress={() => setSeasonalFilterActive(v => !v)}
-                            >
-                                <Ionicons
-                                    name={seasonalFilterActive ? 'leaf' : 'leaf-outline'}
-                                    size={22}
-                                    color={seasonalFilterActive ? theme.colors.primary : theme.colors.textSecondary}
-                                />
-                                <Text style={{ marginLeft: 8, color: theme.colors.text }}>
-                                    Nur saisonale Zutaten anzeigen
-                                </Text>
-                                <View style={{
-                                    marginLeft: 8,
-                                    width: 36,
-                                    height: 22,
-                                    borderRadius: 12,
-                                    backgroundColor: seasonalFilterActive ? theme.colors.primary : theme.colors.cardAccent,
-                                    justifyContent: 'center',
-                                    padding: 2,
-                                }}>
-                                    <View style={{
-                                        width: 18,
-                                        height: 18,
-                                        borderRadius: 9,
-                                        backgroundColor: '#fff',
-                                        alignSelf: seasonalFilterActive ? 'flex-end' : 'flex-start',
-                                        shadowColor: '#000',
-                                        shadowOpacity: 0.1,
-                                        shadowRadius: 2,
-                                        elevation: 2,
-                                    }} />
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-
                         {/* Current Results */}
                         <View style={styles.modalSection}>
                             <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
@@ -582,7 +602,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     logoText: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: theme.colors.text,
+        color: '#000000',
     },
     logoImage: {
         height: 40,
@@ -825,26 +845,5 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     },
     resultsSubtitle: {
         fontSize: 14,
-    },
-    seasonalFilterOption: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 15,
-        paddingHorizontal: 16,
-        backgroundColor: theme.colors.surface,
-        borderRadius: 12,
-        marginBottom: 12,
-        gap: 12,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-    },
-    seasonalFilterActive: {
-        backgroundColor: theme.colors.accentBackground,
-        borderColor: theme.colors.primary,
-    },
-    seasonalFilterText: {
-        fontSize: 16,
-        fontWeight: '500',
-        flex: 1,
     },
 });
