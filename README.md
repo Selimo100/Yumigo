@@ -1,14 +1,3 @@
-# was alles anpassen? 
-
--  Testfälle anschauen und überarbeiten wenn nötig
-- testergebniusse anpasse und durchführen nur als beispiel dort von knowledgehub
-- abschnitt autimatisierte test löschen wenn wir keine erstellt haben sonst so lassen! 
-- gui design anpassen ganzer abschnitt nur als beispiel
-- fazit ganzer abschnitt anpassen nur als beispiel hier von knowledgehub
-- geht alles im inhaltsverzeichniss? braucht es alles? ist es aktuell? 
-
----
-
 # <img src="/assets/Logo.png" alt="Logo" width="25">  Hungry on the go? - Yumigo <img src="/assets/Logo.png" alt="Logo" width="25">
 
 ---
@@ -152,13 +141,13 @@ Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um un
 
 | **ID** | **Beschreibung**                                                                                                                                     | **Erreicht?** |
 |--------|------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| O-01   | Als Nutzer:in möchte ich meine Lieblingsrezepte bewerten können.                                                                                     | ❌             |
-| O-02   | Als Nutzer:in möchte ich Rezepte mit Freunden teilen können.                                                                                         | ❌             |
-| O-03   | Als Nutzer:in möchte ich eine Einkaufsliste aus einem Rezept erstellen können, um meinen nächsten Einkauf optional planen zu können.                | ❌             |
-| O-04   | Als Nutzer:in möchte ich meinen Standort teilen, damit mir saisonale Rezepte aus meiner Region angezeigt werden.                                    | ❌             |
+| O-01   | Als Nutzer:in möchte ich meine Lieblingsrezepte bewerten können.                                                                                     | ✅             |
+| O-02   | Als Nutzer:in möchte ich Rezepte mit Freunden teilen können.                                                                                         | ✅             |
+| O-03   | Als Nutzer:in möchte ich eine Einkaufsliste aus einem Rezept erstellen können, um meinen nächsten Einkauf optional planen zu können.                | ✅             |
+| O-04   | Als Nutzer:in möchte ich meinen Standort teilen, damit mir saisonale Rezepte aus meiner Region angezeigt werden.                                    | ✅ & ❌          |
 | O-05   | Als Nutzer:in möchte ich ein Bild von meinem Kühlschrank oder meinen Vorräten fotografieren können, damit eine AI passende Rezepte vorschlägt.     | ❌             |
-| O-06   | Als Nutzer:in möchte ich mein Profil über einen Share-Button (z. B. über WhatsApp oder Instagram) teilen können.                                     | ❌             |
-| O-07   | Als Nutzer:in möchte ich direkt in der Yumigo-App meine Rezepte über einen Chat teilen können.                                                       | ❌             |
+| O-06   | Als Nutzer:in möchte ich mein Profil über einen Share-Button (z. B. über WhatsApp oder Instagram) teilen können.                                     | ✅             |
+| O-07   | Als Nutzer:in möchte ich direkt in der Yumigo-App meine Rezepte über einen Chat teilen können.                                                       | ✅             |
 | O-08   | Als Nutzer:in möchte ich private Nachrichten an andere Nutzer:innen senden können, um mich über Rezepte und Cravings austauschen zu können.         | ❌             |
 
 
