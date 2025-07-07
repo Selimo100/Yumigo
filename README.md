@@ -155,8 +155,45 @@ Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um un
 
 # 5. 🎨 Mockups
 
+## 5.1 App Icon
+Unser Logo besteht aus einer Zunge für unsere Rezepte App und einem Y für Yumigo.
 
-bla bla bla
+![appIconMockup.png](assets/appIconMockup.png)
+
+---
+## 5.2 Homescreen und Rezeptedetailseite
+Oben links im Header haben wir unser Logo platziert und oben rechts einen Add-Butto, wo man ein neues Rezept hinzufügen kann. Ebenfals haben wir oben rechts eine Glocke für die Notifications gemacht. 
+
+Unter dem Header kommt eine Searchbar, um nach Rezepten zu suchen und zu filtern. 
+Unterhalb von der Searchbar kommen alle Rezepte angezeigt. 
+
+Ganz unten haben wir unsere Bottomnavigation mit den Tabs Home, Craving, Favorite und Profile. Wenn man auf ein einzelnes Rezept klickt kommt man auf die Rezeptedetailseite. 
+
+Auf der Rezeptedetailseite sieht man alle Zutaten, eine Beschreibung des Gerichtes, die Vorbereitungsschritte. Ebenfalls hat man die Möglichkeit das Rezept zu Liken, zu speichern unter seinen Favoriten und man kann das Rezept mir Freunden direkt in einem Chat, wie Whatsapp, sharen. 
+
+![Homescreen Mockup.png](assets/Homescreen%20Mockup.png)
+
+---
+
+## 5.3 Craving und Cravingresultsseite
+
+Auf dem Cravingscreen kann der Nutzer auswählen, worauf er aktuell Appetit hat. Zur Auswahl stehen sechs Geschmacksrichtungen: Salty, Sweet, Sour, Spicy, Cold und Hot. Jede Kategorie ist als eigene Kachel mit einem passenden Emoji dargestellt. Sobald man eine dieser Kategorien antippt, wird man zum Cravingdetailscreen weitergeleitet.
+
+Der Cravingdetailscreen zeigt passende Rezepte zur gewählten Kategorie an, in diesem Beispiel „Salty Recipes“. Zuoberst befindet sich ein Titel mit einer kurzen Beschreibung. Darunter werden die Rezeptvorschläge in einer Liste angezeigt, jeweils mit Titel, Bewertungssternen, einem Bild und einer Followoption.
+
+Ganz unten befindet sich wieder unsere Bottom Navigation Bar, mit den vier Tabs: Home, Craving, Favorite und Profile, über die man jederzeit zwischen den Hauptbereichen der App wechseln kann.
+
+![Craving Mockup .png](assets/Craving%20Mockup%20.png)
+
+---
+
+## 5.4 Createform
+
+
+![Createform Mockup.png](assets/Createform%20Mockup.png)
+
+
+
 
 ---
 
