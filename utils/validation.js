@@ -46,3 +46,28 @@ export const validateRecipe = (recipe) => {
     errors
   };
 };
+
+export const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
+
+export const validatePassword = (password) => {
+    return password.length >= 8;
+};
+
+export const validateUsername = (username) => {
+    return username.length >= 3 && username.length <= 20;
+};
+
+export const getPasswordRequirements = () => {
+    return "The password must be at least 8 characters long.";
+};
+
+export const getEmailRequirements = () => {
+    return "Please enter a valid e-mail address.";
+};
+
+export const getUsernameRequirements = () => {
+    return "The user name must be between 3 and 20 characters long.";
+};

@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { login, register, sendVerificationEmail, logout } from '../../services/authService';
 import { useRouter } from "expo-router";
-
+import { validateEmail, validatePassword } from '../../utils/validation';
 
 
 export default function Login() {
@@ -26,9 +26,21 @@ export default function Login() {
     const styles = createStyles(theme);
     const router = useRouter();
 
+
     const handleSubmit = async () => {
+        // Validation
         if (!email || !password) {
-            Alert.alert('Fehler', 'Bitte fülle alle Felder aus');
+            Alert.alert('Missing Information', 'Please fill in all fields to continue.');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            Alert.alert('Invalid Email', 'Please enter a valid email address.');
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            Alert.alert('Password Too Short', 'Your password must be at least 8 characters long.');
             return;
         }
 
@@ -39,17 +51,17 @@ export default function Login() {
 
                 if (!user.emailVerified) {
                     Alert.alert(
-                        "E-Mail nicht bestätigt",
-                        "Bitte bestätige deine E-Mail-Adresse. Wir haben dir eine neue E-Mail gesendet.",
+                        "Email Verification Required",
+                        "Please verify your email address before signing in. Check your inbox for the verification email.",
                         [
                             {
-                                text: "E-Mail erneut senden",
+                                text: "Resend Verification Email",
                                 onPress: async () => {
                                     try {
                                         await sendVerificationEmail(user);
-                                        Alert.alert("E-Mail gesendet", "Überprüfe dein Postfach und den Spam-Ordner.");
+                                        Alert.alert("Email Sent", "Verification email sent successfully. Please check your inbox and spam folder.");
                                     } catch (error) {
-                                        Alert.alert("Fehler", "E-Mail konnte nicht gesendet werden: " + error.message);
+                                        Alert.alert("Unable to Send Email", "We couldn't send the verification email at this time. Please try again later.");
                                     }
                                 }
                             },
@@ -68,23 +80,76 @@ export default function Login() {
                 user = await register(email, password);
                 await sendVerificationEmail(user);
                 Alert.alert(
-                    "Registrierung erfolgreich",
-                    "Bitte überprüfe deine E-Mail-Adresse zur Verifizierung."
+                    "Registration Successful",
+                    "Welcome to Yumigo! Please check your email for verification instructions."
                 );
                 setIsLogin(true);
             }
         } catch (error) {
-            console.error(error.message);
-            if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
-                Alert.alert("Fehler", "Falsche E-Mail oder Passwort.");
+            // Entferne das console.error um Firebase Errors zu unterdrücken
+            // console.error(error.message);
+            
+            // User-friendly error messages
+            if (error.code === "auth/user-not-found") {
+                Alert.alert(
+                    "Account Not Found", 
+                    "No account exists with this email address. You will be redirected to create a new account.",
+                    [
+                        {
+                            text: "OK",
+                            onPress: () => router.push('/register')
+                        }
+                    ]
+                );
+            } else if (error.code === "auth/wrong-password") {
+                Alert.alert(
+                    "Incorrect Password", 
+                    "The password you entered is incorrect. Please check your password and try again."
+                );
+            } else if (error.code === "auth/invalid-credential") {
+                Alert.alert(
+                    "Invalid Login Credentials", 
+                    "The email or password you entered is incorrect. Please check your information and try again."
+                );
             } else if (error.code === "auth/email-already-in-use") {
-                Alert.alert("Fehler", "Diese E-Mail wird bereits verwendet.");
+                Alert.alert(
+                    "Email Already Registered", 
+                    "An account with this email already exists. Please sign in instead or use a different email address."
+                );
+            } else if (error.code === "auth/weak-password") {
+                Alert.alert(
+                    "Password Too Weak", 
+                    "Please choose a stronger password with at least 8 characters."
+                );
+            } else if (error.code === "auth/invalid-email") {
+                Alert.alert(
+                    "Invalid Email Format", 
+                    "Please enter a valid email address."
+                );
+            } else if (error.code === "auth/too-many-requests") {
+                Alert.alert(
+                    "Too Many Attempts", 
+                    "You've made too many unsuccessful login attempts. Please wait a few minutes before trying again."
+                );
+            } else if (error.code === "auth/network-request-failed") {
+                Alert.alert(
+                    "Connection Problem", 
+                    "Please check your internet connection and try again."
+                );
+            } else if (error.code === "auth/user-disabled") {
+                Alert.alert(
+                    "Account Disabled", 
+                    "This account has been temporarily disabled. Please contact support for assistance."
+                );
             } else {
-                Alert.alert("Fehler", error.message);
+                Alert.alert(
+                    "Sign In Failed", 
+                    "We're having trouble signing you in right now. Please try again in a moment."
+                );
             }
         }
-
     }
+
 
     const toggleMode = () => {
         router.push('/register');
@@ -120,7 +185,7 @@ export default function Login() {
                             <TextInput
                                 style={styles.input}
                                 placeholder="your@email.com"
-                                placeholderTextColor={theme.colors.textSecondary}
+                                placeholderTextColor={theme.colors?.textSecondary || '#666'}
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
@@ -132,8 +197,8 @@ export default function Login() {
                             <Text style={styles.label}>Password</Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="Password"
-                                placeholderTextColor={theme.colors.textSecondary}
+                                placeholder="Password (min. 8 characters)"
+                                placeholderTextColor={theme.colors?.textSecondary || '#666'}
                                 value={password}
                                 onChangeText={setPassword}
                                 secureTextEntry
@@ -259,6 +324,3 @@ const createStyles = (theme) => StyleSheet.create({
         textDecorationLine: 'underline'
     },
 });
-
-
-

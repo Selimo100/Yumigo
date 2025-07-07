@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../../contexts/ThemeContext";
 import { register } from "../../services/authService";
 import { useRouter } from "expo-router";
+import { validateEmail, validatePassword, validateUsername } from "../../utils/validation";
 
 export default function Register() {
     const [username, setUsername] = useState("");
@@ -25,8 +26,24 @@ export default function Register() {
     const router = useRouter();
 
     const handleSubmit = async () => {
+        // Validation
         if (!username || !email || !password) {
-            Alert.alert("Fehler", "Bitte fülle alle Felder aus");
+            Alert.alert("Missing Information", "Please fill in all fields to continue");
+            return;
+        }
+
+        if (!validateUsername(username)) {
+            Alert.alert("Invalid Username", "Username must be between 3 and 20 characters long");
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            Alert.alert("Invalid Email", "Please enter a valid email address");
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            Alert.alert("Password Too Short", "Password must be at least 8 characters long");
             return;
         }
 
@@ -34,22 +51,66 @@ export default function Register() {
             // Register user (verification email is sent automatically)
             const user = await register(email, password, username);
             Alert.alert(
-                "Registrierung erfolgreich",
-                "Bitte überprüfe deine E-Mail-Adresse zur Verifizierung. Du wirst zur Home-Seite weitergeleitet."
+                "Registration Successful",
+                "Welcome to Yumigo! Please check your email for verification instructions. You will be redirected to the home page."
             );
             router.replace("/home");
         } catch (error) {
-            console.error(error.message);
+            // Entferne das console.error um Firebase Errors zu unterdrücken
+            // console.error(error.message);
+            
+            // User-friendly error messages
             if (error.code === "auth/email-already-in-use") {
-                Alert.alert("Fehler", "Diese E-Mail wird bereits verwendet.");
+                Alert.alert(
+                    "Email Already Registered", 
+                    "An account with this email already exists. Would you like to sign in instead?",
+                    [
+                        {
+                            text: "Sign In",
+                            onPress: () => router.push('/login')
+                        },
+                        {
+                            text: "Try Different Email",
+                            style: "cancel"
+                        }
+                    ]
+                );
+            } else if (error.code === "auth/weak-password") {
+                Alert.alert(
+                    "Password Too Weak", 
+                    "Please choose a stronger password with at least 8 characters, including letters and numbers."
+                );
+            } else if (error.code === "auth/invalid-email") {
+                Alert.alert(
+                    "Invalid Email Format", 
+                    "Please enter a valid email address."
+                );
+            } else if (error.code === "auth/operation-not-allowed") {
+                Alert.alert(
+                    "Registration Disabled", 
+                    "Account registration is currently disabled. Please try again later."
+                );
+            } else if (error.code === "auth/too-many-requests") {
+                Alert.alert(
+                    "Too Many Attempts", 
+                    "Too many registration attempts. Please wait a few minutes before trying again."
+                );
+            } else if (error.code === "auth/network-request-failed") {
+                Alert.alert(
+                    "Connection Problem", 
+                    "Please check your internet connection and try again."
+                );
             } else {
-                Alert.alert("Fehler", error.message);
+                Alert.alert(
+                    "Registration Failed", 
+                    "We're having trouble creating your account right now. Please try again in a moment."
+                );
             }
         }
     };
 
-    const goToHomeScreen = () => {
-        router.push("/home");
+    const goToLogin = () => {
+        router.push("/login");
     };
 
     return (
@@ -76,8 +137,8 @@ export default function Register() {
                             <Text style={styles.label}>Username</Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="Your Username"
-                                placeholderTextColor={theme.colors.textSecondary}
+                                placeholder="Your Username (3-20 characters)"
+                                placeholderTextColor={theme.colors?.textSecondary || '#666'}
                                 value={username}
                                 onChangeText={setUsername}
                                 autoCapitalize="none"
@@ -90,7 +151,7 @@ export default function Register() {
                             <TextInput
                                 style={styles.input}
                                 placeholder="your@email.com"
-                                placeholderTextColor={theme.colors.textSecondary}
+                                placeholderTextColor={theme.colors?.textSecondary || '#666'}
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
@@ -103,8 +164,8 @@ export default function Register() {
                             <Text style={styles.label}>Password</Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="Password"
-                                placeholderTextColor={theme.colors.textSecondary}
+                                placeholder="Password (min. 8 characters)"
+                                placeholderTextColor={theme.colors?.textSecondary || '#666'}
                                 value={password}
                                 onChangeText={setPassword}
                                 secureTextEntry
@@ -119,7 +180,7 @@ export default function Register() {
 
                     <View style={styles.switchContainer}>
                         <Text style={styles.switchText}>Already have an account?</Text>
-                        <TouchableOpacity onPress={goToHomeScreen}>
+                        <TouchableOpacity onPress={goToLogin}>
                             <Text style={styles.switchButton}>Sign in here</Text>
                         </TouchableOpacity>
                     </View>
