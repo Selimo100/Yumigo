@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { COLORS, CATEGORIES, ALLERGENS, DIETARY } from '../utils/constants';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ALLERGENS, CATEGORIES, COLORS, DIETARY} from '../utils/constants';
 
-const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => {
+const CravingSummary = ({cravings = [], allergies = [], preferences = []}) => {
     const getCravingItems = () => CATEGORIES.filter(item => cravings.includes(item.id));
     const getAllergyItems = () => ALLERGENS.filter(item => allergies.includes(item.id));
     const getPreferenceItems = () => DIETARY.filter(item => preferences.includes(item.id));
@@ -27,10 +27,10 @@ const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => 
                     {items.map((item) => (
                         <View
                             key={item.id}
-                            style={[styles.tag, { backgroundColor: item.color + '20', borderColor: item.color }]}
+                            style={[styles.tag, {backgroundColor: item.color + '20', borderColor: item.color}]}
                         >
                             <Text style={styles.tagEmoji}>{item.icon}</Text>
-                            <Text style={[styles.tagText, { color: item.color }]}>{item.label}</Text>
+                            <Text style={[styles.tagText, {color: item.color}]}>{item.label}</Text>
                         </View>
                     ))}
                 </ScrollView>
@@ -39,16 +39,18 @@ const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => 
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Your Selections</Text>
-            {renderSection('Cravings', getCravingItems())}
-            
-            {/* Allergies und Preferences nebeneinander */}
-            <View style={styles.compactRow}>
-                {renderSection('Allergies', getAllergyItems(), true, true)}
-                {renderSection('Preferences', getPreferenceItems(), true, true)}
+        <>
+            <View style={styles.container}>
+                <Text style={styles.title}>Your Selections</Text>
+                {renderSection('Cravings', getCravingItems())}
+
+                {/* Allergies und Preferences nebeneinander */}
+                <View style={styles.compactRow}>
+                    {renderSection('Allergies', getAllergyItems(), true, true)}
+                    {renderSection('Preferences', getPreferenceItems(), true, true)}
+                </View>
             </View>
-        </View>
+        </>
     );
 };
 
@@ -56,27 +58,29 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: COLORS.white,
         borderRadius: 12,
-        padding: 10, // Noch weiter reduziert
-        marginBottom: 10, // Noch weiter reduziert
+        padding: 10,
+        marginBottom: 10,
         shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.08,
         shadowRadius: 4,
         elevation: 2,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.lightGray,
     },
     title: {
-        fontSize: 15, // Noch kleiner
+        fontSize: 15,
         fontWeight: 'bold',
         color: COLORS.primary,
-        marginBottom: 6, // Reduziert
+        marginBottom: 6,
         textAlign: 'center',
     },
     section: {
-        marginBottom: 6, // Reduziert
+        marginBottom: 6,
     },
     compactSection: {
         flex: 1,
-        marginRight: 8, // Abstand zwischen den beiden Spalten
+        marginRight: 8,
         marginBottom: 0,
     },
     compactRow: {
@@ -84,42 +88,42 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     sectionTitle: {
-        fontSize: 11, // Noch kleiner
+        fontSize: 11,
         fontWeight: '600',
         color: COLORS.gray,
-        marginBottom: 4, // Reduziert
+        marginBottom: 4,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
     tagContainer: {
         flexDirection: 'row',
-        maxHeight: 30, // Noch kleiner
+        maxHeight: 30,
     },
     tag: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 3, // Noch kleiner
-        paddingHorizontal: 6, // Noch kleiner
-        borderRadius: 12, // Kleiner
+        paddingVertical: 3,
+        paddingHorizontal: 6,
+        borderRadius: 12,
         borderWidth: 1,
-        marginRight: 4, // Kleiner
+        marginRight: 4,
     },
     tagEmoji: {
-        fontSize: 12, // Kleiner
-        marginRight: 3, // Kleiner
+        fontSize: 12,
+        marginRight: 3,
     },
     tagText: {
-        fontSize: 10, // Kleiner
+        fontSize: 10,
         fontWeight: '600',
     },
     noneContainer: {
-        paddingVertical: 4, // Kleiner
-        paddingHorizontal: 6, // Kleiner
+        paddingVertical: 4,
+        paddingHorizontal: 6,
         backgroundColor: COLORS.lightGray,
-        borderRadius: 6, // Kleiner
+        borderRadius: 6,
     },
     noneText: {
-        fontSize: 10, // Kleiner
+        fontSize: 10,
         color: COLORS.gray,
         fontStyle: 'italic',
     },
