@@ -1,5 +1,5 @@
 import {SafeAreaView} from "react-native-safe-area-context";
-import {ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
+import {ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import RecipeCard from "../../components/RecipeCard";
 import CravingSummary from "../../components/CravingSummary";
@@ -12,7 +12,6 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function CravingResults() {
     const { cravingResultsRecipes, isLoading } = useCravingResults();
-    const [searchQuery, setSearchQuery] = useState('');
     const { theme } = useTheme();
     const tabBarHeight = useTabBarHeight();
     const styles = createStyles(theme, tabBarHeight);
@@ -23,23 +22,6 @@ export default function CravingResults() {
     const cravings = params.cravings ? JSON.parse(params.cravings) : [];
     const allergies = params.allergies ? JSON.parse(params.allergies) : [];
     const preferences = params.preferences ? JSON.parse(params.preferences) : [];
-
-    const getFilteredResults = useCallback(() => {
-        if (!searchQuery.trim()) return cravingResultsRecipes;
-
-        const query = searchQuery.toLowerCase();
-        return cravingResultsRecipes.filter(recipe =>
-            recipe.title?.toLowerCase().includes(query) ||
-            recipe.description?.toLowerCase().includes(query) ||
-            (Array.isArray(recipe.ingredients) &&
-                recipe.ingredients.some(ing =>
-                    typeof ing === 'string'
-                        ? ing.toLowerCase().includes(query)
-                        : ing?.name?.toLowerCase().includes(query)
-                ))
-        );
-    }, [cravingResultsRecipes, searchQuery]);
-
 
     if (isLoading) {
         return (
@@ -93,25 +75,6 @@ export default function CravingResults() {
                 )}
             </View>
 
-            {/* Search Bar */}
-            <View style={styles.searchContainer}>
-                <View style={styles.searchInputContainer}>
-                    <Ionicons name="search" size={20} color={COLORS.gray} />
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search your recommended recipes..."
-                        placeholderTextColor={COLORS.gray}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                    />
-                    {searchQuery.length > 0 && (
-                        <TouchableOpacity onPress={() => setSearchQuery('')}>
-                            <Ionicons name="close" size={20} color={COLORS.gray} />
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </View>
-
             {/* Summary of selections */}
             <View style={styles.summaryContainer}>
                 <CravingSummary 
@@ -121,24 +84,16 @@ export default function CravingResults() {
                 />
             </View>
 
-            {getFilteredResults().length > 0 ? (
+            {cravingResultsRecipes.length > 0 ? (
                 <ScrollView
                     style={styles.feed}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.feedContent}
                 >
-                    {getFilteredResults().map((recipe) => (
+                    {cravingResultsRecipes.map((recipe) => (
                         <RecipeCard key={recipe.id} recipe={recipe} />
                     ))}
                 </ScrollView>
-            ) : cravingResultsRecipes.length > 0 ? (
-                <View style={styles.emptyState}>
-                    <Ionicons name="search-outline" size={80} color={COLORS.primary} />
-                    <Text style={styles.emptyText}>No results found</Text>
-                    <Text style={styles.emptySubtext}>
-                        No recipes match "{searchQuery}"
-                    </Text>
-                </View>
             ) : (
                 <View style={styles.emptyState}>
                     <Ionicons name="heart-outline" size={80} color={COLORS.primary} />
@@ -211,7 +166,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         paddingTop: 10,
     },
     feedContent: {
-        paddingBottom: tabBarHeight, // Add padding to prevent content being hidden behind tab bar
+        paddingBottom: tabBarHeight,
     },
     emptyState: {
         flex: 1,
@@ -231,36 +186,6 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         color: theme.colors.textSecondary,
         textAlign: 'center',
         lineHeight: 24,
-    },
-    searchContainer: {
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: theme.colors.cardAccent,
-        flexDirection: 'row',
-        gap: 12,
-        alignItems: 'center',
-    },
-    searchInputContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: theme.colors.background,
-        borderRadius: 25,
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderWidth: 1,
-        borderColor: theme.colors.primary,
-        gap: 10,
-        shadowColor: theme.colors.primary,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    searchInput: {
-        flex: 1,
-        fontSize: 16,
-        color: theme.colors.text,
     },
     summaryContainer: {
         paddingHorizontal: 16,

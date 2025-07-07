@@ -20,8 +20,8 @@ export default function PreferencesSelection() {
 
     const togglePreference = (id) => {
         setSelectedPreferences((prev) => {
-            if (id === 'none') return ['none']; // Only none if selected
-            if (prev.includes('none')) return [id]; // Replace none with other
+            if (id === 'none') return ['none'];
+            if (prev.includes('none')) return [id];
             if (prev.includes(id)) return prev.filter((a) => a !== id);
             return [...prev, id];
         });
@@ -55,6 +55,16 @@ export default function PreferencesSelection() {
                             item={pref}
                             isSelected={isSelected}
                             onPress={() => togglePreference(pref.id)}
+                            style={[
+                                styles.preferenceCard,
+                                {
+                                    backgroundColor: isSelected ? COLORS.primary : COLORS.white,
+                                    borderColor: isSelected ? COLORS.primary : '#e0e0e0',
+                                },
+                            ]}
+                            labelStyle={{
+                                color: isSelected ? COLORS.white : COLORS.primary,
+                            }}
                         />
                     );
                 })}
@@ -87,7 +97,22 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap', 
         justifyContent: 'space-between',
         width: '100%',
-        paddingHorizontal: 4,
+        paddingHorizontal: 10,
+    },
+    preferenceCard: {
+        width: '31%',
+        aspectRatio: 1,
+        borderRadius: 12,
+        borderWidth: 2,
+        padding: 12,
+        marginBottom: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
     },
     buttonsContainer: {
         width: '100%',

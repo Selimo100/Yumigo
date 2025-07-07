@@ -120,7 +120,7 @@ export default function CravingSelection() {
     );
 }
 
-const createStyles = (theme, tabBarHeight) => StyleSheet.create({
+const createStyles = ( tabBarHeight) => StyleSheet.create({
     container: { 
         flex: 1, 
         backgroundColor: COLORS.white 
