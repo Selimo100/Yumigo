@@ -17,6 +17,7 @@ import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 import { recipeHasSeasonalIngredient } from '../../utils/seasonalUtils';
 import * as Location from 'expo-location';
 import ingredientsData from '../../utils/ingredients.json';
+import { smartInput, smartButton, smartCard, smartShadow } from '../../utils/platformStyles';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);
@@ -745,14 +746,16 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         borderRadius: 25,
         paddingHorizontal: 15,
         paddingVertical: 10,
-        borderWidth: 1,
-        borderColor: theme.colors.primary,
         gap: 10,
-        shadowColor: theme.colors.primary,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
+        ...smartShadow(
+            {
+                shadowColor: theme.colors.primary,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+            },
+            1
+        ),
     },
     searchInput: {
         flex: 1,
@@ -814,8 +817,15 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         borderRadius: 12,
         marginBottom: 12,
         gap: 12,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
+        ...smartShadow(
+            {
+                shadowColor: theme.colors.shadow,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 2,
+            },
+            1
+        ),
     },
     filterOptionActive: {
         backgroundColor: theme.colors.accentBackground,
@@ -838,8 +848,15 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         borderRadius: 12,
         marginBottom: 12,
         gap: 12,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
+        ...smartShadow(
+            {
+                shadowColor: theme.colors.shadow,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 2,
+            },
+            1
+        ),
     },
     seasonalFilterActive: {
         backgroundColor: theme.colors.accentBackground,

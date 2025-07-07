@@ -15,6 +15,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNotifications } from '../contexts/NotificationContext';
 import { router } from 'expo-router';
+import { smartShadow } from '../utils/platformStyles';
 const NotificationModal = ({ visible, onClose }) => {
   const { theme } = useTheme();
   const {
@@ -260,8 +261,15 @@ const createStyles = (theme) => StyleSheet.create({
     marginVertical: 4,
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    ...smartShadow(
+      {
+        shadowColor: theme.colors.shadow,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      1
+    ),
   },
   unreadNotification: {
     backgroundColor: theme.colors.primary + '08',

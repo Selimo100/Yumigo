@@ -16,6 +16,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { register } from "../../services/authService";
 import { useRouter } from "expo-router";
 import { validateEmail, validatePassword, validateUsername } from "../../utils/validation";
+import { smartInput, smartButton } from '../../utils/platformStyles';
 export default function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
@@ -227,21 +228,16 @@ const createStyles = (theme) =>
             marginBottom: 6,
         },
         input: {
-            borderWidth: 1,
-            borderColor: COLORS.border,
-            borderRadius: 10,
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-            fontSize: 15,
-            color: COLORS.text,
-            backgroundColor: COLORS.surface,
+            ...smartInput({ colors: COLORS }, false, {
+                fontSize: 15,
+            }),
         },
         submitButton: {
-            backgroundColor: COLORS.accent,
-            paddingVertical: 14,
-            borderRadius: 10,
-            alignItems: "center",
-            marginTop: 12,
+            ...smartButton({ colors: COLORS }, true, {
+                paddingVertical: 14,
+                borderRadius: 10,
+                marginTop: 12,
+            }),
         },
         submitButtonText: {
             color: COLORS.textOnAccent,

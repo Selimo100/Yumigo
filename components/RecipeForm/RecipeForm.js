@@ -20,6 +20,7 @@ import IngredientInput from './IngredientInput';
 import InstructionInput from './InstructionInput';
 import TimePicker from './TimePicker';
 import { useTheme } from '../../contexts/ThemeContext';
+import { smartInput, smartButton } from '../../utils/platformStyles';
 
 export default function RecipeForm({ onSuccess, onCancel }) {
   const { theme } = useTheme();
@@ -225,14 +226,7 @@ const createStyles = (theme) => StyleSheet.create({
     color: theme.colors.text,
   },
   input: {
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 16,
-    backgroundColor: theme.colors.surface,
-    color: theme.colors.text,
+    ...smartInput(theme, false),
     shadowColor: theme.colors.primary,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -240,15 +234,10 @@ const createStyles = (theme) => StyleSheet.create({
     elevation: 1,
   },
   textArea: {
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 16,
-    backgroundColor: theme.colors.inputBackground,
-    color: theme.colors.text,
-    minHeight: 80,
+    ...smartInput(theme, false, {
+      minHeight: 80,
+      textAlignVertical: 'top',
+    }),
   },
   errorBorder: {
     borderColor: '#DC3545',
@@ -265,27 +254,18 @@ const createStyles = (theme) => StyleSheet.create({
     marginBottom: 20,
   },
   cancelButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
+    ...smartButton(theme, false, {
+      flex: 1,
+      paddingVertical: 16,
+      borderRadius: 12,
+    }),
   },
   publishButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary,
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    ...smartButton(theme, true, {
+      flex: 1,
+      paddingVertical: 16,
+      borderRadius: 12,
+    }),
   },
   disabledButton: {
     opacity: 0.6,

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { COLORS, CATEGORIES, ALLERGENS, DIETARY } from '../../utils/constants';
 import { useTheme } from '../../contexts/ThemeContext';
+import { smartShadow } from '../../utils/platformStyles';
 
 const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => {
     const { theme } = useTheme();
@@ -62,13 +63,15 @@ const createStyles = (theme) => StyleSheet.create({
         borderRadius: 12,
         padding: 10,
         marginBottom: 10,
-        shadowColor: theme.colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
+        ...smartShadow(
+            {
+                shadowColor: theme.colors.shadow,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.08,
+                shadowRadius: 4,
+            },
+            1
+        ),
     },
     title: {
         fontSize: 15,

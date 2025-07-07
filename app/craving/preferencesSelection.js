@@ -5,6 +5,7 @@ import { DIETARY, COLORS } from '../../utils/constants';
 import CravingLayout from '../../components/Craving/CravingLayout';
 import CravingSelector from '../../components/Craving/CravingSelector';
 import { useTheme } from '../../contexts/ThemeContext';
+import { smartShadow, smartButton } from '../../utils/platformStyles';
 
 // Add "None" option to dietary preferences
 const PREFERENCE_OPTIONS = [
@@ -106,16 +107,19 @@ const createStyles = (theme) => StyleSheet.create({
         width: '31%',
         aspectRatio: 1,
         borderRadius: 12,
-        borderWidth: 2,
         padding: 12,
         marginBottom: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: theme.colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
+        ...smartShadow(
+            {
+                shadowColor: theme.colors.shadow,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+            },
+            2
+        ),
     },
     buttonsContainer: {
         width: '100%',
@@ -124,14 +128,12 @@ const createStyles = (theme) => StyleSheet.create({
         paddingHorizontal: 4,
     },
     submitButton: {
-        paddingVertical: 16,
-        paddingHorizontal: 32,
-        borderRadius: 12,
-        width: '100%',
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        shadowOpacity: 0.1,
-        elevation: 3,
+        ...smartButton({ colors: { primary: COLORS.primary } }, true, {
+            paddingVertical: 16,
+            paddingHorizontal: 32,
+            borderRadius: 12,
+            width: '100%',
+        }),
     },
     submitButtonText: {
         fontWeight: '600',

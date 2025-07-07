@@ -1,6 +1,7 @@
 import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, Animated } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { COLORS } from '../../utils/constants';
+import { smartButton, smartShadow, smartBorder, androidStyleCleanup } from '../../utils/platformStyles';
 
 const CravingSelector = ({ 
     item, 
@@ -26,11 +27,12 @@ const CravingSelector = ({
                     styles.button,
                     {
                         backgroundColor: isSelected ? COLORS.primary : COLORS.white,
-                        borderColor: COLORS.primary,
+                        ...smartBorder(2, COLORS.primary), // Zeigt Border nur auf iOS
                         shadowColor: COLORS.primary,
                         shadowOpacity: isSelected ? 0.25 : 0.1,
                     },
-                    style
+                    // Nur Android-spezifische Border-Cleanup
+                    Platform.OS === 'android' ? androidStyleCleanup(style) : style
                 ]}
                 onPress={onPress}
                 activeOpacity={0.8}
@@ -60,18 +62,22 @@ const styles = StyleSheet.create({
     button: {
         width: '47%',
         borderRadius: 16,
-        borderWidth: 2,
         height: 110,
         marginBottom: 12,
         paddingVertical: 16,
         paddingHorizontal: 12,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        shadowOpacity: 0.1,
-        elevation: 3,
         position: 'relative',
         justifyContent: 'center',
         alignItems: 'center',
+        ...smartShadow(
+            {
+                shadowColor: COLORS.primary,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+            },
+            3
+        ),
     },
     content: {
         flexDirection: 'column',
@@ -99,10 +105,14 @@ const styles = StyleSheet.create({
         height: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowOffset: { width: 0, height: 1 },
-        shadowRadius: 2,
-        shadowOpacity: 0.2,
-        elevation: 2,
+        ...smartShadow(
+            {
+                shadowOffset: { width: 0, height: 1 },
+                shadowRadius: 2,
+                shadowOpacity: 0.2,
+            },
+            2
+        ),
     },
     checkmark: {
         fontSize: 14,

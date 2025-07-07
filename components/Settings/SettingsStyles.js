@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { smartInput, smartButton, smartCard, smartShadow } from '../../utils/platformStyles';
 
 export const createStyles = (theme) => StyleSheet.create({
   container: {
@@ -39,13 +40,15 @@ export const createStyles = (theme) => StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 12,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: theme.colors.cardAccent,
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...smartShadow(
+      {
+        shadowColor: theme.colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      1
+    ),
   },
   settingItem: {
     flexDirection: 'row',
@@ -124,19 +127,13 @@ export const createStyles = (theme) => StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: theme.colors.background,
-    borderWidth: 1,
-    borderColor: theme.colors.primary,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: theme.colors.text,
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    ...smartInput(theme, false, {
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    }),
   },  bioInput: {
     height: 80,
     textAlignVertical: 'top',

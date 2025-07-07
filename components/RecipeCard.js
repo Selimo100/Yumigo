@@ -13,6 +13,7 @@ import { useState, useRef } from 'react';
 import { toggleRecipeLike, rateRecipe, getUserRating } from '../services/recipeService';
 import { notifyRecipeLike, notifyRecipeRating } from '../services/inAppNotificationService';
 import { RatingModal } from './RatingModal';
+import { smartCard, smartShadow } from '../utils/platformStyles';
 
 // PERFORMANCE-KRITISCH: Allergen-Konfiguration wird einmalig berechnet
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
@@ -280,13 +281,15 @@ const createStyles = (theme) => StyleSheet.create({
         marginBottom: 20,
         borderRadius: 16,
         overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: theme.colors.cardAccent,
-        shadowColor: theme.colors.primary,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 3,
+        ...smartShadow(
+            {
+                shadowColor: theme.colors.primary,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+            },
+            2
+        ),
     },
     imageContainer: {
         position: 'relative',

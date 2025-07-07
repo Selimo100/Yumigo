@@ -12,6 +12,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { useRouter } from 'expo-router';
 import { CATEGORIES, COLORS } from '../../utils/constants';
 import useTabBarHeight from '../../hooks/useTabBarHeight';
+import { smartShadow, smartButton, smartBorder } from '../../utils/platformStyles';
 export default function CravingSelection() {
     const [selectedCravings, setSelectedCravings] = useState([]);
     const { theme } = useTheme();
@@ -57,9 +58,9 @@ export default function CravingSelection() {
                                     styles.cravingButton,
                                     {
                                         backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
-                                        borderColor: isSelected ? COLORS.primary : theme.colors.border,
                                         shadowColor: theme.colors.shadow,
                                         transform: [{ scale: isSelected ? 1.02 : 1 }],
+                                        ...smartBorder(2, isSelected ? COLORS.primary : theme.colors.border),
                                     },
                                 ]}
                                 onPress={() => toggleCraving(craving.id)}
@@ -153,18 +154,21 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     cravingButton: {
         width: '47%',
         borderRadius: 16,
-        borderWidth: 2,
         height: 110,
         marginBottom: 12,
         paddingVertical: 16,
         paddingHorizontal: 12,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        shadowOpacity: 0.1,
-        elevation: 3,
         position: 'relative',
         justifyContent: 'center',
         alignItems: 'center',
+        ...smartShadow(
+            {
+                shadowOffset: { width: 0, height: 2 },
+                shadowRadius: 4,
+                shadowOpacity: 0.1,
+            },
+            2
+        ),
     },
     cravingContent: {
         flexDirection: 'column',
@@ -225,16 +229,19 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     errorContainer: {
         width: '100%',
         backgroundColor: theme.colors.errorBackground || '#fce8e8',
-        borderColor: COLORS.error,
-        borderWidth: 1,
         borderRadius: 12,
         paddingVertical: 12,
         paddingHorizontal: 20,
         marginTop: 12,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
         alignSelf: 'center',
+        ...smartShadow(
+            {
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+            },
+            1
+        ),
     },
     errorText: {
         color: COLORS.error,

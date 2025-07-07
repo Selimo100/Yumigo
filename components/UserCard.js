@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import FollowButton from './FollowButton';
+import { smartCard } from '../utils/platformStyles';
 export default function UserCard({ 
   user, 
   onPress, 
@@ -18,7 +19,7 @@ export default function UserCard({
   const { theme } = useTheme();
   if (!user) return null;
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+    <View style={[smartCard(theme), styles.container]}>
       <TouchableOpacity
         style={styles.userInfoContainer}
         onPress={() => onPress?.(user)}
@@ -70,14 +71,7 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     marginHorizontal: 16,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    // Using smart card styling that adapts to platform
   },
   userInfoContainer: {
     flex: 1,

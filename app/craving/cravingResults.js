@@ -9,6 +9,7 @@ import useTabBarHeight from "../../hooks/useTabBarHeight";
 import useCravingResults from "../../hooks/useCravingResults";
 import { COLORS } from '../../utils/constants';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { smartShadow } from '../../utils/platformStyles';
 
 export default function CravingResults() {
     const { cravingResultsRecipes, isLoading } = useCravingResults();
@@ -119,8 +120,15 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 16,
         backgroundColor: theme.colors.cardBackground,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.border,
+        ...smartShadow(
+            {
+                shadowColor: theme.colors.shadow,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 2,
+            },
+            1
+        ),
     },
     backButton: {
         padding: 8,
@@ -136,9 +144,16 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     header: {
         paddingHorizontal: 20,
         paddingVertical: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.border,
         backgroundColor: theme.colors.cardBackground,
+        ...smartShadow(
+            {
+                shadowColor: theme.colors.shadow,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 2,
+            },
+            1
+        ),
     },
     title: {
         fontSize: 24,
