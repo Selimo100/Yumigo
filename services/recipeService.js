@@ -261,3 +261,23 @@ const updateRecipeAverageRating = async (recipeId) => {
 
     }
 };
+
+export const getRecipeLikesCount = async (recipeId) => {
+  try {
+    const likesCollection = collection(db, 'recipes', recipeId, 'likes');
+    const likesSnapshot = await getDocs(likesCollection);
+    return likesSnapshot.size;
+  } catch (error) {
+    return 0;
+  }
+};
+
+export const getRecipeCommentsCount = async (recipeId) => {
+  try {
+    const commentsCollection = collection(db, 'recipes', recipeId, 'comments');
+    const commentsSnapshot = await getDocs(commentsCollection);
+    return commentsSnapshot.size;
+  } catch (error) {
+    return 0;
+  }
+};
