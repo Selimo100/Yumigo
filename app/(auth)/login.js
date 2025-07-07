@@ -46,7 +46,7 @@ export default function Login() {
                                 text: "E-Mail erneut senden",
                                 onPress: async () => {
                                     try {
-                                        await sendVerificationEmail();
+                                        await sendVerificationEmail(user);
                                         Alert.alert("E-Mail gesendet", "Überprüfe dein Postfach und den Spam-Ordner.");
                                     } catch (error) {
                                         Alert.alert("Fehler", "E-Mail konnte nicht gesendet werden: " + error.message);
@@ -66,7 +66,7 @@ export default function Login() {
                 router.replace('/home');
             } else {
                 user = await register(email, password);
-                await sendVerificationEmail();
+                await sendVerificationEmail(user);
                 Alert.alert(
                     "Registrierung erfolgreich",
                     "Bitte überprüfe deine E-Mail-Adresse zur Verifizierung."
