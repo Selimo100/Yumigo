@@ -229,6 +229,41 @@ export const androidStyleCleanup = (styles) => {
   return cleanedStyles;
 };
 
+/**
+ * Plattformspezifisches Grid-Layout für Allergie- und Präferenzauswahl
+ * iOS: Behält das aktuelle Layout bei
+ * Android: Optimiert für bessere Ausrichtung und Konsistenz
+ */
+export const smartGrid = () => ({
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: Platform.OS === 'ios' ? 'space-between' : 'space-evenly',
+    alignItems: 'flex-start',
+    width: '100%',
+    paddingHorizontal: Platform.OS === 'ios' ? 10 : 12,
+});
+
+/**
+ * Plattformspezifische Kartengröße für Grid-Items
+ * iOS: 31% Breite (3 Spalten mit Zwischenräumen)
+ * Android: Optimierte Breite für bessere Verteilung und Konsistenz
+ */
+export const smartGridItem = (customStyle = {}) => ({
+    width: Platform.OS === 'ios' ? '31%' : '29%',
+    aspectRatio: Platform.OS === 'ios' ? 1 : 1,
+    marginHorizontal: Platform.OS === 'ios' ? 0 : 2,
+    marginBottom: Platform.OS === 'ios' ? 12 : 14,
+    ...customStyle,
+});
+
+/**
+ * Plattformspezifische Padding und Margins für Grid-Container
+ */
+export const smartGridPadding = () => ({
+    paddingHorizontal: Platform.OS === 'ios' ? 4 : 6,
+    paddingVertical: Platform.OS === 'ios' ? 0 : 4,
+});
+
 export default {
   createPlatformStyles,
   smartBorder,
@@ -237,4 +272,7 @@ export default {
   smartButton,
   smartInput,
   androidStyleCleanup,
+  smartGrid,
+  smartGridItem,
+  smartGridPadding,
 };

@@ -5,7 +5,7 @@ import { DIETARY, COLORS } from '../../utils/constants';
 import CravingLayout from '../../components/Craving/CravingLayout';
 import CravingSelector from '../../components/Craving/CravingSelector';
 import { useTheme } from '../../contexts/ThemeContext';
-import { smartShadow, smartButton } from '../../utils/platformStyles';
+import { smartShadow, smartButton, smartGrid, smartGridItem, smartGridPadding } from '../../utils/platformStyles';
 
 // Add "None" option to dietary preferences
 const PREFERENCE_OPTIONS = [
@@ -54,22 +54,24 @@ export default function PreferencesSelection() {
                 {PREFERENCE_OPTIONS.map((pref) => {
                     const isSelected = selectedPreferences.includes(pref.id);
                     return (
-                        <CravingSelector
-                            key={pref.id}
-                            item={pref}
-                            isSelected={isSelected}
-                            onPress={() => togglePreference(pref.id)}
-                            style={[
-                                styles.preferenceCard,
-                                {
-                                    backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
-                                    borderColor: isSelected ? COLORS.primary : theme.colors.border,
-                                },
-                            ]}
-                            labelStyle={{
-                                color: isSelected ? COLORS.white : theme.colors.text,
-                            }}
-                        />
+                        <View key={pref.id} style={styles.gridItem}>
+                            <CravingSelector
+                                item={pref}
+                                isSelected={isSelected}
+                                onPress={() => togglePreference(pref.id)}
+                                useGridLayout={true}
+                                style={[
+                                    styles.preferenceCard,
+                                    {
+                                        backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
+                                        borderColor: isSelected ? COLORS.primary : theme.colors.border,
+                                    },
+                                ]}
+                                labelStyle={{
+                                    color: isSelected ? COLORS.white : theme.colors.text,
+                                }}
+                            />
+                        </View>
                     );
                 })}
             </View>
@@ -97,18 +99,17 @@ export default function PreferencesSelection() {
 
 const createStyles = (theme) => StyleSheet.create({
     grid: { 
-        flexDirection: 'row', 
-        flexWrap: 'wrap', 
-        justifyContent: 'space-between',
-        width: '100%',
-        paddingHorizontal: 10,
+        ...smartGrid(),
+        ...smartGridPadding(),
+    },
+    gridItem: {
+        ...smartGridItem(),
     },
     preferenceCard: {
-        width: '31%',
+        width: '100%',
         aspectRatio: 1,
         borderRadius: 12,
         padding: 12,
-        marginBottom: 12,
         alignItems: 'center',
         justifyContent: 'center',
         ...smartShadow(

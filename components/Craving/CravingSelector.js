@@ -7,7 +7,8 @@ const CravingSelector = ({
     item, 
     isSelected, 
     onPress, 
-    style = {} 
+    style = {},
+    useGridLayout = false // Neuer Prop für Grid-basierte Nutzung
 }) => {
     const scaleValue = new Animated.Value(isSelected ? 1.02 : 1);
 
@@ -24,7 +25,7 @@ const CravingSelector = ({
         <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
             <TouchableOpacity
                 style={[
-                    styles.button,
+                    useGridLayout ? styles.gridButton : styles.button,
                     {
                         backgroundColor: isSelected ? COLORS.primary : COLORS.white,
                         ...smartBorder(2, COLORS.primary), // Zeigt Border nur auf iOS
@@ -38,12 +39,16 @@ const CravingSelector = ({
                 activeOpacity={0.8}
             >
                 <View style={styles.content}>
-                    <Text style={styles.emoji}>
+                    <Text style={[
+                        styles.emoji,
+                        useGridLayout && styles.gridEmoji
+                    ]}>
                         {item.icon}
                     </Text>
                     <Text style={[
                         styles.label, 
-                        { color: isSelected ? COLORS.white : COLORS.primary }
+                        { color: isSelected ? COLORS.white : COLORS.primary },
+                        useGridLayout && styles.gridLabel
                     ]}>
                         {item.label}
                     </Text>
@@ -79,6 +84,24 @@ const styles = StyleSheet.create({
             3
         ),
     },
+    gridButton: {
+        width: '100%',
+        borderRadius: 12,
+        aspectRatio: 1,
+        padding: Platform.OS === 'ios' ? 12 : 8,
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...smartShadow(
+            {
+                shadowColor: COLORS.primary,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+            },
+            3
+        ),
+    },
     content: {
         flexDirection: 'column',
         alignItems: 'center',
@@ -90,11 +113,20 @@ const styles = StyleSheet.create({
         marginBottom: 6,
         textAlign: 'center',
     },
+    gridEmoji: {
+        fontSize: Platform.OS === 'ios' ? 24 : 22,
+        marginBottom: Platform.OS === 'ios' ? 4 : 3,
+    },
     label: {
         fontSize: 14,
         fontWeight: '600',
         textAlign: 'center',
         lineHeight: 16,
+    },
+    gridLabel: {
+        fontSize: Platform.OS === 'ios' ? 12 : 11,
+        fontWeight: Platform.OS === 'ios' ? '600' : '700',
+        lineHeight: Platform.OS === 'ios' ? 14 : 13,
     },
     checkmarkWrapper: {
         position: 'absolute',

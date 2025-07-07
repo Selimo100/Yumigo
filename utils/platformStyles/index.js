@@ -11,6 +11,9 @@ export {
   smartButton,
   smartInput,
   androidStyleCleanup,
+  smartGrid,
+  smartGridItem,
+  smartGridPadding,
 } from '../platformStyles';
 
 // Re-export für bequeme Verwendung

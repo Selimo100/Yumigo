@@ -5,7 +5,7 @@ import { ALLERGENS, COLORS } from '../../utils/constants';
 import CravingLayout from '../../components/Craving/CravingLayout';
 import CravingSelector from '../../components/Craving/CravingSelector';
 import { useTheme } from '../../contexts/ThemeContext';
-import { smartShadow, smartButton } from '../../utils/platformStyles';
+import { smartShadow, smartButton, smartGrid, smartGridItem, smartGridPadding } from '../../utils/platformStyles';
 
 // Add "None" option to allergens
 const ALLERGY_OPTIONS = [
@@ -52,22 +52,24 @@ export default function AllergySelection() {
                 {ALLERGY_OPTIONS.map((allergy) => {
                     const isSelected = selectedAllergies.includes(allergy.id);
                     return (
-                        <CravingSelector
-                            key={allergy.id}
-                            item={allergy}
-                            isSelected={isSelected}
-                            onPress={() => toggleAllergy(allergy.id)}
-                            style={[
-                                styles.allergyCard,
-                                {
-                                    backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
-                                    borderColor: isSelected ? COLORS.primary : theme.colors.border,
-                                },
-                            ]}
-                            labelStyle={{
-                                color: isSelected ? COLORS.white : theme.colors.text,
-                            }}
-                        />
+                        <View key={allergy.id} style={styles.gridItem}>
+                            <CravingSelector
+                                item={allergy}
+                                isSelected={isSelected}
+                                onPress={() => toggleAllergy(allergy.id)}
+                                useGridLayout={true}
+                                style={[
+                                    styles.allergyCard,
+                                    {
+                                        backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
+                                        borderColor: isSelected ? COLORS.primary : theme.colors.border,
+                                    },
+                                ]}
+                                labelStyle={{
+                                    color: isSelected ? COLORS.white : theme.colors.text,
+                                }}
+                            />
+                        </View>
                     );
                 })}
             </View>
@@ -95,18 +97,17 @@ export default function AllergySelection() {
 
 const createStyles = (theme) => StyleSheet.create({
     grid: { 
-        flexDirection: 'row', 
-        flexWrap: 'wrap', 
-        justifyContent: 'space-between',
-        width: '100%',
-        paddingHorizontal: 10,
+        ...smartGrid(),
+        ...smartGridPadding(),
+    },
+    gridItem: {
+        ...smartGridItem(),
     },
     allergyCard: {
-        width: '31%',
+        width: '100%',
         aspectRatio: 1,
         borderRadius: 12,
         padding: 12,
-        marginBottom: 12,
         alignItems: 'center',
         justifyContent: 'center',
         ...smartShadow(
