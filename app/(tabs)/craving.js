@@ -8,23 +8,16 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTheme } from "../../contexts/ThemeContext";
 import { useRouter } from 'expo-router';
-
-const CRAVINGS = [
-    { id: 'sweet', label: 'Sweet', iconName: 'cupcake' },
-    { id: 'salty', label: 'Salty', iconName: 'shaker' },
-    { id: 'spicy', label: 'Spicy', iconName: 'fire' },
-    { id: 'sour', label: 'Sour', iconName: 'fruit-citrus' },
-    { id: 'cold', label: 'Cold', iconName: 'ice-cream' },
-    { id: 'hot', label: 'Hot', iconName: 'coffee' },
-];
+import { CATEGORIES, COLORS } from '../../utils/constants';
+import useTabBarHeight from '../../hooks/useTabBarHeight';
 
 export default function CravingSelection() {
     const [selectedCravings, setSelectedCravings] = useState([]);
     const { theme } = useTheme();
-    const styles = createStyles(theme);
+    const tabBarHeight = useTabBarHeight();
+    const styles = createStyles(theme, tabBarHeight);
     const [error, setError] = useState('');
     const router = useRouter();
 
@@ -57,13 +50,12 @@ export default function CravingSelection() {
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
-                    <Image source={require('../../assets/icon.png')} style={styles.logoImage} />
                     <Text style={styles.title}>What are you craving for today?</Text>
                     <Text style={styles.subsubtitle}>Tell us your mood, we'll find your food</Text>
                 </View>
 
                 <View style={styles.grid}>
-                    {CRAVINGS.map((craving) => {
+                    {CATEGORIES.map((craving) => {
                         const isSelected = selectedCravings.includes(craving.id);
                         return (
                             <TouchableOpacity
@@ -71,27 +63,28 @@ export default function CravingSelection() {
                                 style={[
                                     styles.cravingButton,
                                     {
-                                        backgroundColor: isSelected ? '#0D6159' : '#DDE6D5',
-                                        borderColor: '#0D6159',
-                                        shadowOpacity: isSelected ? 0.8 : 0.3,
-                                        transform: [{ scale: isSelected ? 1.05 : 1 }],
+                                        backgroundColor: isSelected ? COLORS.primary : COLORS.white,
+                                        borderColor: COLORS.primary,
+                                        shadowColor: COLORS.primary,
+                                        transform: [{ scale: isSelected ? 1.02 : 1 }],
                                     },
                                 ]}
                                 onPress={() => toggleCraving(craving.id)}
                             >
                                 <View style={styles.cravingContent}>
-                                    <MaterialCommunityIcons
-                                        name={craving.iconName}
-                                        size={40}
-                                        color={isSelected ? '#DDE6D5' : '#0D6159'}
-                                    />
-                                    <Text style={[styles.cravingLabel, { color: isSelected ? '#DDE6D5' : '#0D6159' }]}>
+                                    <Text style={styles.cravingEmoji}>
+                                        {craving.icon}
+                                    </Text>
+                                    <Text style={[
+                                        styles.cravingLabel, 
+                                        { color: isSelected ? COLORS.white : COLORS.primary }
+                                    ]}>
                                         {craving.label}
                                     </Text>
                                 </View>
                                 {isSelected && (
-                                    <View style={styles.checkmarkWrapper}>
-                                        <Text style={styles.checkmark}>✓</Text>
+                                    <View style={[styles.checkmarkWrapper, { backgroundColor: COLORS.white }]}>
+                                        <Text style={[styles.checkmark, { color: COLORS.primary }]}>✓</Text>
                                     </View>
                                 )}
                             </TouchableOpacity>
@@ -108,12 +101,15 @@ export default function CravingSelection() {
                         <TouchableOpacity
                             style={[
                                 styles.submitButton,
-                                { backgroundColor: selectedCravings.length === 0 ? '#7a9a97' : '#0D6159' },
+                                { backgroundColor: selectedCravings.length === 0 ? COLORS.lightGray : COLORS.primary },
                             ]}
                             onPress={handleNextButton}
                             disabled={selectedCravings.length === 0}
                         >
-                            <Text style={styles.submitButtonText}>
+                            <Text style={[
+                                styles.submitButtonText,
+                                { color: selectedCravings.length === 0 ? COLORS.gray : COLORS.white }
+                            ]}>
                                 {selectedCravings.length === 0 ? 'Please select at least one craving' : 'Next →'}
                             </Text>
                         </TouchableOpacity>
@@ -124,98 +120,133 @@ export default function CravingSelection() {
     );
 }
 
-const createStyles = (theme) => StyleSheet.create({
-    container: { flex: 1, backgroundColor: 'white' },
-    scrollContent: { padding: 20, paddingBottom: 40, alignItems: 'center' },
-    header: { alignItems: 'center', marginBottom: 30 },
-    logoImage: {
-        width: 120,
-        height: 120,
-        marginTop: 30,
+const createStyles = (theme, tabBarHeight) => StyleSheet.create({
+    container: { 
+        flex: 1, 
+        backgroundColor: COLORS.white 
     },
-
-    title: { fontSize: 23.8, fontWeight: 'bold', color: '#0D6159', marginBottom: 4, marginTop: -5 },
-    subsubtitle: { fontSize: 14, color: '#0D6159', opacity: 0.8 },
-
-    grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+    scrollContent: { 
+        padding: 20, 
+        paddingBottom: tabBarHeight + 20, 
+        alignItems: 'center' 
+    },
+    header: { 
+        alignItems: 'center', 
+        marginBottom: 30 
+    },
+    logoImage: {
+        width: 100,
+        height: 100,
+        marginTop: 20,
+    },
+    title: { 
+        fontSize: 24, 
+        fontWeight: 'bold', 
+        color: COLORS.primary, 
+        marginBottom: 8, 
+        marginTop: 16,
+        textAlign: 'center'
+    },
+    subsubtitle: { 
+        fontSize: 16, 
+        color: COLORS.gray, 
+        textAlign: 'center'
+    },
+    grid: { 
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        justifyContent: 'space-between',
+        width: '100%',
+        paddingHorizontal: 4,
+    },
     cravingButton: {
-        width: '48%',
+        width: '47%',
         borderRadius: 16,
         borderWidth: 2,
-        borderColor: '#0D6159',
-        height: 106,
-        marginBottom: 16,
+        height: 110,
+        marginBottom: 12,
         paddingVertical: 16,
         paddingHorizontal: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
-        shadowOpacity: 0.3,
+        shadowOpacity: 0.1,
+        elevation: 3,
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-
     cravingContent: {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        flex: 1,
     },
-
-    cravingLabel: {
-        fontSize: 16,
-        fontWeight: '700',
+    cravingEmoji: {
+        fontSize: 28,
+        marginBottom: 6,
         textAlign: 'center',
-        justifyContent: 'center',
-        width: '100%',
+    },
+    cravingLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        textAlign: 'center',
+        lineHeight: 16,
     },
     checkmarkWrapper: {
         position: 'absolute',
         top: 8,
         right: 8,
-        backgroundColor: '#DDE6D5',
         borderRadius: 10,
         width: 20,
         height: 20,
         justifyContent: 'center',
         alignItems: 'center',
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 2,
+        shadowOpacity: 0.2,
+        elevation: 2,
     },
     checkmark: {
-        color: '#0D6159',
-        fontWeight: '700',
+        fontSize: 14,
+        fontWeight: '900',
     },
-
     buttonsContainer: {
         width: '100%',
         alignItems: 'center',
+        marginTop: 30,
+        paddingHorizontal: 4,
     },
     submitButton: {
         paddingVertical: 16,
-        paddingHorizontal: 24,
-        borderRadius: 16,
-        marginBottom: 12,
+        paddingHorizontal: 32,
+        borderRadius: 12,
+        width: '100%',
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        shadowOpacity: 0.1,
+        elevation: 3,
     },
     submitButtonText: {
-        color: '#DDE6D5',
-        fontWeight: '700',
+        fontWeight: '600',
         fontSize: 16,
         textAlign: 'center',
     },
-
     errorContainer: {
         width: '100%',
         backgroundColor: '#fce8e8',
-        borderColor: '#e05656',
+        borderColor: COLORS.error,
         borderWidth: 1,
-        borderRadius: 8,
-        paddingVertical: 10,
+        borderRadius: 12,
+        paddingVertical: 12,
         paddingHorizontal: 20,
         marginTop: 12,
-        shadowColor: '#a71d2a',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.15,
-        shadowRadius: 3,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
         alignSelf: 'center',
     },
     errorText: {
-        color: '#a71d2a',
+        color: COLORS.error,
         fontSize: 14,
         fontWeight: '600',
         textAlign: 'center',

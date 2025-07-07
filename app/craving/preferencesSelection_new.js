@@ -1,24 +1,25 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ALLERGENS, COLORS } from '../../utils/constants';
+import { DIETARY, COLORS } from '../../utils/constants';
 import CravingLayout from '../../components/CravingLayout';
 import CravingSelector from '../../components/CravingSelector';
 
-// Add "None" option to allergens
-const ALLERGY_OPTIONS = [
-    ...ALLERGENS,
+// Add "None" option to dietary preferences
+const PREFERENCE_OPTIONS = [
+    ...DIETARY,
     { id: 'none', label: 'None', color: COLORS.success, icon: '✅' }
 ];
 
-export default function AllergySelection() {
-    const [selectedAllergies, setSelectedAllergies] = useState([]);
+export default function PreferencesSelection() {
+    const [selectedPreferences, setSelectedPreferences] = useState([]);
     const router = useRouter();
     const params = useLocalSearchParams();
     const cravings = params.cravings ? JSON.parse(params.cravings) : [];
+    const allergies = params.allergies ? JSON.parse(params.allergies) : [];
 
-    const toggleAllergy = (id) => {
-        setSelectedAllergies((prev) => {
+    const togglePreference = (id) => {
+        setSelectedPreferences((prev) => {
             if (id === 'none') return ['none']; // Only none if selected
             if (prev.includes('none')) return [id]; // Replace none with other
             if (prev.includes(id)) return prev.filter((a) => a !== id);
@@ -28,31 +29,32 @@ export default function AllergySelection() {
 
     const handleNext = () => {
         router.push({
-            pathname: '/craving/preferencesSelection',
+            pathname: '/craving/cravingResults',
             params: { 
                 cravings: JSON.stringify(cravings),
-                allergies: JSON.stringify(selectedAllergies) 
+                allergies: JSON.stringify(allergies),
+                preferences: JSON.stringify(selectedPreferences) 
             },
         });
     };
 
     return (
         <CravingLayout
-            title="Any allergies or intolerances?"
-            subtitle="Select all that apply"
-            stepNumber={2}
+            title="Select your preferences"
+            subtitle="Choose all that apply"
+            stepNumber={3}
             totalSteps={3}
             onBack={() => router.back()}
         >
             <View style={styles.grid}>
-                {ALLERGY_OPTIONS.map((allergy) => {
-                    const isSelected = selectedAllergies.includes(allergy.id);
+                {PREFERENCE_OPTIONS.map((pref) => {
+                    const isSelected = selectedPreferences.includes(pref.id);
                     return (
                         <CravingSelector
-                            key={allergy.id}
-                            item={allergy}
+                            key={pref.id}
+                            item={pref}
                             isSelected={isSelected}
-                            onPress={() => toggleAllergy(allergy.id)}
+                            onPress={() => togglePreference(pref.id)}
                         />
                     );
                 })}
@@ -62,16 +64,16 @@ export default function AllergySelection() {
                 <TouchableOpacity
                     style={[
                         styles.submitButton, 
-                        { backgroundColor: selectedAllergies.length === 0 ? COLORS.lightGray : COLORS.primary }
+                        { backgroundColor: selectedPreferences.length === 0 ? COLORS.lightGray : COLORS.primary }
                     ]}
                     onPress={handleNext}
-                    disabled={selectedAllergies.length === 0}
+                    disabled={selectedPreferences.length === 0}
                 >
                     <Text style={[
                         styles.submitButtonText,
-                        { color: selectedAllergies.length === 0 ? COLORS.gray : COLORS.white }
+                        { color: selectedPreferences.length === 0 ? COLORS.gray : COLORS.white }
                     ]}>
-                        {selectedAllergies.length === 0 ? 'Please select at least one option' : 'Next →'}
+                        {selectedPreferences.length === 0 ? 'Please select at least one preference' : 'Find Recipes →'}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -84,27 +86,25 @@ const styles = StyleSheet.create({
         flexDirection: 'row', 
         flexWrap: 'wrap', 
         justifyContent: 'space-between',
-        width: '100%',
-        paddingHorizontal: 4,
+        width: '100%'
     },
     buttonsContainer: {
         width: '100%',
         alignItems: 'center',
-        marginTop: 30,
-        paddingHorizontal: 4,
+        marginTop: 20,
     },
     submitButton: {
-        paddingVertical: 16,
+        paddingVertical: 18,
         paddingHorizontal: 32,
-        borderRadius: 12,
+        borderRadius: 25,
         width: '100%',
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        shadowOpacity: 0.1,
-        elevation: 3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 8,
+        shadowOpacity: 0.15,
+        elevation: 4,
     },
     submitButtonText: {
-        fontWeight: '600',
+        fontWeight: '700',
         fontSize: 16,
         textAlign: 'center',
     },

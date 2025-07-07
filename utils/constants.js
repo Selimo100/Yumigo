@@ -32,14 +32,14 @@ export const DIETARY = [
 ];
 
 export const COLORS = {
-  primary: '#FF6B35',
-  secondary: '#F7931E',
+  primary: '#0D6159',
+  secondary: '#A5B68D',
   background: '#F8F9FA',
   white: '#FFFFFF',
   black: '#000000',
   gray: '#6C757D',
   lightGray: '#E9ECEF',
-  success: '#28A745',
+  success: '#0D6159',
   error: '#DC3545'
 };
 

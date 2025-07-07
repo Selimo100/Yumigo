@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebaseconfig';
-import usePreferences from './usePreferences';
-import useAllergies from './useAllergies';
+import { useLocalSearchParams } from 'expo-router';
 
 const useCravingResults = () => {
     const [cravingResultsRecipes, setCravingResultsRecipes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const params = useLocalSearchParams();
 
-    const preferences = usePreferences();
-    const selectedPreferences = Array.isArray(preferences) ? preferences : [];
-
-    const allergies = useAllergies();
-    const selectedAllergies = Array.isArray(allergies) ? allergies : [];
+    // Get parameters from URL
+    const selectedCravings = params.cravings ? JSON.parse(params.cravings) : [];
+    const selectedAllergies = params.allergies ? JSON.parse(params.allergies) : [];
+    const selectedPreferences = params.preferences ? JSON.parse(params.preferences) : [];
 
     useEffect(() => {
         const fetchRecipes = async () => {
@@ -26,23 +25,37 @@ const useCravingResults = () => {
                     ...doc.data()
                 }));
 
-
                 console.log("All Recipes:", allRecipes.length);
-                console.log("Preferences:", selectedPreferences);
-                console.log("Allergies:", selectedAllergies);
+                console.log("Selected Cravings:", selectedCravings);
+                console.log("Selected Preferences:", selectedPreferences);
+                console.log("Selected Allergies:", selectedAllergies);
 
                 const filteredRecipes = allRecipes.filter(recipe => {
-                    // 1. Allergien ausschließen
-                    const hasAllergyConflict = selectedAllergies.some(allergy =>
-                        recipe.allergens?.includes(allergy)
-                    );
+                    // 1. Filter by cravings (categories) - if any selected
+                    if (selectedCravings.length > 0) {
+                        const matchesCraving = selectedCravings.some(craving =>
+                            recipe.categories?.includes(craving) || 
+                            recipe.tags?.includes(craving) ||
+                            recipe.category === craving
+                        );
+                        if (!matchesCraving) return false;
+                    }
 
-                    if (hasAllergyConflict) return false;
+                    // 2. Exclude recipes with allergens - if 'none' is not selected
+                    if (!selectedAllergies.includes('none') && selectedAllergies.length > 0) {
+                        const hasAllergyConflict = selectedAllergies.some(allergy =>
+                            recipe.allergens?.includes(allergy) ||
+                            recipe.allergies?.includes(allergy)
+                        );
+                        if (hasAllergyConflict) return false;
+                    }
 
-                    // 2. Muss mindestens eine Präferenz matchen, wenn welche ausgewählt wurden
-                    if (selectedPreferences.length > 0) {
+                    // 3. Include recipes matching dietary preferences - if 'none' is not selected
+                    if (!selectedPreferences.includes('none') && selectedPreferences.length > 0) {
                         const matchesPreference = selectedPreferences.some(pref =>
-                            recipe.tags?.includes(pref)
+                            recipe.dietary?.includes(pref) || 
+                            recipe.tags?.includes(pref) ||
+                            recipe.diet === pref
                         );
                         if (!matchesPreference) return false;
                     }
@@ -50,6 +63,7 @@ const useCravingResults = () => {
                     return true;
                 });
 
+                console.log("Filtered Recipes:", filteredRecipes.length);
                 setCravingResultsRecipes(filteredRecipes);
             } catch (error) {
                 console.error("Error fetching craving results:", error);
@@ -59,8 +73,13 @@ const useCravingResults = () => {
             }
         };
 
-        fetchRecipes();
-    }, [selectedPreferences, selectedAllergies]);
+        // Only fetch if we have at least some parameters
+        if (selectedCravings.length > 0 || selectedAllergies.length > 0 || selectedPreferences.length > 0) {
+            fetchRecipes();
+        } else {
+            setIsLoading(false);
+        }
+    }, [params.cravings, params.allergies, params.preferences]);
 
     return { cravingResultsRecipes, isLoading };
 };
