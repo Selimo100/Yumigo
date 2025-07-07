@@ -30,6 +30,7 @@ export const NotificationProvider = ({ children }) => {
 
     const notificationsRef = collection(db, 'notifications');
 
+// Echzeit-Firebase-Listener für Benachrichtigungen
     const q = query(
       notificationsRef,
       where('recipientId', '==', user.uid)

@@ -18,6 +18,7 @@ export const createInAppNotification = async (notificationData) => {
   }
 };
 
+// Verschiedene Notification-Types (Like, Follow, Comment)
 export const notifyRecipeLike = async (recipeId, recipeTitle, likerName, recipeAuthorId) => {
   if (!recipeAuthorId) return;
   
@@ -79,8 +80,4 @@ export const notifyRecipeRating = async (recipeId, recipeTitle, raterName, ratin
   } catch (error) {
     
   }
-};
-
-export const cleanupOldNotifications = async (userId) => {
-
 };
