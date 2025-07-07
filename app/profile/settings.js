@@ -5,6 +5,7 @@ import {
     ScrollView,
     Alert,
     ActivityIndicator,
+    LogBox
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
@@ -16,6 +17,10 @@ import { ProfileSection } from '../../components/Settings/ProfileSection';
 import { AccountSection } from '../../components/Settings/AccountSection';
 import { createStyles } from '../../components/Settings/SettingsStyles';
 import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
+
+// Ignoriere spezifische Warnungen
+LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component']);
+
 export default function SettingsScreen() {
     const { theme, toggleTheme, isDarkMode } = useTheme();
     const {
