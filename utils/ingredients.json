@@ -1,0 +1,162 @@
+[
+  {
+    "id": "veg_001",
+    "names": ["Tomato", "Tomate"],
+    "season": {
+      "Switzerland": ["July", "August", "September"],
+      "Germany": ["July", "August", "September"]
+    }
+  },
+  {
+    "id": "veg_002",
+    "names": ["Zucchini", "Courgette"],
+    "season": {
+      "Switzerland": ["June", "July", "August"],
+      "Germany": ["June", "July", "August"]
+    }
+  },
+  {
+    "id": "veg_003",
+    "names": ["Carrot", "Möhre"],
+    "season": {
+      "Switzerland": ["May", "June", "July", "August", "September", "October"],
+      "Germany": ["May", "June", "July", "August", "September", "October"]
+    }
+  },
+  {
+    "id": "veg_004",
+    "names": ["Pumpkin", "Kürbis"],
+    "season": {
+      "Switzerland": ["September", "October", "November"],
+      "Germany": ["September", "October", "November"]
+    }
+  },
+  {
+    "id": "veg_005",
+    "names": ["Spinach", "Spinat"],
+    "season": {
+      "Switzerland": ["April", "May", "June", "September", "October"],
+      "Germany": ["April", "May", "June", "September", "October"]
+    }
+  },
+  {
+    "id": "veg_006",
+    "names": ["Strawberry", "Erdbeere"],
+    "season": {
+      "Switzerland": ["June", "July"],
+      "Germany": ["June", "July"]
+    }
+  },
+  {
+    "id": "veg_007",
+    "names": ["Cucumber", "Gurke"],
+    "season": {
+      "Switzerland": ["June", "July", "August"],
+      "Germany": ["June", "July", "August"]
+    }
+  },
+  {
+    "id": "veg_008",
+    "names": ["Bell Pepper", "Paprika"],
+    "season": {
+      "Switzerland": ["July", "August", "September"],
+      "Germany": ["July", "August", "September"]
+    }
+  },
+  {
+    "id": "veg_009",
+    "names": ["Cauliflower", "Blumenkohl"],
+    "season": {
+      "Switzerland": ["June", "July", "August", "September"],
+      "Germany": ["June", "July", "August", "September"]
+    }
+  },
+  {
+    "id": "veg_010",
+    "names": ["Broccoli", "Brokkoli"],
+    "season": {
+      "Switzerland": ["June", "July", "August", "September"],
+      "Germany": ["June", "July", "August", "September"]
+    }
+  },
+  {
+    "id": "veg_011",
+    "names": ["Asparagus", "Spargel"],
+    "season": {
+      "Switzerland": ["April", "May", "June"],
+      "Germany": ["April", "May", "June"]
+    }
+  },
+  {
+    "id": "veg_012",
+    "names": ["Peas", "Erbsen"],
+    "season": {
+      "Switzerland": ["June", "July"],
+      "Germany": ["June", "July"]
+    }
+  },
+  {
+    "id": "veg_013",
+    "names": ["Radish", "Radieschen"],
+    "season": {
+      "Switzerland": ["April", "May", "June", "September", "October"],
+      "Germany": ["April", "May", "June", "September", "October"]
+    }
+  },
+  {
+    "id": "veg_014",
+    "names": ["Leek", "Lauch"],
+    "season": {
+      "Switzerland": ["September", "October", "November", "December", "January", "February"],
+      "Germany": ["September", "October", "November", "December", "January", "February"]
+    }
+  },
+  {
+    "id": "veg_015",
+    "names": ["Cabbage", "Kohl"],
+    "season": {
+      "Switzerland": ["September", "October", "November", "December", "January", "February"],
+      "Germany": ["September", "October", "November", "December", "January", "February"]
+    }
+  },
+  {
+    "id": "veg_016",
+    "names": ["Eggplant", "Aubergine"],
+    "season": {
+      "Switzerland": ["July", "August", "September"],
+      "Germany": ["July", "August", "September"]
+    }
+  },
+  {
+    "id": "veg_017",
+    "names": ["Fennel", "Fenchel"],
+    "season": {
+      "Switzerland": ["September", "October", "November"],
+      "Germany": ["September", "October", "November"]
+    }
+  },
+  {
+    "id": "veg_018",
+    "names": ["Celery", "Sellerie"],
+    "season": {
+      "Switzerland": ["September", "October", "November", "December", "January"],
+      "Germany": ["September", "October", "November", "December", "January"]
+    }
+  },
+  {
+    "id": "veg_019",
+    "names": ["Beetroot", "Rote Bete"],
+    "season": {
+      "Switzerland": ["September", "October", "November"],
+      "Germany": ["September", "October", "November"]
+    }
+  },
+  {
+    "id": "veg_020",
+    "names": ["Kale", "Grünkohl"],
+    "season": {
+      "Switzerland": ["November", "December", "January", "February"],
+      "Germany": ["November", "December", "January", "February"]
+    }
+  }
+]
