@@ -1,132 +1,191 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Share, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, router } from 'expo-router';
-import { useState, useEffect, useRef } from 'react';
+import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StarRating } from '../../components/CommentComponents';
 import { CommentInput } from '../../components/CommentInput';
 import { CommentsSection } from '../../components/CommentsSection';
 import { RatingModal } from '../../components/RatingModal';
+import { ALLERGENS, CATEGORIES } from '../../utils/constants';
+import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebaseconfig';
+import { formatDistanceToNow } from 'date-fns';
+import { serverTimestamp } from 'firebase/firestore';
+import { useUserProfile } from '../../hooks/useUserProfile';
+import useFavorites from '../../hooks/useFavorites';
+import { deleteRecipe, isRecipeOwner, rateRecipe, getUserRating } from '../../services/recipeService';
+import { createCommentNotification } from '../../services/notificationService';
+import { addShoppingListItem } from '../../services/userService';
+import { showToast } from '../../utils/toast';
+import useAuth from '../../lib/useAuth';
 
-// Tag configurations
-const allergyConfig = {
-  gluten: { label: 'Gluten', color: '#FF6B6B', icon: '🌾' },
-  dairy: { label: 'Dairy', color: '#4ECDC4', icon: '🥛' },
-  nuts: { label: 'Nuts', color: '#45B7D1', icon: '🥜' },
-  shellfish: { label: 'Shellfish', color: '#96CEB4', icon: '🦐' },
-  eggs: { label: 'Eggs', color: '#FF6F00', icon: '🥚' },
-  soy: { label: 'Soy', color: '#DDA0DD', icon: '🫛' },
-};
-
-const categoryConfig = {
-  salty: { label: 'Salty', color: '#4A90E2', emoji: '🧂' },
-  sweet: { label: 'Sweet', color: '#F5A623', emoji: '🍯' },
-  sour: { label: 'Sour', color: '#7ED321', emoji: '🍋' },
-  spicy: { label: 'Spicy', color: '#D0021B', emoji: '🌶️' },
-  cold: { label: 'Cold', color: '#50E3C2', emoji: '🧊' },
-  hot: { label: 'Hot', color: '#FF6F00', emoji: '🔥' },
-};
-
-const mockRecipeDetails = {
-  1: {
-    id: 1,
-    title: 'Quick Pasta Carbonara',
-    image: 'https://via.placeholder.com/400x300',
-    time: '15 min',
-    rating: 4.8,
-    reviews: 124,
-    author: 'Chef Mario',
-    allergies: ['gluten', 'dairy', 'eggs'],
-    categories: ['salty', 'hot'],
-    description: 'A classic Italian pasta dish made with eggs, cheese, and pancetta. Perfect for a quick dinner that feels luxurious.',
-    ingredients: [
-      '400g spaghetti',
-      '200g pancetta or bacon',
-      '4 large eggs',
-      '100g Parmesan cheese',
-      '2 cloves garlic',
-      'Black pepper',
-      'Salt'
-    ],
-    comments: [
-      {
-        id: 1,
-        user: 'FoodLover23',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Absolutely delicious! Made this for dinner last night and my family loved it. 😍',
-        time: '2h',
-        likes: 12,
-        isLiked: false
-      },
-      {
-        id: 2,
-        user: 'CookingMama',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Great recipe! I added some peas for extra color 🟢',
-        time: '1d',
-        likes: 8,
-        isLiked: false
-      },
-      {
-        id: 3,
-        user: 'PastaKing',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Pro tip: Use fresh pasta if you can! 👨‍🍳',
-        time: '3d',
-        likes: 15,
-        isLiked: false
-      }
-    ]
-  },
-  2: {
-    id: 2,
-    title: 'Avocado Toast Supreme',
-    image: 'https://via.placeholder.com/400x300',
-    time: '10 min',
-    rating: 4.6,
-    reviews: 89,
-    author: 'FoodieQueen',
-    allergies: ['gluten', 'eggs'],
-    categories: ['salty'],
-    description: 'Elevated avocado toast with perfectly seasoned avocado, cherry tomatoes, and a poached egg on top.',
-    ingredients: [
-      '2 slices sourdough bread',
-      '1 ripe avocado',
-      '1 egg',
-      'Cherry tomatoes',
-      'Lime juice',
-      'Red pepper flakes',
-      'Salt and pepper'
-    ],
-    comments: [
-      {
-        id: 1,
-        user: 'HealthyEater',
-        avatar: 'https://via.placeholder.com/40x40',
-        comment: 'Perfect breakfast! Love the poached egg 🥚',
-        time: '5h',
-        likes: 6,
-        isLiked: false
-      }
-    ]
+const formatTime = (timestamp) => {
+  try {
+    const date = timestamp?.toDate?.() || new Date(timestamp);
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch (e) {
+    console.error("Error formatting time:", e);
+    return 'just now';
   }
 };
 
+// Convert arrays to config objects for easier lookup
+const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
+  acc[allergen.id] = {
+    label: allergen.label.replace('Contains ', ''),
+    color: allergen.color,
+    icon: allergen.icon
+  };
+  return acc;
+}, {});
+
+const categoryConfig = CATEGORIES.reduce((acc, category) => {
+  acc[category.id] = {
+    label: category.label,
+    color: category.color,
+    emoji: category.icon
+  };
+  return acc;
+}, {});
+
 export default function RecipeDetailScreen() {
-  const { id, scrollToComments } = useLocalSearchParams();
+  const { id, scrollToComments, created } = useLocalSearchParams();
   const { theme } = useTheme();
+  const { user: currentUser } = useAuth(); // Use useAuth instead of getAuth
   const styles = createStyles(theme);
-  const recipe = mockRecipeDetails[id] || mockRecipeDetails[1];
-  
-  const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-  const [userRating, setUserRating] = useState(0);
-  const [showRating, setShowRating] = useState(false);
-  const [comments, setComments] = useState(recipe.comments || []);
-  
   const scrollViewRef = useRef(null);
   const commentsRef = useRef(null);
+  const { profile: userProfile } = useUserProfile();
+  const { isFavorite, toggleFavorite } = useFavorites();
+
+  const [recipe, setRecipe] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [showRating, setShowRating] = useState(false);
+
+  // Check if this recipe is in favorites
+  const isSaved = isFavorite(id);
+
+  useEffect(() => {
+    const fetchRecipeAndData = async () => {
+      setLoading(true);
+      try {
+        const recipeDocRef = doc(db, 'recipes', id);
+        const recipeDocSnap = await getDoc(recipeDocRef);
+
+        if (recipeDocSnap.exists()) {
+          const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
+
+          let authorDisplayName = 'Anonymous';
+          if (recipeData.authorId) {
+            const userDocRef = doc(db, 'users', recipeData.authorId); 
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+              authorDisplayName = userDocSnap.data().displayName || userDocSnap.data().email || 'Anonymous';
+            } else if (currentUser && currentUser.uid === recipeData.authorId) {
+              authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
+            }
+          }
+
+          const ratingsCollectionRef = collection(db, 'recipes', id, 'ratings');
+          const ratingsSnapshot = await getDocs(ratingsCollectionRef);
+          const reviewsCount = ratingsSnapshot.size;
+          
+          let averageRating = recipeData.rating || 0;
+          if (reviewsCount > 0 && !recipeData.rating) {
+            let totalRating = 0;
+            ratingsSnapshot.docs.forEach(doc => {
+              totalRating += doc.data().rating;
+            });
+            averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
+          }
+
+          setRecipe({ 
+            ...recipeData, 
+            authorDisplayName,
+            rating: averageRating,
+            reviews: reviewsCount
+          });
+
+          if (currentUser) {
+            const userCurrentRating = await getUserRating(id, currentUser.uid);
+            setUserRating(userCurrentRating);
+          }
+          if (currentUser) {
+            const recipeLikeDocRef = doc(db, 'recipes', id, 'likes', currentUser.uid);
+            const recipeLikeSnap = await getDoc(recipeLikeDocRef);
+            setIsLiked(recipeLikeSnap.exists());
+          }
+
+          const commentsSnap = await getDocs(collection(db, 'recipes', id, 'comments'));
+          const commentsData = await Promise.all(commentsSnap.docs.map(async docSnapshot => {
+            const data = docSnapshot.data();
+            let isCommentLikedByUser = false;
+            let commentLikesCount = 0;
+            let commentAuthorName = data.authorName || data.authorId || 'Anonymous'; 
+
+            if (!data.authorName && data.authorId) {
+              const commentUserDocRef = doc(db, 'users', data.authorId);
+              const commentUserDocSnap = await getDoc(commentUserDocRef);
+              if (commentUserDocSnap.exists()) {
+                commentAuthorName = commentUserDocSnap.data().displayName || commentUserDocSnap.data().email || commentAuthorName;
+              }
+            }
+
+
+            const commentLikesCollectionRef = collection(db, 'recipes', id, 'comments', docSnapshot.id, 'likes');
+            const commentLikesSnapshot = await getDocs(commentLikesCollectionRef);
+            commentLikesCount = commentLikesSnapshot.size;
+
+            if (currentUser) {
+              const userCommentLikeDocRef = doc(commentLikesCollectionRef, currentUser.uid);
+              const userCommentLikeSnap = await getDoc(userCommentLikeDocRef);
+              isCommentLikedByUser = userCommentLikeSnap.exists();
+            }            return {
+              id: docSnapshot.id,
+              user: commentAuthorName, 
+              avatar: data.authorAvatar || null, 
+              comment: data.text || '',
+              time: formatTime(data.createdAt?.toDate?.() || new Date()),
+              likes: commentLikesCount,
+              isLiked: isCommentLikedByUser,
+            };
+          }));
+
+          commentsData.sort((a, b) => {
+            return 0; 
+          });
+
+          setComments(commentsData);
+
+        } else {
+          console.warn('❌ Recipe not found');
+        }
+      } catch (error) {
+        console.error('❌ Error fetching recipe and data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchRecipeAndData();
+  }, [id, currentUser]);
+
+  // Show success alert when recipe is newly created
+  useEffect(() => {
+    if (created === 'true') {
+      setTimeout(() => {
+        Alert.alert(
+          'Success!', 
+          'Your recipe has been published successfully!',
+          [{ text: 'OK' }]
+        );
+      }, 500); // Small delay to ensure the page is loaded
+    }
+  }, [created]);
 
   useEffect(() => {
     if (scrollToComments === 'true') {
@@ -141,52 +200,337 @@ export default function RecipeDetailScreen() {
     }
   }, [scrollToComments]);
 
-  const handleLike = () => setIsLiked(!isLiked);
+  const handleLike = async () => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to like recipes.");
+      return;
+    }
 
-  const handleSave = () => {
-    setIsSaved(!isSaved);
-    Alert.alert(
-      isSaved ? 'Removed from Favorites' : 'Saved to Favorites',
-      isSaved ? 'Recipe removed from your favorites' : 'Recipe saved to your favorites'
-    );
+    const recipeLikeDocRef = doc(db, 'recipes', id, 'likes', currentUser.uid);
+
+    try {
+      if (isLiked) {
+        await deleteDoc(recipeLikeDocRef);
+        setIsLiked(false);
+      } else {
+        await setDoc(recipeLikeDocRef, { timestamp: serverTimestamp() }); 
+        setIsLiked(true);
+      }
+    } catch (error) {
+      console.error("Error updating recipe like:", error);
+      Alert.alert("Error", "Could not update like status.");
+    }
   };
 
-  const handleRating = (rating) => {
-    setUserRating(rating);
-    setShowRating(false);
-    Alert.alert(
-      'Rating Submitted',
-      `You rated this recipe ${rating} star${rating !== 1 ? 's' : ''}!`
-    );
+  const handleSave = async () => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to save recipes to favorites.");
+      return;
+    }
+
+    try {
+      await toggleFavorite(id);
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
+        Alert.alert(
+          "Setup Required", 
+          "Favorites feature requires Firestore rules setup. Check UPDATE_FIRESTORE_RULES.md in your project."
+        );
+      } else {
+        Alert.alert("Error", "Could not update favorite status.");
+      }
+    }
+  };
+
+  const handleRating = async (rating) => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to rate recipes.");
+      return;
+    }
+
+    try {
+      await rateRecipe(id, currentUser.uid, rating);
+      setUserRating(rating);
+      setShowRating(false);
+      
+      await reloadRecipeData();
+      
+    } catch (error) {
+      console.error('Error rating recipe:', error);
+      Alert.alert("Error", "Could not save your rating.");
+    }
   };
 
   const handleCommentLike = (commentId) => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to like comments.");
+      return;
+    }
+
+    const commentLikeDocRef = doc(db, 'recipes', id, 'comments', commentId, 'likes', currentUser.uid);
+
     setComments(prevComments =>
-      prevComments.map(comment =>
-        comment.id === commentId
-          ? {
-              ...comment,
-              isLiked: !comment.isLiked,
-              likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1
+      prevComments.map(comment => {
+        if (comment.id === commentId) {
+          const newIsLiked = !comment.isLiked;
+          const newLikes = newIsLiked ? comment.likes + 1 : comment.likes - 1;
+
+          const updatedComment = {
+            ...comment,
+            isLiked: newIsLiked,
+            likes: newLikes,
+          };
+
+          (async () => {
+            try {
+              if (newIsLiked) {
+                await setDoc(commentLikeDocRef, { timestamp: serverTimestamp() });
+              } else {
+                await deleteDoc(commentLikeDocRef);
+              }
+            } catch (error) {
+              console.error("Error updating comment like in Firestore:", error);
+              setComments(prev => prev.map(c => c.id === commentId ? comment : c)); 
+              Alert.alert("Error", "Could not update comment like status.");
             }
-          : comment
-      )
+          })();
+
+          return updatedComment;
+        }
+        return comment;
+      })
     );
   };
 
-  const handleAddComment = (commentText) => {
-    const comment = {
-      id: Date.now(),
-      user: 'You',
-      avatar: 'https://via.placeholder.com/40x40',
-      comment: commentText,
-      time: 'now',
-      likes: 0,
-      isLiked: false
-    };
-    setComments([comment, ...comments]);
-    Alert.alert('Comment Added', 'Your comment has been posted!');
+  const handleAddComment = async (commentText) => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to post comments.");
+      return;
+    }
+
+    if (!commentText.trim()) {
+      Alert.alert("Empty Comment", "Please enter some text for your comment.");
+      return;
+    }
+
+    try {
+      const newCommentData = {
+        text: commentText,
+        authorId: currentUser.uid, 
+        authorName: userProfile?.username || currentUser.displayName || currentUser.email || 'Anonymous', 
+        authorAvatar: userProfile?.avatar || null, 
+        createdAt: serverTimestamp(),
+      };
+
+      const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newCommentData);
+
+      // Create notification for recipe owner if commenter is not the owner
+      if (recipe.authorId && recipe.authorId !== currentUser.uid) {
+        try {
+          await createCommentNotification(id, currentUser.uid, recipe.authorId, commentText);
+        } catch (notificationError) {
+          console.error('Error creating comment notification:', notificationError);
+          // Don't show error to user for notification failures
+        }
+      }
+
+      const localComment = {
+        id: docRef.id,
+        user: newCommentData.authorName, 
+        avatar: newCommentData.authorAvatar,
+        comment: commentText, 
+        time: 'just now', 
+        likes: 0,
+        isLiked: false,
+      };
+
+      setComments(prev => [localComment, ...prev]);
+    } catch (error) {
+      console.error('❌ Failed to post comment:', error);
+      Alert.alert('Error', 'Failed to post comment.');
+    }
   };
+
+  const handleDeleteRecipe = () => {
+    Alert.alert(
+      "Delete Recipe",
+      "Are you sure you want to delete this recipe? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteRecipe(id, recipe.authorId);
+              global.profileNeedsReload = true;
+              Alert.alert("Recipe Deleted", "Your recipe has been deleted successfully.");
+              router.back();
+            } catch (error) {
+              console.error('Error deleting recipe:', error);
+              Alert.alert("Error", "Failed to delete recipe. Please try again.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const reloadRecipeData = async () => {
+    try {
+      setLoading(true);
+      const recipeDocRef = doc(db, 'recipes', id);
+      const recipeDocSnap = await getDoc(recipeDocRef);
+
+      if (recipeDocSnap.exists()) {
+        const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
+
+        let authorDisplayName = 'Anonymous';
+        if (recipeData.authorId) {
+          const userDocRef = doc(db, 'users', recipeData.authorId);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            authorDisplayName = userDocSnap.data().displayName || userDocSnap.data().email || 'Anonymous';
+          } else if (currentUser && currentUser.uid === recipeData.authorId) {
+            authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
+          }
+        }
+
+        const ratingsCollectionRef = collection(db, 'recipes', id, 'ratings');
+        const ratingsSnapshot = await getDocs(ratingsCollectionRef);
+        const reviewsCount = ratingsSnapshot.size;
+        
+        let averageRating = recipeData.rating || 0;
+        if (reviewsCount > 0 && !recipeData.rating) {
+          let totalRating = 0;
+          ratingsSnapshot.docs.forEach(doc => {
+            totalRating += doc.data().rating;
+          });
+          averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
+        }
+
+        setRecipe({ 
+          ...recipeData, 
+          authorDisplayName,
+          rating: averageRating,
+          reviews: reviewsCount
+        });
+
+        if (currentUser) {
+          const userCurrentRating = await getUserRating(id, currentUser.uid);
+          setUserRating(userCurrentRating);
+        }
+      }
+    } catch (error) {
+      console.error('Error reloading recipe:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditRecipe = () => {
+    router.push(`/recipe/edit-recipe?id=${id}`);
+  };
+
+  const handleShare = async () => {
+    try {
+      const shareText = `Check out this delicious recipe: ${recipe.title}\n\nIngredients:\n${recipe.ingredients.map(item => `• ${item.amount} ${item.ingredient}`).join('\n')}\n\nTime: ${recipe.time} min\nRating: ${recipe.rating}⭐\n\nBy ${recipe.authorName}`;
+      
+      const result = await Share.share({
+        message: shareText,
+        title: recipe.title,
+        url: recipe.imageUrl, // Optional: share the image URL
+      });
+      
+      if (result.action === Share.sharedAction) {
+        console.log('Recipe shared successfully!');
+      }
+    } catch (error) {
+      console.error('Error sharing recipe:', error);
+      Alert.alert('Error', 'Could not share recipe. Please try again.');
+    }
+  };
+
+  const handleAddToShoppingList = async () => {
+    if (!currentUser) {
+      Alert.alert("Login Required", "You need to be logged in to add items to your shopping list.");
+      return;
+    }
+
+    try {
+      let addedCount = 0;
+      
+      // Add each ingredient individually and count successful additions
+      for (const ingredient of recipe.ingredients) {
+        const itemText = `${ingredient.amount} ${ingredient.ingredient}`.trim();
+        if (itemText) {
+          try {
+            // Pass an object with text property as expected by addShoppingListItem
+            await addShoppingListItem(currentUser.uid, { text: itemText });
+            addedCount++;
+          } catch (itemError) {
+            console.error(`Error adding ingredient "${itemText}":`, itemError);
+            // Continue with other ingredients even if one fails
+          }
+        }
+      }
+      
+      // Only show success alert if at least one item was added
+      if (addedCount > 0) {
+        Alert.alert(
+          "Success! 🛒", 
+          `${addedCount} ingredient${addedCount > 1 ? 's' : ''} ${addedCount > 1 ? 'have' : 'has'} been added to your shopping list!`,
+          [
+            { 
+              text: "OK", 
+              style: "default"
+            }
+          ]
+        );
+        
+        showToast(`${addedCount} ingredients added to your shopping list!`);
+      } else {
+        Alert.alert("Error", "No ingredients could be added to your shopping list. Please try again.");
+      }
+      
+    } catch (error) {
+      console.error('Error adding to shopping list:', error);
+      Alert.alert("Error", "Could not add ingredients to shopping list. Please try again.");
+    }
+  };
+
+  const handleCommentInputFocus = () => {
+    // Kleine Verzögerung um sicherzustellen, dass die Keyboard-Animation startet
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        // Einfach zum Ende scrollen, da die Kommentare am Ende sind
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }, 100);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      if (global.recipeEditCompleted) {
+        reloadRecipeData();
+        global.recipeEditCompleted = false;
+      }
+    }, [])
+  );
+
+  const isOwner = isRecipeOwner(recipe, currentUser?.uid);
+
+  if (loading || !recipe) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
+        <Text style={{ color: theme.colors.text }}>Loading recipe details...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -195,21 +539,34 @@ export default function RecipeDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.shareButton}>
-          <Ionicons name="share-outline" size={24} color={theme.colors.text} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          {isOwner && (
+            <>
+              <TouchableOpacity style={styles.actionButton} onPress={handleEditRecipe}>
+                <Ionicons name="create-outline" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton} onPress={handleDeleteRecipe}>
+                <Ionicons name="trash-outline" size={24} color={theme.colors.error} />
+              </TouchableOpacity>
+            </>
+          )}
+          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+            <Ionicons name="share-outline" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <ScrollView 
-        ref={scrollViewRef}
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 120 }} // Extra padding for comment input
-      >
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          ref={scrollViewRef}
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
+        >
         {/* Recipe Image with Category Tags */}
         <View style={styles.imageContainer}>
-          <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
-          
+          <Image source={{ uri: recipe.imageUrl }} style={styles.recipeImage} />
+
           {/* Category Tags on Image */}
           {recipe.categories && recipe.categories.length > 0 && (
             <View style={styles.imageTags}>
@@ -230,11 +587,11 @@ export default function RecipeDetailScreen() {
         {/* Recipe Info */}
         <View style={styles.content}>
           <Text style={styles.title}>{recipe.title}</Text>
-          
+
           <View style={styles.metadata}>
             <View style={styles.timeContainer}>
               <Ionicons name="time-outline" size={16} color={theme.colors.textSecondary} />
-              <Text style={styles.time}>{recipe.time}</Text>
+              <Text style={styles.time}>{recipe.time} min</Text>
             </View>
 
             <View style={styles.ratingContainer}>
@@ -244,17 +601,18 @@ export default function RecipeDetailScreen() {
             </View>
           </View>
 
-          <Text style={styles.author}>by {recipe.author}</Text>
+          {/* Use recipe.authorName here */}
+          <Text style={styles.author}>by {recipe.authorName}</Text>
 
           {/* Allergy Information */}
-          {recipe.allergies && recipe.allergies.length > 0 && (
+          {recipe.allergens && recipe.allergens.length > 0 && (
             <View style={styles.allergySection}>
               <View style={styles.allergyHeader}>
                 <Ionicons name="warning-outline" size={18} color="#FF6B6B" />
                 <Text style={styles.allergyTitle}>Allergen Information</Text>
               </View>
               <View style={styles.allergyTags}>
-                {recipe.allergies.map((allergy) => {
+                {recipe.allergens.map((allergy) => {
                   const config = allergyConfig[allergy];
                   if (!config) return null;
                   return (
@@ -272,28 +630,28 @@ export default function RecipeDetailScreen() {
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            <TouchableOpacity 
-              style={[styles.likeButton, isLiked && styles.likedButton]} 
+            <TouchableOpacity
+              style={[styles.likeButton, isLiked && styles.likedButton]}
               onPress={handleLike}
             >
-              <Ionicons 
-                name={isLiked ? "heart" : "heart-outline"} 
-                size={20} 
-                color={isLiked ? "#FF6B6B" : theme.colors.buttonText} 
+              <Ionicons
+                name={isLiked ? "heart" : "heart-outline"}
+                size={20}
+                color="#FFFFFF"
               />
               <Text style={[styles.buttonText, isLiked && styles.likedText]}>
                 {isLiked ? 'Liked' : 'Like'}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[styles.saveButton, isSaved && styles.savedButton]} 
+            <TouchableOpacity
+              style={[styles.saveButton, isSaved && styles.savedButton]}
               onPress={handleSave}
             >
-              <Ionicons 
-                name={isSaved ? "bookmark" : "bookmark-outline"} 
-                size={20} 
-                color={isSaved ? "#4ECDC4" : theme.colors.buttonText} 
+              <Ionicons
+                name={isSaved ? "bookmark" : "bookmark-outline"}
+                size={20}
+                color="#FFFFFF"
               />
               <Text style={[styles.buttonText, isSaved && styles.savedText]}>
                 {isSaved ? 'Saved' : 'Save'}
@@ -314,7 +672,7 @@ export default function RecipeDetailScreen() {
               </View>
             ) : (
               <TouchableOpacity style={styles.rateButton} onPress={() => setShowRating(true)}>
-                <Ionicons name="star-outline" size={20} color={theme.colors.buttonText} />
+                <Ionicons name="star-outline" size={20} color="#FFFFFF" />
                 <Text style={styles.buttonText}>Rate Recipe</Text>
               </TouchableOpacity>
             )}
@@ -322,17 +680,50 @@ export default function RecipeDetailScreen() {
 
           {/* Ingredients */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
-            {recipe.ingredients.map((ingredient, index) => (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Ingredients</Text>
+              <TouchableOpacity 
+                style={styles.addToShoppingListButton}
+                onPress={handleAddToShoppingList}
+              >
+                <Ionicons name="basket-outline" size={16} color={theme.colors.primary} />
+                <Text style={styles.addToShoppingListText}>Add to List</Text>
+              </TouchableOpacity>
+            </View>
+            {recipe.ingredients.map((item, index) => (
               <View key={index} style={styles.ingredientItem}>
                 <View style={styles.bulletPoint} />
-                <Text style={styles.ingredientText}>{ingredient}</Text>
+                <Text style={styles.ingredientText}>
+                  {item.amount} {item.ingredient}
+                </Text>
               </View>
             ))}
           </View>
 
+          {/* Instructions */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Instructions</Text>
+            <Text style={styles.sectionSubtitle}>Step-by-step guide</Text>
+
+            {recipe.instructions?.length > 0 ? (
+              recipe.instructions.map((step, index) => (
+                <View key={index} style={styles.stepCard}>
+                  <View style={styles.stepHeader}>
+                    <View style={styles.stepCircle}>
+                      <Text style={styles.stepNumber}>{index + 1}</Text>
+                    </View>
+                    <Text style={styles.stepTitle}>Step {index + 1}</Text>
+                  </View>
+                  <Text style={styles.stepDescription}>{step}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.ingredientText}>No instructions provided.</Text>
+            )}
+          </View>
+
           {/* Comments Section */}
-          <CommentsSection 
+          <CommentsSection
             comments={comments}
             onCommentLike={handleCommentLike}
             theme={theme}
@@ -341,11 +732,16 @@ export default function RecipeDetailScreen() {
         </View>
       </ScrollView>
 
-      {/* Comment Input - Now positioned absolutely */}
-      <CommentInput onAddComment={handleAddComment} theme={theme} />
+      {/* Comment Input */}
+      <CommentInput 
+        onAddComment={handleAddComment} 
+        theme={theme} 
+        onFocus={handleCommentInputFocus}
+      />
+      </View>
 
       {/* Rating Modal */}
-      <RatingModal 
+      <RatingModal
         visible={showRating}
         onClose={() => setShowRating(false)}
         onRating={handleRating}
@@ -373,23 +769,50 @@ const createStyles = (theme) => StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
-    backgroundColor: theme.isDarkMode 
-      ? 'rgba(0,0,0,0.8)' 
+    backgroundColor: theme.isDarkMode
+      ? 'rgba(0,0,0,0.8)'
       : 'rgba(255,255,255,0.9)',
   },
   backButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.cardAccent,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: theme.colors.cardAccent,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   shareButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.cardAccent,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   imageContainer: {
     position: 'relative',
@@ -440,6 +863,16 @@ const createStyles = (theme) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    backgroundColor: theme.colors.cardAccent,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   timeContainer: {
     flexDirection: 'row',
@@ -471,12 +904,17 @@ const createStyles = (theme) => StyleSheet.create({
     marginBottom: 20,
   },
   allergySection: {
-    backgroundColor: '#FF6B6B10',
+    backgroundColor: theme.colors.accentBackground,
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#FF6B6B30',
+    borderColor: theme.colors.primary,
     marginBottom: 20,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   allergyHeader: {
     flexDirection: 'row',
@@ -510,39 +948,6 @@ const createStyles = (theme) => StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  categorySection: {
-    backgroundColor: theme.colors.surface,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  categoryTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.text,
-    marginBottom: 12,
-  },
-  categoryTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  categoryPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    gap: 6,
-  },
-  categoryPillEmoji: {
-    fontSize: 16,
-  },
-  categoryPillText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
   description: {
     fontSize: 16,
     color: theme.colors.text,
@@ -559,47 +964,64 @@ const createStyles = (theme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.button,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     borderRadius: 25,
     gap: 8,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   saveButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.button,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     borderRadius: 25,
     gap: 8,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   likedButton: {
-    backgroundColor: '#FF6B6B20',
+    backgroundColor: '#FF6B6B',
     borderWidth: 1,
     borderColor: '#FF6B6B',
   },
   savedButton: {
-    backgroundColor: '#4ECDC420',
+    backgroundColor: '#4ECDC4',
     borderWidth: 1,
     borderColor: '#4ECDC4',
   },
   buttonText: {
-    color: theme.colors.buttonText,
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
   likedText: {
-    color: '#FF6B6B',
+    color: '#FFFFFF',
   },
   savedText: {
-    color: '#4ECDC4',
+    color: '#FFFFFF',
   },
   ratingSection: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.cardAccent,
     padding: 20,
     borderRadius: 16,
     marginBottom: 30,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   ratingSectionTitle: {
     fontSize: 18,
@@ -621,37 +1043,68 @@ const createStyles = (theme) => StyleSheet.create({
   },
   changeRatingText: {
     fontSize: 14,
-    color: '#4A90E2',
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   rateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.button,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     borderRadius: 25,
     gap: 8,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   section: {
     marginBottom: 30,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: 20,
+    color: theme.colors.primary,
+  },
+  addToShoppingListButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    gap: 6,
+  },
+  addToShoppingListText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.primary,
   },
   ingredientItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    backgroundColor: theme.colors.cardAccent,
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: theme.colors.primary,
   },
   bulletPoint: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: theme.colors.text,
+    backgroundColor: theme.colors.primary,
     marginRight: 12,
   },
   ingredientText: {
@@ -659,4 +1112,61 @@ const createStyles = (theme) => StyleSheet.create({
     color: theme.colors.text,
     flex: 1,
   },
+
+  stepCard: {
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.cardAccent,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  stepHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+
+  stepCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    backgroundColor: theme.colors.primary,
+  },
+
+  stepNumber: {
+    fontWeight: '600',
+    fontSize: 13,
+    color: '#FFFFFF',
+  },
+
+  stepTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.text,
+  },
+
+  stepDescription: {
+    fontSize: 15,
+    color: theme.colors.textSecondary,
+    lineHeight: 22,
+  },
+
+  sectionSubtitle: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    marginBottom: 10,
+  },
+
 });

@@ -1,109 +1,254 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { useTheme } from '../../contexts/ThemeContext';
+import React, { useState } from 'react';
+import {
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { useTheme } from "../../contexts/ThemeContext";
+import { useRouter } from 'expo-router';
+import { CATEGORIES, COLORS } from '../../utils/constants';
+import useTabBarHeight from '../../hooks/useTabBarHeight';
 
-const cravingTypes = [
-  { id: 1, label: 'Salty', emoji: '🧂', color: '#4A90E2', slug: 'salty' },
-  { id: 2, label: 'Sweet', emoji: '🍯', color: '#F5A623', slug: 'sweet' },
-  { id: 3, label: 'Sour', emoji: '🍋', color: '#7ED321', slug: 'sour' },
-  { id: 4, label: 'Spicy', emoji: '🌶️', color: '#D0021B', slug: 'spicy' },
-  { id: 5, label: 'Cold', emoji: '🧊', color: '#50E3C2', slug: 'cold' },
-  { id: 6, label: 'Hot', emoji: '🔥', color: '#F8E71C', slug: 'hot' },
-];
+export default function CravingSelection() {
+    const [selectedCravings, setSelectedCravings] = useState([]);
+    const { theme } = useTheme();
+    const tabBarHeight = useTabBarHeight();
+    const styles = createStyles(theme, tabBarHeight);
+    const [error, setError] = useState('');
+    const router = useRouter();
 
-export default function ExploreScreen() {
-  const { theme } = useTheme();
-  const styles = createStyles(theme);
+    const toggleCraving = (id) => {
+        setSelectedCravings((prev) => {
+            let newSelection = prev.includes(id)
+                ? prev.filter((c) => c !== id)
+                : [...prev, id];
 
-  const handleCravingPress = (craving) => {
-    router.push(`/category/${craving.slug}`); 
-  };
+            if (newSelection.includes('hot') && newSelection.includes('cold')) {
+                setError('"Cold" and "Hot"cannot be selected together.');
+            } else if (newSelection.length > 2) {
+                setError('Please select up to 2 cravings only.');
+            } else {
+                setError('');
+            }
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>What are you craving?</Text>
-        <Text style={styles.subtitle}>Discover recipes by taste</Text>
-      </View>
+            return newSelection;
+        });
+    };
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.cravingsGrid}>
-          {cravingTypes.map((craving) => (
-            <TouchableOpacity
-              key={craving.id}
-              style={[styles.cravingButton, { borderColor: craving.color }]}
-              onPress={() => handleCravingPress(craving)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.cravingEmoji}>{craving.emoji}</Text>
-              <Text style={styles.cravingLabel}>{craving.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+    const handleNextButton = () => {
+        router.push({
+            pathname: '/craving/allergySelection',
+            params: { cravings: JSON.stringify(selectedCravings) },
+        });
+    };
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>What are you craving for today?</Text>
+                    <Text style={styles.subsubtitle}>Tell us your mood, we'll find your food</Text>
+                </View>
+
+                <View style={styles.grid}>
+                    {CATEGORIES.map((craving) => {
+                        const isSelected = selectedCravings.includes(craving.id);
+                        return (
+                            <TouchableOpacity
+                                key={craving.id}
+                                style={[
+                                    styles.cravingButton,
+                                    {
+                                        backgroundColor: isSelected ? COLORS.primary : COLORS.white,
+                                        borderColor: COLORS.primary,
+                                        shadowColor: COLORS.primary,
+                                        transform: [{ scale: isSelected ? 1.02 : 1 }],
+                                    },
+                                ]}
+                                onPress={() => toggleCraving(craving.id)}
+                            >
+                                <View style={styles.cravingContent}>
+                                    <Text style={styles.cravingEmoji}>
+                                        {craving.icon}
+                                    </Text>
+                                    <Text style={[
+                                        styles.cravingLabel, 
+                                        { color: isSelected ? COLORS.white : COLORS.primary }
+                                    ]}>
+                                        {craving.label}
+                                    </Text>
+                                </View>
+                                {isSelected && (
+                                    <View style={[styles.checkmarkWrapper, { backgroundColor: COLORS.white }]}>
+                                        <Text style={[styles.checkmark, { color: COLORS.primary }]}>✓</Text>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+
+                <View style={styles.buttonsContainer}>
+                    {error ? (
+                        <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>{error}</Text>
+                        </View>
+                    ) : (
+                        <TouchableOpacity
+                            style={[
+                                styles.submitButton,
+                                { backgroundColor: selectedCravings.length === 0 ? COLORS.lightGray : COLORS.primary },
+                            ]}
+                            onPress={handleNextButton}
+                            disabled={selectedCravings.length === 0}
+                        >
+                            <Text style={[
+                                styles.submitButtonText,
+                                { color: selectedCravings.length === 0 ? COLORS.gray : COLORS.white }
+                            ]}>
+                                {selectedCravings.length === 0 ? 'Please select at least one craving' : 'Next →'}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </ScrollView>
+        </SafeAreaView>
+    );
 }
 
-const createStyles = (theme) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 30,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  cravingsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 20,
-  },
-  cravingButton: {
-    width: '45%',
-    aspectRatio: 1,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 20,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    position: 'relative',
-  },
-  cravingEmoji: {
-    fontSize: 40,
-    marginBottom: 8,
-  },
-  cravingLabel: {
-    color: theme.colors.text,
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  colorDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    position: 'absolute',
-    top: 12,
-    right: 12,
-  },
+const createStyles = ( tabBarHeight) => StyleSheet.create({
+    container: { 
+        flex: 1, 
+        backgroundColor: COLORS.white 
+    },
+    scrollContent: { 
+        padding: 20, 
+        paddingBottom: tabBarHeight + 20, 
+        alignItems: 'center' 
+    },
+    header: { 
+        alignItems: 'center', 
+        marginBottom: 30 
+    },
+    logoImage: {
+        width: 100,
+        height: 100,
+        marginTop: 20,
+    },
+    title: { 
+        fontSize: 24, 
+        fontWeight: 'bold', 
+        color: COLORS.primary, 
+        marginBottom: 8, 
+        marginTop: 16,
+        textAlign: 'center'
+    },
+    subsubtitle: { 
+        fontSize: 16, 
+        color: COLORS.gray, 
+        textAlign: 'center'
+    },
+    grid: { 
+        flexDirection: 'row', 
+        flexWrap: 'wrap', 
+        justifyContent: 'space-between',
+        width: '100%',
+        paddingHorizontal: 4,
+    },
+    cravingButton: {
+        width: '47%',
+        borderRadius: 16,
+        borderWidth: 2,
+        height: 110,
+        marginBottom: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 12,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        shadowOpacity: 0.1,
+        elevation: 3,
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cravingContent: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+    },
+    cravingEmoji: {
+        fontSize: 28,
+        marginBottom: 6,
+        textAlign: 'center',
+    },
+    cravingLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        textAlign: 'center',
+        lineHeight: 16,
+    },
+    checkmarkWrapper: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        borderRadius: 10,
+        width: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 2,
+        shadowOpacity: 0.2,
+        elevation: 2,
+    },
+    checkmark: {
+        fontSize: 14,
+        fontWeight: '900',
+    },
+    buttonsContainer: {
+        width: '100%',
+        alignItems: 'center',
+        marginTop: 30,
+        paddingHorizontal: 4,
+    },
+    submitButton: {
+        paddingVertical: 16,
+        paddingHorizontal: 32,
+        borderRadius: 12,
+        width: '100%',
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        shadowOpacity: 0.1,
+        elevation: 3,
+    },
+    submitButtonText: {
+        fontWeight: '600',
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    errorContainer: {
+        width: '100%',
+        backgroundColor: '#fce8e8',
+        borderColor: COLORS.error,
+        borderWidth: 1,
+        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        marginTop: 12,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        alignSelf: 'center',
+    },
+    errorText: {
+        color: COLORS.error,
+        fontSize: 14,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
 });
