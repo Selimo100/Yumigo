@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ALLERGENS, COLORS } from '../../utils/constants';
 import CravingLayout from '../../components/CravingLayout';
 import CravingSelector from '../../components/CravingSelector';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Add "None" option to allergens
 const ALLERGY_OPTIONS = [
@@ -16,6 +17,8 @@ export default function AllergySelection() {
     const router = useRouter();
     const params = useLocalSearchParams();
     const cravings = params.cravings ? JSON.parse(params.cravings) : [];
+    const { theme } = useTheme();
+    const styles = createStyles(theme);
 
     const toggleAllergy = (id) => {
         setSelectedAllergies((prev) => {
@@ -56,12 +59,12 @@ export default function AllergySelection() {
                             style={[
                                 styles.allergyCard,
                                 {
-                                    backgroundColor: isSelected ? COLORS.primary : COLORS.white,
-                                    borderColor: isSelected ? COLORS.primary : '#e0e0e0',
+                                    backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
+                                    borderColor: isSelected ? COLORS.primary : theme.colors.border,
                                 },
                             ]}
                             labelStyle={{
-                                color: isSelected ? COLORS.white : COLORS.primary,
+                                color: isSelected ? COLORS.white : theme.colors.text,
                             }}
                         />
                     );
@@ -72,14 +75,14 @@ export default function AllergySelection() {
                 <TouchableOpacity
                     style={[
                         styles.submitButton, 
-                        { backgroundColor: selectedAllergies.length === 0 ? COLORS.lightGray : COLORS.primary }
+                        { backgroundColor: selectedAllergies.length === 0 ? theme.colors.disabled : COLORS.primary }
                     ]}
                     onPress={handleNext}
                     disabled={selectedAllergies.length === 0}
                 >
                     <Text style={[
                         styles.submitButtonText,
-                        { color: selectedAllergies.length === 0 ? COLORS.gray : COLORS.white }
+                        { color: selectedAllergies.length === 0 ? theme.colors.textSecondary : COLORS.white }
                     ]}>
                         {selectedAllergies.length === 0 ? 'Please select at least one option' : 'Next →'}
                     </Text>
@@ -89,7 +92,7 @@ export default function AllergySelection() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     grid: { 
         flexDirection: 'row', 
         flexWrap: 'wrap', 
@@ -106,7 +109,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
+        shadowColor: theme.colors.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
