@@ -9,11 +9,11 @@ import { useFollow } from '../hooks/useFollow';
 import { notifyUserFollow } from '../services/inAppNotificationService';
 import { showToast } from '../utils/toast';
 import useAuth from '../lib/useAuth';
-export default function FollowButton({ 
-  userId, 
-  size = 'medium', 
+export default function FollowButton({
+  userId,
+  size = 'medium',
   style,
-  onFollowChange 
+  onFollowChange
 }) {
   const { theme } = useTheme();
   const { user } = useAuth();
@@ -33,11 +33,11 @@ export default function FollowButton({
   // Bei Fehlern wird der Status zurückgesetzt
   const handlePress = async () => {
     if (isLoading) return;
-    
+
     setIsLoading(true);
     const previousStatus = isFollowing;
     const newStatus = !isFollowing;
-    
+
     // Optimistisches Update der UI
     setIsFollowing(newStatus);
     onFollowChange?.(newStatus);
@@ -48,8 +48,9 @@ export default function FollowButton({
         success = await handleUnfollow(userId);
       } else {
         success = await handleFollow(userId);
-        
+
         // BENACHRICHTIGUNGS-SYSTEM: Informiere gefolgten User
+        // Wird ausgelöst wenn User einem anderen folgt
         if (success && !previousStatus && user) {
           notifyUserFollow(userId, user.displayName || user.email?.split('@')[0] || 'Someone', user.uid);
         }
@@ -94,9 +95,9 @@ export default function FollowButton({
       disabled={isLoading}
     >
       {isLoading ? (
-        <ActivityIndicator 
-          size="small" 
-          color={isFollowing ? theme.colors.primary : '#FFFFFF'} 
+        <ActivityIndicator
+          size="small"
+          color={isFollowing ? theme.colors.primary : '#FFFFFF'}
         />
       ) : (
         <>

@@ -91,6 +91,7 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
             setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
 
             // BENACHRICHTIGUNGS-LOGIK: Informiere Autor über neuen Like
+            // Wird ausgelöst wenn User ein Rezept liked
             if (newLikedState && recipe.authorId && recipe.authorId !== user.uid) {
                 notifyRecipeLike(recipe.id, recipe.title, user.displayName || user.email?.split('@')[0] || 'Someone', recipe.authorId);
             }
@@ -120,8 +121,14 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
             await rateRecipe(recipe.id, user.uid, rating);
             setUserRating(rating);
             setShowRatingModal(false);
+            // Wird ausgelöst bei Recipe-Bewertung
             if (recipe.authorId && recipe.authorId !== user.uid) {
-                notifyRecipeRating(recipe.id, recipe.title, user.displayName || user.email?.split('@')[0] || 'Someone', rating, recipe.authorId);
+                notifyRecipeRating(
+                    recipe.id, recipe.title,
+                    user.displayName || user.email?.split('@')[0] || 'Someone',
+                    rating,
+                    recipe.authorId
+                );
             }
             if (onRatingUpdate) {
                 onRatingUpdate(recipe.id);
@@ -177,7 +184,7 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                             } catch (error) {
                                 if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
                                     Alert.alert(
-                                        "Setup Required", 
+                                        "Setup Required",
                                         "Favorites feature requires Firestore rules setup. Check UPDATE_FIRESTORE_RULES.md in your project."
                                     );
                                 } else {
@@ -186,10 +193,10 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                             }
                         }}
                     >
-                        <Ionicons 
-                            name={isRecipeFavorite ? "bookmark" : "bookmark-outline"} 
-                            size={20} 
-                            color={isRecipeFavorite ? theme.colors.primary : theme.colors.textSecondary} 
+                        <Ionicons
+                            name={isRecipeFavorite ? "bookmark" : "bookmark-outline"}
+                            size={20}
+                            color={isRecipeFavorite ? theme.colors.primary : theme.colors.textSecondary}
                         />
                     </TouchableOpacity>
                 </View>
@@ -230,10 +237,10 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                         <Text style={styles.author}>by {recipe.authorName}</Text>
                     </TouchableOpacity>
                     <View style={styles.engagement}>
-                        {}
-                        <TouchableOpacity 
-                            style={[styles.likeButton, isLiking && styles.likeButtonDisabled]} 
-                            onPress={handleLikePress} 
+                        { }
+                        <TouchableOpacity
+                            style={[styles.likeButton, isLiking && styles.likeButtonDisabled]}
+                            onPress={handleLikePress}
                             disabled={isLiking}
                         >
                             <Animated.View style={{ transform: [{ scale: likeAnimation }] }}>
@@ -251,21 +258,21 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                             <Ionicons name="chatbubble-outline" size={18} color={theme.colors.textSecondary} />
                             <Text style={[styles.commentCount, { color: theme.colors.textSecondary }]}>{commentCount}</Text>
                         </TouchableOpacity>
-                        {}
+                        { }
                         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
                             <Ionicons name="share-outline" size={18} color={theme.colors.textSecondary} />
                         </TouchableOpacity>
-                        {}
+                        { }
                         {recipe.authorId && recipe.authorId !== user?.uid && (
-                            <FollowButton 
-                                userId={recipe.authorId} 
+                            <FollowButton
+                                userId={recipe.authorId}
                                 size="small"
                             />
                         )}
                     </View>
                 </View>
             </View>
-            {}
+            { }
             <RatingModal
                 visible={showRatingModal}
                 onClose={() => setShowRatingModal(false)}
@@ -300,7 +307,7 @@ const createStyles = (theme) => StyleSheet.create({
     image: {
         width: '100%',
         height: 200,
-        backgroundColor: theme.colors.button, 
+        backgroundColor: theme.colors.button,
     },
     topTags: {
         position: 'absolute',

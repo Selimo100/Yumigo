@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { onSnapshot, collection, query, where, orderBy, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebaseconfig';
 import useAuth from '../lib/useAuth';
@@ -30,26 +30,27 @@ export const NotificationProvider = ({ children }) => {
 
     const notificationsRef = collection(db, 'notifications');
 
-// Echzeit-Firebase-Listener für Benachrichtigungen
+    // Query: Nur Notifications für aktuellen User
     const q = query(
       notificationsRef,
-      where('recipientId', '==', user.uid)
+      where('recipientId', '==', user.uid) // Filter nach Empfänger
     );
 
+    // Real-time Listener
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      
       const notificationsList = [];
       let unreadCounter = 0;
 
       snapshot.docs.forEach(doc => {
         const data = { id: doc.id, ...doc.data() };
         notificationsList.push(data);
-        
+
         if (!data.read) {
-          unreadCounter++;
+          unreadCounter++; // Zählt ungelesene
         }
       });
 
+      // Sortierung: Neueste zuerst
       notificationsList.sort((a, b) => {
         const dateA = a.createdAt?.toDate?.() || new Date(0);
         const dateB = b.createdAt?.toDate?.() || new Date(0);
@@ -63,15 +64,15 @@ export const NotificationProvider = ({ children }) => {
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => unsubscribe(); // Cleanup
   }, [user?.uid]);
 
   const markAsRead = async (notificationId) => {
     try {
-      
-      setNotifications(prevNotifications => 
-        prevNotifications.map(notification => 
-          notification.id === notificationId 
+      // Optimistic Update (UI sofort aktualisieren)
+      setNotifications(prevNotifications =>
+        prevNotifications.map(notification =>
+          notification.id === notificationId
             ? { ...notification, read: true }
             : notification
         )
@@ -79,37 +80,38 @@ export const NotificationProvider = ({ children }) => {
 
       setUnreadCount(prevCount => Math.max(0, prevCount - 1));
 
+      // Firebase Update
       const notificationRef = doc(db, 'notifications', notificationId);
       await updateDoc(notificationRef, { read: true });
     } catch (error) {
-      
+      // Error handling
     }
   };
 
   const markAllAsRead = async () => {
     try {
       const unreadNotifications = notifications.filter(notification => !notification.read);
-      
+
       if (unreadNotifications.length === 0) {
-        return true; 
+        return true;
       }
 
-      setNotifications(prevNotifications => 
+      setNotifications(prevNotifications =>
         prevNotifications.map(notification => ({
           ...notification,
           read: true
         }))
       );
       setUnreadCount(0);
-
+      // Batch-Write für Performance
       const batch = writeBatch(db);
-      
+
       unreadNotifications.forEach(notification => {
         const notificationRef = doc(db, 'notifications', notification.id);
         batch.update(notificationRef, { read: true });
       });
-      
-      await batch.commit();
+
+    await batch.commit(); // Alle Updates in einem Batch
       return true;
     } catch (error) {
 

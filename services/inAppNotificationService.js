@@ -5,15 +5,16 @@ export const createInAppNotification = async (notificationData) => {
   try {
     const notification = {
       ...notificationData,
-      createdAt: serverTimestamp(),
+      createdAt: serverTimestamp(), // Firebase Server Timestamp
       read: false,
-      type: 'in-app' 
-    };    
-    
+      type: 'in-app'
+    };
+
+    // Speichert in Firebase Collection 'notifications'
     const docRef = await addDoc(collection(db, 'notifications'), notification);
     return docRef.id;
   } catch (error) {
-    
+
     return null;
   }
 };
@@ -21,7 +22,7 @@ export const createInAppNotification = async (notificationData) => {
 // Verschiedene Notification-Types (Like, Follow, Comment)
 export const notifyRecipeLike = async (recipeId, recipeTitle, likerName, recipeAuthorId) => {
   if (!recipeAuthorId) return;
-  
+
   try {
     await createInAppNotification({
       recipientId: recipeAuthorId,
@@ -36,13 +37,13 @@ export const notifyRecipeLike = async (recipeId, recipeTitle, likerName, recipeA
       }
     });
   } catch (error) {
-    
+
   }
 };
 
 export const notifyUserFollow = async (followedUserId, followerName, followerId) => {
   if (!followedUserId) return;
-  
+
   try {
     await createInAppNotification({
       recipientId: followedUserId,
@@ -56,13 +57,13 @@ export const notifyUserFollow = async (followedUserId, followerName, followerId)
       }
     });
   } catch (error) {
-    
+
   }
 };
 
 export const notifyRecipeRating = async (recipeId, recipeTitle, raterName, rating, recipeAuthorId) => {
   if (!recipeAuthorId) return;
-  
+
   try {
     await createInAppNotification({
       recipientId: recipeAuthorId,
@@ -78,6 +79,6 @@ export const notifyRecipeRating = async (recipeId, recipeTitle, raterName, ratin
       }
     });
   } catch (error) {
-    
+
   }
 };
