@@ -155,8 +155,68 @@ Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um un
 
 # 5. 🎨 Mockups
 
+## 5.1 App Icon
+Unser Logo besteht aus einer Zunge für unsere Rezepte App und einem Y für Yumigo.
 
-bla bla bla
+![appIconMockup.png](assets/appIconMockup.png)
+
+---
+## 5.2 Homescreen und Rezeptedetailseite
+Oben links im Header haben wir unser Logo platziert und oben rechts einen Add-Butto, wo man ein neues Rezept hinzufügen kann. Ebenfals haben wir oben rechts eine Glocke für die Notifications gemacht. 
+
+Unter dem Header kommt eine Searchbar, um nach Rezepten zu suchen und zu filtern. 
+Unterhalb von der Searchbar kommen alle Rezepte angezeigt. 
+
+Ganz unten haben wir unsere Bottomnavigation mit den Tabs Home, Craving, Favorite und Profile. Wenn man auf ein einzelnes Rezept klickt kommt man auf die Rezeptedetailseite. 
+
+Auf der Rezeptedetailseite sieht man alle Zutaten, eine Beschreibung des Gerichtes, die Vorbereitungsschritte. Ebenfalls hat man die Möglichkeit das Rezept zu Liken, zu speichern unter seinen Favoriten und man kann das Rezept mir Freunden direkt in einem Chat, wie Whatsapp, sharen. 
+
+![Homescreen Mockup.png](assets/Homescreen%20Mockup.png)
+
+---
+
+## 5.3 Craving und Cravingresultsseite
+
+Auf dem Cravingscreen kann der Nutzer auswählen, worauf er aktuell Appetit hat. Zur Auswahl stehen sechs Geschmacksrichtungen: Salty, Sweet, Sour, Spicy, Cold und Hot. Jede Kategorie ist als eigene Kachel mit einem passenden Emoji dargestellt. Sobald man eine dieser Kategorien antippt, wird man zum Cravingdetailscreen weitergeleitet.
+
+Der Cravingdetailscreen zeigt passende Rezepte zur gewählten Kategorie an, in diesem Beispiel „Salty Recipes“. Zuoberst befindet sich ein Titel mit einer kurzen Beschreibung. Darunter werden die Rezeptvorschläge in einer Liste angezeigt, jeweils mit Titel, Bewertungssternen, einem Bild und einer Followoption.
+
+Ganz unten befindet sich wieder unsere Bottom Navigation Bar, mit den vier Tabs: Home, Craving, Favorite und Profile, über die man jederzeit zwischen den Hauptbereichen der App wechseln kann.
+
+![Craving Mockup .png](assets/Craving%20Mockup%20.png)
+
+---
+
+## 5.4 Createform
+Auf dem Createrecipescreen kann der Nutzer ein neues Rezept anlegen. Zuoberst gibt es die Möglichkeit, ein Foto hochzuladen. Darunter befinden sich Eingabefelder für den Rezepttitel, eine Beschreibung und die Kategorie (Salty, Sweet, Spicy, ect.).
+
+Scrollt man weiter nach unten, können Zutaten mit Menge und Einheit hinzugefügt werden. Ausserdem gibt es ein Feld für die Zubereitungsschritte. Unten am Screen befindet sich ein Button, um das Rezept zu veröffentlichen.
+
+Auch hier ist die Bottom Navigation Bar mit den Tabs Home, Craving, Favorite und Profile jederzeit sichtbar.
+
+![Createform Mockup.png](assets/Createform%20Mockup.png)
+
+
+---
+## 5.5 Profilescreen
+
+Auf dem Profilescreen sieht man alle Infos zum eigenen Nutzerkonto. Oben werden Profilbild, Username, Follower- und Following-Anzahl sowie die Anzahl der eigenen Rezepte angezeigt. Darunter gibt es eine kurze Beschreibung.
+
+Man hat die Möglichkeit, das Profil zu bearbeiten oder den Link zum Profil zu teilen. Unter dem Bereich „Your Recipes“ werden alle eigenen Rezepte als Karten aufgelistet.
+
+Unten befindet sich die Bottom Navigation Bar mit den Tabs Home, Craving, Favorites und Profile.
+
+![ProfileScreen Mockup.png](assets/ProfileScreen%20Mockup.png)
+
+--- 
+## 5.6 Favoritesscreen
+Im Favoritesscreen werden alle gespeicherten Lieblingsrezepte angezeigt. Oben gibt es eine Searchbar, um nach Favoriten zu suchen oder nach Kategorien wie Sweet, Salty oder Spicy zu filtern.
+
+Darunter sind die Favoriten als Liste dargestellt. Jedes Rezept zeigt Titel, Bild, Bewertung, Icons zum Speichern, Liken oder Teilen und einen Follow-Button für den Rezept-Ersteller.
+
+Ganz unten ist wie immer die Bottom Navigation Bar mit den Tabs Home, Craving, Favorites und Profile.
+
+![Favorite Mockup.png](assets/Favorite%20Mockup.png)
 
 ---
 
