@@ -1,18 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useFollow } from '../../hooks/useFollow';
-import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import React, {useCallback, useEffect, useState} from 'react';
+import {ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View,} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {Ionicons} from '@expo/vector-icons';
+import {useTheme} from '../../contexts/ThemeContext';
+import {useFollow} from '../../hooks/useFollow';
+import {useFocusEffect, useLocalSearchParams, useRouter} from 'expo-router';
 import UserCard from '../../components/UserCard';
 
 export default function FollowListScreen() {

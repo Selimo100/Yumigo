@@ -1,6 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, View, Text, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {Alert, Text, TouchableOpacity, View} from 'react-native';
+import {Ionicons} from '@expo/vector-icons';
 
 export const AccountSection = ({ styles, theme }) => {
   

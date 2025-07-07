@@ -1,17 +1,9 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Image,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, {useState} from 'react';
+import {ActivityIndicator, Alert, Image, Text, TextInput, TouchableOpacity, View,} from 'react-native';
+import {Ionicons} from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { uploadProfileImage } from '../../services/userService';
-import { auth } from '../../lib/firebaseconfig';
+import {uploadProfileImage} from '../../services/userService';
+import {auth} from '../../lib/firebaseconfig';
 
 export const ProfileSection = ({ profile, updateProfile, styles, theme }) => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);

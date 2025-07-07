@@ -1,7 +1,7 @@
 import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, Animated, Platform } from 'react-native';
-import { COLORS } from '../../utils/constants';
-import { smartButton, smartShadow, smartBorder, androidStyleCleanup } from '../../utils/platformStyles';
+import {Animated, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {COLORS} from '../../utils/constants';
+import {androidStyleCleanup, smartBorder, smartShadow} from '../../utils/platformStyles';
 
 const CravingSelector = ({ 
     item, 

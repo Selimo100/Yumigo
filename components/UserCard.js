@@ -1,16 +1,11 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Image 
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Ionicons} from '@expo/vector-icons';
+import {useTheme} from '../contexts/ThemeContext';
 import FollowButton from './FollowButton';
-import { smartCard } from '../utils/platformStyles';
-export default function UserCard({ 
+import {smartCard} from '../utils/platformStyles';
+
+export default function UserCard({
   user, 
   onPress, 
   showFollowButton = true,

@@ -3,10 +3,10 @@
  * This can be temporarily imported to see the difference between old and new styles
  */
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../contexts/ThemeContext';
-import { smartCard, smartButton, smartInput, smartShadow } from '../utils/platformStyles';
+import {Platform, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useTheme} from '../contexts/ThemeContext';
+import {smartButton, smartCard, smartInput} from '../utils/platformStyles';
 
 export default function PlatformStyleTest() {
   const { theme } = useTheme();

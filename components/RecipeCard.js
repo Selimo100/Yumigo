@@ -1,19 +1,19 @@
 // KOMPLEXE KOMPONENTE: Rezeptkarte mit interaktiven Features
 // Verwaltet Likes, Ratings, Favoriten und Navigation in einem optimierten UI-Element
 
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Animated, Share } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useTheme } from '../contexts/ThemeContext';
-import { ALLERGENS, CATEGORIES } from '../utils/constants';
+import {Alert, Animated, Image, Share, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Ionicons} from '@expo/vector-icons';
+import {router} from 'expo-router';
+import {useTheme} from '../contexts/ThemeContext';
+import {ALLERGENS, CATEGORIES} from '../utils/constants';
 import FollowButton from './FollowButton';
 import useAuth from '../lib/useAuth';
 import useFavorites from '../hooks/useFavorites';
-import { useState, useRef } from 'react';
-import { toggleRecipeLike, rateRecipe, getUserRating } from '../services/recipeService';
-import { notifyRecipeLike, notifyRecipeRating } from '../services/inAppNotificationService';
-import { RatingModal } from './RatingModal';
-import { smartCard, smartShadow } from '../utils/platformStyles';
+import {useRef, useState} from 'react';
+import {getUserRating, rateRecipe, toggleRecipeLike} from '../services/recipeService';
+import {notifyRecipeLike, notifyRecipeRating} from '../services/inAppNotificationService';
+import {RatingModal} from './RatingModal';
+import {smartShadow} from '../utils/platformStyles';
 
 // PERFORMANCE-KRITISCH: Allergen-Konfiguration wird einmalig berechnet
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {

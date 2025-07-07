@@ -1,4 +1,5 @@
-import { useLocalSearchParams } from 'expo-router';
+import {useLocalSearchParams} from 'expo-router';
+
 const useAllergies = () => {
     const { allergies } = useLocalSearchParams();
     if (!allergies) return []; 

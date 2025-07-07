@@ -1,22 +1,23 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import {
     Alert,
+    Image,
     KeyboardAvoidingView,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
-    Image,
-    Platform,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useTheme } from "../../contexts/ThemeContext";
-import { register } from "../../services/authService";
-import { useRouter } from "expo-router";
-import { validateEmail, validatePassword, validateUsername } from "../../utils/validation";
-import { smartInput, smartButton } from '../../utils/platformStyles';
+import {SafeAreaView} from "react-native-safe-area-context";
+import {useTheme} from "../../contexts/ThemeContext";
+import {register} from "../../services/authService";
+import {useRouter} from "expo-router";
+import {validateEmail, validatePassword, validateUsername} from "../../utils/validation";
+import {smartButton, smartInput} from '../../utils/platformStyles';
+
 export default function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");

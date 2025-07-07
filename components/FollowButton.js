@@ -1,14 +1,15 @@
 // KOMPLEXE KOMPONENTE: Follow/Unfollow Button mit optimistischen Updates
 // Verwaltet Follow-Status, Benachrichtigungen und Error-Handling
 
-import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
-import { useFollow } from '../hooks/useFollow';
-import { notifyUserFollow } from '../services/inAppNotificationService';
-import { showToast } from '../utils/toast';
+import React, {useEffect, useState} from 'react';
+import {ActivityIndicator, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {Ionicons} from '@expo/vector-icons';
+import {useTheme} from '../contexts/ThemeContext';
+import {useFollow} from '../hooks/useFollow';
+import {notifyUserFollow} from '../services/inAppNotificationService';
+import {showToast} from '../utils/toast';
 import useAuth from '../lib/useAuth';
+
 export default function FollowButton({
   userId,
   size = 'medium',

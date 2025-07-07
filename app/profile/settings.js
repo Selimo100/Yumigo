@@ -1,22 +1,14 @@
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    ScrollView,
-    Alert,
-    ActivityIndicator,
-    LogBox
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useSettings } from '../../hooks/useSettings';
-import { SettingItem, Section } from '../../components/Settings/SettingComponents';
-import { ProfileSection } from '../../components/Settings/ProfileSection';
-import { AccountSection } from '../../components/Settings/AccountSection';
-import { createStyles } from '../../components/Settings/SettingsStyles';
-import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
+import {ActivityIndicator, Alert, LogBox, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {router, Stack} from 'expo-router';
+import {Ionicons} from '@expo/vector-icons';
+import {useTheme} from '../../contexts/ThemeContext';
+import {useSettings} from '../../hooks/useSettings';
+import {Section, SettingItem} from '../../components/Settings/SettingComponents';
+import {ProfileSection} from '../../components/Settings/ProfileSection';
+import {AccountSection} from '../../components/Settings/AccountSection';
+import {createStyles} from '../../components/Settings/SettingsStyles';
+import {profileUpdateEmitter} from '../../utils/profileUpdateEmitter';
 
 // Ignoriere spezifische Warnungen
 LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component']);

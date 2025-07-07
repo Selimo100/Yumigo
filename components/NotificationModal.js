@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Modal,
-    ScrollView,
-    TouchableOpacity,
-    Image,
-    ActivityIndicator,
-} from 'react-native';
+import {ActivityIndicator, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Ionicons} from '@expo/vector-icons';
 import {formatDistanceToNow} from 'date-fns';

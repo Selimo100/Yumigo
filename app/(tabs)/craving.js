@@ -1,19 +1,11 @@
-import React, { useState } from 'react';
-import {
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    Platform,
-} from 'react-native';
-import { useTheme } from "../../contexts/ThemeContext";
-import { useRouter } from 'expo-router';
-import { CATEGORIES, COLORS } from '../../utils/constants';
+import React, {useState} from 'react';
+import {Platform, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
+import {useTheme} from "../../contexts/ThemeContext";
+import {useRouter} from 'expo-router';
+import {CATEGORIES, COLORS} from '../../utils/constants';
 import useTabBarHeight from '../../hooks/useTabBarHeight';
-import { smartShadow, smartButton, smartBorder, androidStyleCleanup, smartGridTwoColumns, smartGridItemTwoColumns } from '../../utils/platformStyles';
+import {smartButton, smartGridItemTwoColumns, smartGridTwoColumns, smartShadow} from '../../utils/platformStyles';
+
 export default function CravingSelection() {
     const [selectedCravings, setSelectedCravings] = useState([]);
     const { theme } = useTheme();

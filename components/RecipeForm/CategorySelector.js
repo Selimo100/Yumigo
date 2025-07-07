@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { CATEGORIES } from '../../utils/constants';
-import { useTheme } from '../../contexts/ThemeContext';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {CATEGORIES} from '../../utils/constants';
+import {useTheme} from '../../contexts/ThemeContext';
 
 export default function CategorySelector({ selectedCategories, onToggleCategory, error }) {
   const { theme } = useTheme();

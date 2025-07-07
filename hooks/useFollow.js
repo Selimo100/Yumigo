@@ -1,21 +1,22 @@
 // KOMPLEXER HOOK: Follow-System mit Cache-Management und optimistischen Updates
 // Verwaltet Following/Followers-Listen, Suchfunktionen und Live-Feed-Updates
 
-import { useState, useEffect, useCallback } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {
   followUser,
-  unfollowUser,
-  isFollowing,
-  getFollowingUsers,
   getFollowers,
+  getFollowingFeed,
+  getFollowingUsers,
   getSuggestedUsers,
+  isFollowing,
   searchUsers,
-  getFollowingFeed
+  unfollowUser
 } from '../services/userService';
-import { notifyUserFollow } from '../services/inAppNotificationService';
+import {notifyUserFollow} from '../services/inAppNotificationService';
 import useAuth from '../lib/useAuth';
-import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
-import { showToast } from '../utils/toast';
+import {profileUpdateEmitter} from '../utils/profileUpdateEmitter';
+import {showToast} from '../utils/toast';
+
 export const useFollow = () => {
   const { user } = useAuth();
   const [followingList, setFollowingList] = useState([]);

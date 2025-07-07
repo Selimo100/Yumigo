@@ -1,26 +1,24 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Share, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { StarRating } from '../../components/Comment/CommentComponents';
-import { CommentInput } from '../../components/Comment/CommentInput';
-import { CommentsSection } from '../../components/Comment/CommentsSection';
-import { RatingModal } from '../../components/RatingModal';
-import { ALLERGENS, CATEGORIES } from '../../utils/constants';
-import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebaseconfig';
-import { formatDistanceToNow } from 'date-fns';
-import { serverTimestamp } from 'firebase/firestore';
-import { useUserProfile } from '../../hooks/useUserProfile';
+import {Alert, Image, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {Ionicons} from '@expo/vector-icons';
+import {router, useFocusEffect, useLocalSearchParams} from 'expo-router';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {useTheme} from '../../contexts/ThemeContext';
+import {StarRating} from '../../components/Comment/CommentComponents';
+import {CommentInput} from '../../components/Comment/CommentInput';
+import {CommentsSection} from '../../components/Comment/CommentsSection';
+import {RatingModal} from '../../components/RatingModal';
+import {ALLERGENS, CATEGORIES} from '../../utils/constants';
+import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc} from 'firebase/firestore';
+import {db} from '../../lib/firebaseconfig';
+import {formatDistanceToNow} from 'date-fns';
+import {useUserProfile} from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
-import { deleteRecipe, isRecipeOwner, rateRecipe, getUserRating } from '../../services/recipeService';
-import { notifyRecipeRating } from '../../services/inAppNotificationService';
-import { addShoppingListItem } from '../../services/userService';
-import { showToast } from '../../utils/toast';
+import {deleteRecipe, getUserRating, isRecipeOwner, rateRecipe} from '../../services/recipeService';
+import {addShoppingListItem} from '../../services/userService';
+import {showToast} from '../../utils/toast';
 import useAuth from '../../lib/useAuth';
-import { smartShadow, smartButton, androidStyleCleanup } from '../../utils/platformStyles';
+
 const formatTime = (timestamp) => {
   try {
     const date = timestamp?.toDate?.() || new Date(timestamp);

@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
-import { auth } from '../lib/firebaseconfig';
-import { getUserProfile, getUserRecipes } from '../services/userService';
-import { onAuthStateChanged } from 'firebase/auth';
-import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
+import {useState, useEffect} from 'react';
+import {auth} from '../lib/firebaseconfig';
+import {getUserProfile, getUserRecipes} from '../services/userService';
+import {onAuthStateChanged} from 'firebase/auth';
+import {profileUpdateEmitter} from '../utils/profileUpdateEmitter';
+
 export const useUserProfile = () => {
     const [profile, setProfile] = useState(null);
     const [recipes, setRecipes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null); const loadUserData = async (user) => {
+    const [error, setError] = useState(null);
+    const loadUserData = async (user) => {
         try {
             setIsLoading(true);
             setError(null);
@@ -28,7 +30,7 @@ export const useUserProfile = () => {
                 setProfile(fallbackProfile);
             }
             try {
-                const userRecipes = await getUserRecipes(user.uid, user.uid); 
+                const userRecipes = await getUserRecipes(user.uid, user.uid);
                 setRecipes(userRecipes);
             } catch (recipeError) {
                 setRecipes([]);
@@ -65,7 +67,7 @@ export const useUserProfile = () => {
     useEffect(() => {
         const unsubscribe = profileUpdateEmitter.subscribe(async () => {
             const user = auth.currentUser;
-            if (user && !isLoading) { 
+            if (user && !isLoading) {
                 try {
                     setIsLoading(true);
                     const userProfile = await getUserProfile(user.uid);
@@ -81,12 +83,12 @@ export const useUserProfile = () => {
             }
         });
         return unsubscribe;
-    }, [isLoading]); 
+    }, [isLoading]);
     const refreshProfile = async () => {
         const user = auth.currentUser;
         if (user) {
             await loadUserData(user);
         }
     };
-    return { profile, recipes, isLoading, error, refreshProfile };
+    return {profile, recipes, isLoading, error, refreshProfile};
 };

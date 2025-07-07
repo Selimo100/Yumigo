@@ -17,7 +17,7 @@ import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 import { recipeHasSeasonalIngredient } from '../../utils/seasonalUtils';
 import * as Location from 'expo-location';
 import ingredientsData from '../../utils/ingredients.json';
-import { smartInput, smartButton, smartCard, smartShadow } from '../../utils/platformStyles';
+import {smartShadow } from '../../utils/platformStyles';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);
