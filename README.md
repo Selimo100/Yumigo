@@ -162,7 +162,41 @@ bla bla bla
 
 # 6. ⚙️ Technische Realisierung
 
-bla bla bla 
+## Komponentenübersicht
+### Frontend (React Native):
+
+Screens: Die App ist in verschiedene Screens unterteilt (Home, Craving, Favorites, Profile, etc.), die jeweils als eigene Komponenten im app-Verzeichnis liegen.
+Komponenten: Wiederverwendbare Komponenten wie RecipeCard, SearchBar, FollowButton und Modals befinden sich im components Ordner.
+Hooks & Contexts: Eigene React Hooks (useFavorites, useFollow, etc.) und Contexts (ThemeContext, NotificationContext) sorgen für State Management und globale Zustände.
+Navigation: Die Navigation erfolgt über das Expo Router System und React Navigation.
+
+
+### Backend (Firebase):
+
+Firestore: Speicherung aller Rezepte, Userdaten, Likes, Kommentare, etc.
+Authentication: Nutzerverwaltung und Authentifizierung via Firebase Auth.
+Push Notifications: Versand von Benachrichtigungen über Firebase.
+
+### Utilities:
+
+Saisonale Zutaten: Im Verzeichnis ingredients.json sind alle Zutaten mit Saisondaten für verschiedene Länder hinterlegt. Die Logik zur Filterung nach saisonalen Zutaten ist in seasonalUtils.js implementiert.
+Personalisierung: Die Feed Ranking Logik berücksichtigt Nutzerpräferenzen, Engagement und Saisonalität.
+
+## Datenfluss & Abläufe
+
+### Rezept-Feed:
+
+Rezepte werden aus Firestore geladen und lokal im State gespeichert.
+Die Feed-Logik (home.js) filtert und sortiert Rezepte nach Engagement, Aktualität, Trending, Saisonalität und Nutzerpräferenzen.
+Ein Pull-to-Refresh Mechanismus sorgt für aktuelle Daten ohne App-Neustart.
+### Saisonfilter:
+
+Nutzer können Rezepte nach saisonalen Zutaten filtern. Die App erkennt dabei auch Pluralformen von Zutaten.
+Die aktuelle Saison wird dynamisch anhand des Monats und des Nutzerstandorts bestimmt.
+Personalisierung:
+
+Der Feed wird für jeden Nutzer individuell gewichtet: Likes, gespeicherte Zutaten, bevorzugte Küchen und Ernährungsweisen fliessen in das Ranking ein.
+Ein Algorithmus mit anpassbaren Gewichtungen sorgt für eine dynamische, personalisierte Reihenfolge der Rezepte.
 
 ---
 
@@ -182,7 +216,7 @@ bla bla bla
 |-------------------|---------------------------------------------------------------------------------------------------------|
 | **Anforderungen** | R-01 (Rezeptverwaltung)                                                                                 |
 | **Ablauf**        | Nutzer:in erstellt ein Rezept „Gemüsesuppe“, bearbeitet die Zutatenliste und löscht das Rezept wieder. |
-| **Erwartet**      | Rezept wird erfolgreich gespeichert, Änderungen übernommen und anschließend gelöscht.                   |
+| **Erwartet**      | Rezept wird erfolgreich gespeichert, Änderungen übernommen und anschliessend gelöscht.                   |
 
 ### Testfall: Rezepte nach Kategorien durchsuchen
 
