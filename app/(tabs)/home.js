@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput, Image, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useCallback } from 'react'; 
+import { useState, useCallback, useEffect } from 'react'; 
 import RecipeCard from '../../components/RecipeCard';
 import RecipeForm from '../../components/RecipeForm/RecipeForm';
 import NotificationModal from '../../components/NotificationModal';
@@ -11,7 +11,6 @@ import useAuth from "../../lib/useAuth";
 import { Redirect } from 'expo-router'; 
 import { db } from '../../lib/firebaseconfig';
 import { getDocs, collection, doc, getDoc } from 'firebase/firestore';
-import { useFocusEffect } from '@react-navigation/native'; 
 import { useFollow } from '../../hooks/useFollow';
 import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 
@@ -136,20 +135,14 @@ export default function HomeScreen() {
         }
     }, [user]); // Re-create getRecipes if the user object changes
 
-    // Use useFocusEffect to re-fetch recipes when the screen comes into focus
-    useFocusEffect(
-        useCallback(() => {
+    // Rezepte/Feed nur laden, wenn der Tab explizit gewechselt wird
+    useEffect(() => {
+        if (activeTab === 'discover') {
             getRecipes();
-            if (activeTab === 'following') {
-                loadFollowingFeed();
-            }
-            // Optional: return a cleanup function if you had listeners that needed unsubscribing
-            return () => {
-                console.log('[HomeScreen] Screen unfocused. No specific cleanup needed for getDocs.');
-            };
-        }, [getRecipes, activeTab, loadFollowingFeed]) // Depend on getRecipes and activeTab to re-run when they change
-    );
-
+        } else if (activeTab === 'following') {
+            loadFollowingFeed();
+        }
+    }, [activeTab, getRecipes, loadFollowingFeed]);
 
     const handleCreatePress = () => {
         setShowCreateModal(true);
@@ -165,6 +158,7 @@ export default function HomeScreen() {
         setShowCreateModal(false);
     };
 
+    // Like-Handler: Nur lokalen State aktualisieren, kein komplettes Reload
     const handleLikeUpdate = (recipeId, isLiked, newLikesCount) => {
         // Update the recipe in both discover and following feeds
         setRecipeList(prevRecipes => 
@@ -174,19 +168,13 @@ export default function HomeScreen() {
                     : recipe
             )
         );
-        
-        // Update following feed if it exists
-        if (followingFeed.length > 0) {
-            loadFollowingFeed(); // Refresh following feed
-        }
+        // Kein automatisches Nachladen mehr! Feed bleibt stabil.
     };
 
     const handleRatingUpdate = (recipeId) => {
-        // Refresh recipes to get updated rating
-        getRecipes();
-        if (activeTab === 'following') {
-            loadFollowingFeed();
-        }
+        // Optional: Nur lokalen State updaten, kein globales Nachladen
+        // Wenn du willst, kannst du hier auch gezielt das Rating im State anpassen
+        // oder einfach gar nichts tun, da RecipeCard das Rating schon lokal updated.
     };
 
     const handleNotificationPress = () => {
