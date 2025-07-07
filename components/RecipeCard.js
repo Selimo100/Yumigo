@@ -46,7 +46,10 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
     const [userRating, setUserRating] = useState(0);
     const likeAnimation = useRef(new Animated.Value(1)).current;
     const isRecipeFavorite = isFavorite(recipe.id);
-    const commentCount = typeof recipe.commentsCount === 'number' ? recipe.commentsCount : 0;
+    // Korrigiert: Unterstützt sowohl commentsCount als auch commentCount
+    const commentCount = typeof recipe.commentsCount === 'number'
+        ? recipe.commentsCount
+        : (typeof recipe.commentCount === 'number' ? recipe.commentCount : 0);
     const handlePress = () => {
         router.push(`/recipe/${recipe.id}`);
     };
@@ -246,7 +249,7 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.commentButton} onPress={handleCommentPress}>
                             <Ionicons name="chatbubble-outline" size={18} color={theme.colors.textSecondary} />
-                            {commentCount > 0 && <Text style={[styles.commentCount, { color: theme.colors.textSecondary }]}>{commentCount}</Text>}
+                            <Text style={[styles.commentCount, { color: theme.colors.textSecondary }]}>{commentCount}</Text>
                         </TouchableOpacity>
                         {}
                         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
@@ -423,12 +426,12 @@ const createStyles = (theme) => StyleSheet.create({
     engagement: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 15,
+        gap: 8, // Weniger Abstand für kompakteres Layout
     },
     likeButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 2, // Weniger Abstand zwischen Icon und Zahl
         padding: 4,
         opacity: 1,
     },
@@ -439,17 +442,19 @@ const createStyles = (theme) => StyleSheet.create({
         fontSize: 12,
         color: theme.colors.text,
         fontWeight: '500',
+        marginLeft: 2, // Leichter Abstand zum Icon
     },
     commentButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 2, // Weniger Abstand zwischen Icon und Zahl
         padding: 4,
     },
     commentCount: {
         fontSize: 12,
         color: theme.colors.text,
         fontWeight: '500',
+        marginLeft: 2, // Leichter Abstand zum Icon
     },
     shareButton: {
         flexDirection: 'row',
