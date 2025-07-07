@@ -1,8 +1,5 @@
 # was alles anpassen? 
 
-- benutzung der app -> 4. Rezept Browser -> name von feature wo man rezepte filtern kann
-- api dokumentation anpassen auf unsere vorallem endpunkte! 
-- Projektstruktur alles nur als beispiel von knowledgehub! 
 -  Testfälle anschauen und überarbeiten wenn nötig
 - testergebniusse anpasse und durchführen nur als beispiel dort von knowledgehub
 - abschnitt autimatisierte test löschen wenn wir keine erstellt haben sonst so lassen! 
@@ -25,20 +22,18 @@
 1. [Einleitung](#1--einleitung)
 2. [Abstract](#2--abstract)
 3. [Benutzung der App](#3--benutzung-der-app)
-4. [Funktionen](#4--funktionen)
-5. [API-Dokumentation](#5--api-dokumentation)
-6. [Projektstruktur](#6--projektstruktur)
-  - [Frontend im Detail](#61--frontend-im-detail)
-  - [Backend im Detail](#62--backend-im-detail)
-7. [Anforderungsanalyse](#7--anforderungsanalyse)
-  - [User Stories](#71--user-stories)
-  - [Testfälle](#72--testfälle)
-  - [Testergebnisse](#73--testergebnisse)
-  - [Automatisierte Tests](#74--automatisierte-tests)
-8. [GUI Design](#8--gui-design)
-  - [Allgemein](#81--allgemein)
-  - [Design-Richtlinien](#82--design-richtlinien-optional)
-9. [Fazit](#9--fazit)
+4. [User Stories](#4--user-stories)
+5. [Mockups](#5--mockups)
+6. [Technische Realisierung](#6--technische-realisierung)
+7. [Testing](#7--testing)
+8. [Testprotokoll](#8--testprotokoll)
+9. [Übersicht unseren automatisierten Tests](#9--übersicht-unseren-automatisierten-tests)
+   - [Authentifizierung Tests](#91--authentifizierung-tests)
+   - [Rezeptmanagement Tests](#92--rezeptmanagement-tests)
+   - [UI Komponenten Tests](#93--ui-komponenten-tests)
+   - [Utilities & Constants Tests](#94--utilities-&-constants-tests)
+   - [Hooks & Features Tests](#95--hooks-&-features-tests)
+10. [Fazit](#9--fazit)
 
 ---
 
@@ -116,277 +111,10 @@ Nach dem Öffnen der Yumigo-App startet der Nutzer auf einer Login- oder Registr
 7. Auf der **Profile** Seite kann sieht man seine Follower und seinen Gefolgten, man sieht alle seine eigenen erstellten Rezepte.
 8. Die Nutzeroberfläche lässt sich per Einstellung zwischen **Dark- und Lightmode** wechseln.
 
-💡 Ein JWT wird im Hintergrund verwaltet – dadurch bleiben Benutzer auch nach einem Seitenreload eingeloggt.
+💡 Ein JWT wird im Hintergrund verwaltet, dadurch bleiben Benutzer auch nach einem Seitenreload eingeloggt.
 
 ---
-
-# 4. ⚙️ Funktionen
-
---- 
-
-
-# 5. 📡 API-Dokumentation
-
-Die REST-API des Backends wurde mit Firebase erstellt und folgt den üblichen Konventionen von HTTP-Verben (GET, POST,
-PUT, DELETE).
-
-### 🧯 Fehlerbehandlung
-
-**Typische Fehlermeldungen:**
-
-- 401 Unauthorized – Kein oder ungültiges Token
-- 403 Forbidden – Zugriff auf fremde Ressourcen
-- 404 Not Found – Objekt existiert nicht
-- 400 Bad Request – Validierungsfehler bei Formulardaten
-
-### 🔐 Authentifizierung
-
-- POST /api/auth/login  
-  → Gibt ein JWT zurück, das im Header verwendet wird
-
-- POST /api/auth/register  
-  → Registrierung eines neuen Benutzers
-
-### 📘 Notenverwaltung
-
-- GET /api/grades  
-  → Gibt alle Noten des eingeloggten Benutzers zurück
-
-- POST /api/grades
-  → Neue Note hinzufügen
-
-### ✅ ToDos
-
-- GET /api/todos
-  → Gibt alle offenen ToDos zurück
-
-- POST /api/todos
-  → Neues ToDo erstellen
-
-- PUT /api/todos/{id}
-  → Status ändern (erledigt / offen)
-
-### 💬 Beiträge & Kommentare
-
-- GET /api/posts
-  → Beiträge abrufen
-
-- POST /api/posts
-  → Neuen Beitrag erstellen
-
-- POST /api/comments
-  → Kommentar zu Beitrag speichern
-
-### 🛡 Header mit JWT
-
-Alle geschützten Routen erfordern:
-→ Authorization: Bearer <TOKEN>
-
----
-
-# 6. 📂 Projektstruktur
-
-## 6.1 🖥️ Frontend im Detail
-
-Das Frontend von *KnowledgeHub* wurde mit **React.js** umgesetzt. Als Build-Tool kam **Vite** zum Einsatz, was eine
-schnelle Entwicklungs- und Ladezeit ermöglichte. Für das Styling wurde **Bootstrap 5** verwendet, ergänzt durch ein
-eigenes Farbschema in theme.css, das auch den Light-/Darkmode unterstützt.
-
-### 🔧 Technologien
-
-- **React.js (mit Vite)**
-- **Bootstrap 5**
-- **Custom Theme (Dark/Light)**
-- **React Router (Pages & Routing)**
-- **LocalStorage** zur Speicherung des JWT & Theme
-
-### 📁 Projektstruktur (Frontend)
-
-```
-📦 src/
-├── components/         # Wiederverwendbare UI-Komponenten
-│   ├── auth/           # Login, Registrierung, Buttons
-│   ├── community/      # Beiträge und Kommentare
-│   ├── grademanager/   # Notenstruktur & Anzeige
-│   ├── layout/         # Navbar, Footer etc.
-│   ├── sticky-notes/   # Zusatzmodul Sticky Notes
-│   └── todos/          # Aufgabenmanagement
-├── context/            # Globale States (ThemeContext)
-├── layouts/            # Hauptlayout mit Routing-Outlet
-├── lib/                # API-Aufrufe, Authentifizierung, Logik
-├── pages/              # Routen für jede Hauptansicht
-├── main.jsx            # Einstiegspunkt
-├── router.jsx          # Routenstruktur (React Router)
-└── theme.css           # Light/Dark Theme Farben
-```
-
-### 🔄 Routing / Navigation
-
-Die App nutzt **React Router** zur Navigation. Es gibt folgende Haupt-Routen:
-
-- /auth/login – Login-Seite
-- /auth/register – Registrierung
-- /dashboard – Übersicht über alle Module
-- /grademanager/* – Schulnotenverwaltung
-- /todos – Aufgabenverwaltung
-- /community – Beiträge & Kommentare
-
-Private Routen sind durch eine ProtectedRoute-Komponente geschützt, die prüft, ob ein gültiger JWT vorhanden ist.
-
-### 🌗 Theme (Light-/Darkmode)
-
-Der ThemeContext erlaubt die Umschaltung zwischen Light- und Darkmode. Die gewählte Einstellung wird lokal im
-localStorage gespeichert und beim Seitenladen angewendet.
-
-**Verwendete Farben:**
-
-- #3B82F6 für Akzente (z.B Buttons, Links)
-- #0F172A für Darkmode-Hintergrund
-- Neutrale Grautöne für Texte und Rahmen
-
-### 🧩 Komponentenstruktur
-
-Die Komponenten wurden thematisch gruppiert und folgen einem konsistenten Aufbau. Props werden zur Datenweitergabe
-genutzt.
-
-**Beispiele:**
-
-- GradeForm.jsx – Formular zum Eingeben neuer Noten
-- SubjectCard.jsx – Darstellung eines Fachs mit zugehörigen Noten
-- PostForm.jsx – Beitrag im Community-Bereich erstellen
-- CommentForm.jsx – Kommentare schreiben
-- TodoItem.jsx – Einzelne Aufgabe inkl. Statusumschaltung
-
---- 
-
-## 6.2 ⚙️ Backend im Detail
-
-Das Backend der Anwendung wurde mit **Spring Boot (Java)** entwickelt. Es stellt eine REST-API bereit, die vom Frontend
-über HTTP angesprochen wird. Die Daten werden in einer **MySQL-Datenbank** gespeichert, die beim Start der App über
-Flyway-Migrationen initialisiert wird.
-
-### 🔐 Sicherheit
-
-Für Authentifizierung und Autorisierung wurde **Spring Security** mit **JWT (JSON Web Tokens)** integriert.  
-Benutzer müssen sich registrieren und erhalten beim Login ein gültiges Token, das bei allen Folgeanfragen im Header
-mitgeschickt wird.
-
-Nur authentifizierte Benutzer können auf geschützte Ressourcen zugreifen, und jeder User kann nur seine eigenen Daten
-bearbeiten (z. B. ToDos, Noten, etc.).
-
-### 🧱 Backend-Struktur (Auszug aus src/main/java/...)
-
-```
-📦 src/
-├── main/
-│   └── java/
-│       └── org.example/
-│           ├── bootstrap/
-│           │   └── DataBootstrap.java
-│           ├── community/
-│           │   ├── comment/
-│           │   │   ├── Comment.java, CommentController.java
-│           │   │   ├── CommentService.java, CommentMapper.java
-│           │   │   ├── CommentRepository.java
-│           │   │   └── CommentRequestDTO / ResponseDTO
-│           │   └── post/
-│           │       ├── Post.java, PostController.java, PostService.java
-│           │       ├── PostMapper.java, PostRepository.java
-│           │       └── PostRequestDTO / ResponseDTO
-│           ├── configuration/
-│           │   ├── AppConfiguration.java, WebConfiguration.java
-│           │   ├── JWTConfiguration.java, OpenAPIConfiguration.java
-│           ├── gradebook/
-│           │   ├── grade/
-│           │   │   ├── Grade.java, GradeController.java, GradeService.java
-│           │   │   ├── GradeMapper.java, GradeRepository.java
-│           │   │   └── GradeRequestDTO / ResponseDTO
-│           │   ├── school/
-│           │   │   ├── School.java, SchoolController.java, SchoolService.java
-│           │   │   ├── SchoolMapper.java, SchoolRepository.java
-│           │   │   └── SchoolRequestDTO / ResponseDTO / DetailDTO
-│           │   ├── semester/
-│           │   │   ├── Semester.java, SemesterController.java, SemesterService.java
-│           │   │   ├── SemesterMapper.java, SemesterRepository.java
-│           │   │   └── SemesterRequestDTO / ResponseDTO / DetailDTO
-│           │   └── subject/
-│           │       ├── Subject.java, SubjectController.java, SubjectService.java
-│           │       ├── SubjectMapper.java, SubjectRepository.java
-│           │       └── SubjectRequestDTO / ResponseDTO / DetailsDTO
-│           ├── sticky_notes/
-│           │   ├── StickyNote.java, StickyNoteController.java, StickyNoteService.java
-│           │   ├── StickyNoteMapper.java, StickyNoteRepository.java
-│           │   └── StickyNoteRequestDTO / ResponseDTO
-│           ├── todoAdvanced/
-│           │   ├── folder/
-│           │   │   ├── Folder.java, FolderController.java, FolderService.java
-│           │   │   ├── FolderMapper.java, FolderRepository.java
-│           │   │   └── FolderRequestDTO / ResponseDTO / DetailDTO
-│           │   ├── list/
-│           │   │   ├── TodoList.java, TodoListController.java, TodoListService.java
-│           │   │   ├── TodoListMapper.java, TodoListRepository.java
-│           │   │   └── TodoListRequestDTO / ResponseDTO / DetailDTO
-│           │   └── todo/
-│           │       ├── Todo.java, ToDoController.java, ToDoService.java
-│           │       ├── TodoMapper.java, TodoRepository.java
-│           │       └── ToDoRequestDTO / ResponseDTO
-│           ├── user/
-│           │   ├── Person.java, PersonController.java, PersonService.java
-│           │   ├── PersonMapper.java, PersonRepository.java
-│           │   ├── PersonAuthenticationToken.java, PersonConverter.java
-│           │   └── PersonRequestDTO / ResponseDTO / SignInDTO / TokenResponseDTO
-│           ├── App.java
-│           └── FailedValidationException.java
-├── resources/
-│   ├── db.migration/
-│   │   ├── V1__schema.sql
-│   │   ├── V2.0–V7.0__migration_steps.sql
-│   └── application.properties
-```
-
-### 📄 Datenbank & Migration
-
-Die Datenbankstruktur wurde über **Flyway SQL-Skripte** erstellt und erweitert.  
-Alle Migrationen befinden sich im Verzeichnis resources/db.migration/.
-
-Beispiele für Migrationsdateien:
-
-- V1__schema.sql
-- V2.0__initial_data.sql
-- V3.0__add_foreign_keys.sql  
-  ... bis V7.0
-
-### 🔄 API-Endpunkte (Auszug)
-
-Die API folgt einem **RESTful Design**. Die meisten Pfade sind nach dem Schema aufgebaut:
-
-- /api/auth
-- /api/grades
-- /api/todos
-- /api/posts
-- /api/comments
-
-Die Endpunkte nutzen HTTP-Methoden wie GET, POST, PUT, DELETE`
-
-### 🔧 DTOs, Mapper und Services
-
-Die Business-Logik ist klar getrennt in:
-
-- **Controller:** REST-Schnittstelle
-- **Service:** Logikschicht
-- **Repository:** Datenbankzugriffe (JPA)
-- **Mapper:** DTO ↔ Entity Konvertierung
-
-Beispielhafte DTOs:
-
-- GradeRequestDTO, GradeResponseDTO
-- PersonSignInDTO, TokenResponseDTO
-
---- 
-
-# 7. 🔍 Anforderungsanalyse
-
-## 7.1 📌 User Stories
+# 4. 🎯️ User Stories
 
 Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um unsere Anforderungen im Auge zu behalten.
 
@@ -436,7 +164,20 @@ Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um un
 
 ---
 
-## 7.2 📌 Testfälle
+# 5. 🎨 Mockups
+
+
+bla bla bla
+
+---
+
+# 6. ⚙️ Technische Realisierung
+
+bla bla bla 
+
+---
+
+# 7. 📌 Testing
 
 ### Testfall: Craving eingeben
 
@@ -505,7 +246,7 @@ Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um un
 
 ---
 
-## 7.3 📌 Testergebnisse
+# 8. 📑 Testprotokoll
 
 | **ID** | **Erfolgreich** | **Wer?** | **Datum und Uhrzeit** |
 |--------|-----------------|----------|-----------------------|
@@ -529,51 +270,156 @@ gemeinsam mit Ivan besprechen.
 
 
 ---
-## 7.4 📌 Automatisierte Tests
+# 9. 📌 Übersicht unseren automatisierten Tests
 
-Sowohl im Frontend als auch im Backend wurden Tests geschrieben:
+Wir haben eine umfassende Test-Suite entwickelt, die verschiedene Aspekte der Yumigo-App abdeckt. Hier ist eine detaillierte Übersicht:
 
-- **Frontend**: Wir haben mit **Vitest** Unit-Tests für einzelne Komponenten und Funktionen erstellt, um die Funktionalität sicherzustellen und frühzeitig Fehler zu erkennen.
-- **Backend**: Auch im Backend wurden **Unit-Tests** geschrieben, um die Logik der einzelnen Module zuverlässig zu überprüfen.
+## 9.1 🔐 Authentifizierung Tests
+___
+authService.test.js
 
-Diese Tests helfen dabei, die Stabilität der Anwendung zu gewährleisten und spätere Änderungen abzusichern.
+#### Was getestet wird:
+
+- Login-Funktionalität mit Firebase Auth
+- Benutzerregistrierung und Email-Verifizierung
+- Logout-Prozess
+- Password-Validierung (starke vs. schwache Passwörter)
+- Email-Format-Validierung
+- Fehlerbehandlung für verschiedene Auth-Szenarien
+
+#### Test-Abdeckung:
+- Erfolgreicher Login mit gültigen Credentials
+- Fehlerbehandlung bei ungültigen Credentials
+- Registrierung neuer Benutzer
+- Behandlung bereits existierender E-Mails
+- Password-Stärke-Validierung
+
+___
+
+authHelpers.test.js
+
+#### Was getestet wird:
+- requireAuth(), Überprüfung ob User eingeloggt ist
+- showAuthError(), Anzeige von Auth-Fehlern
+- Alert-Funktionalität für Login-Anforderungen
+
+#### Test-Abdeckung:
+- Rückgabe true bei eingeloggtem User
+- Alert-Anzeige und false-Rückgabe bei nicht eingeloggtem User
+- Standardtexte für verschiedene Aktionen
+- Errorlogging in Console
 
 --- 
 
-# 8. 🎨 GUI Design
+## 9.2 📝 Rezeptmanagement Tests
+recipeService.test.js
 
-## 8.1 🎨 Allgemein
+### Was getestet wird:
+- Firebase Firestoreintegration für Rezepte
+- getRecipe(), Abrufen einzelner Rezepte
+- Datenvalidierung für Rezept-Strukturen
+- Fehlerbehandlung bei Firebaseoperationen
 
-Beim Design von unserem Projekt haben wir Bootstrap verwendet, da Selina dies schon genutzt hat und man mit Bootstrap
-schnell und effektiv Seiten erstellen kann.
-
-Wichtig waren uns:
-
-- Responsive Design
-- Light-/Darkmode
-- Übersichtliches Dashboard
-- Klare Strukturierung der Inhalte (Noten, Aufgaben, Community)
-
-## 8.2 🎨 Design-Richtlinien
-
-- **Hauptfarben:**
-  - Blau: #3B82F6 (Buttons, Highlights)
-  - Dunkelblau: #0F172A (Darkmode-Hintergrund)
-
-- **Typografie:**
-  - Schriftart: 'Segoe UI', sans-serif
-
-- **Komponenten:**
-  - Bootstrap Cards, Buttons, Modals
-  - Responsive Grids
-
-- **User Experience:**
-  - Fokus auf Klarheit & Lesbarkeit
-  - Minimalistisches Layout
+### Test-Abdeckung:
+- Erfolgreiches Laden existierender Rezepte
+- Rückgabe null für nicht existierende Rezepte
+- Firebaseerrorhandling
+- Validierung der Rezeptdatenstruktur
+- Zeitbereichvalidierung (1-15 Minuten)
+- Zutatenarrayvalidierung
 
 ---
 
-# 9. 🏁 Fazit
+validation.test.js
+
+### Was getestet wird:
+- validateRecipe(), Umfassende Rezeptvalidierung
+- Validierung aller Rezeptfelder (Titel, Beschreibung, Zeit, etc.)
+- Edge Cases und Performancetests
+
+### Test-Abdeckung:
+- Gültige Rezepte werden akzeptiert
+- Titellängevalidierung (mindestens 3 Zeichen)
+- Beschreibungslängevalidierung
+- Kochzeitbereich (1-15 Minuten)
+- Kategorienarray (nicht leer)
+- Zutatenstruktur mit Menge und Name
+- Anweisungenarray
+- Sonderzeichenbehandlung
+- Performance bei grossen Arrays
+- Null/Undefined Behandlung
+
+--- 
+
+# 9.3 🎨 UI Komponenten Tests
+SearchBar.test.js
+
+### Was getestet wird:
+- Renderverhalten der Suchleiste
+- Texteingabe und onSearch-Callback
+- Placeholderanzeige
+- Focus/Blur Verhalten
+
+### Test-Abdeckung:
+- Korrekte Render mit Placeholder
+- onSearch-Callback bei Texteingabe
+- Styling Eigenschaften
+- Leere Eingaben
+- Funktion ohne onSearch-Callback
+- Sonderzeichen Verarbeitung
+
+___
+
+RecipeCard.test.js & FollowButton.test.js
+
+### Was getestet wird:
+- Basis Komponenten Existenz
+- Einfache UI-Logic Tests
+
+### Test-Abdeckung:
+- Komponenten Definition
+- Basis Funktionalität (Toggle-Logic für FollowButton)
+
+--- 
+
+# 9.4 🔧 Utilities & Constants Tests
+constants.test.js
+
+### Was getestet wird:
+- App Konstanten (Kategorien, Allergene, Ernährungsformen)
+- Datenstruktur Validierung
+- Farbcode Validierung
+
+### Test-Abdeckung:
+- CATEGORIES: Vollständigkeit, Eindeutigkeit, Hex Farben
+- ALLERGENS: Wichtige Allergene, Datenstruktur
+- DIETARY: Ernährungsformenvalidierung
+- COLORS: Primärfarben, Hexcodevalidierung
+
+--- 
+
+# 9.5 📱 Hooks & Features Tests
+useFavorites.test.js
+
+### Was getestet wird:
+- Favoritenmanagementlogic
+- Arrayoperationen für Favoriten
+
+### Test-Abdeckung:
+- Hinzufügen/Entfernen von Favoriten
+- Favoritenstatusüberprüfung
+- Arraymanagement
+
+---
+login.test.js
+
+### Was getestet wird:
+- Loginscreenbasisfunktionalität
+- Stringvalidierung für Email/Password
+
+---
+
+# 10. 🏁 Fazit
 
 ### ✅ Was lief gut?
 
