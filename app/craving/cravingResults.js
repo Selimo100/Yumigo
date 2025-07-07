@@ -44,7 +44,7 @@ export default function CravingResults() {
                 </View>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={COLORS.primary} />
-                    <Text style={[styles.loadingText, { color: COLORS.gray }]}>
+                    <Text style={styles.loadingText}>
                         Loading your recommended recipes...
                     </Text>
                 </View>
@@ -69,7 +69,7 @@ export default function CravingResults() {
             <View style={styles.header}>
                 <Text style={styles.title}>Recommended for you</Text>
                 {cravingResultsRecipes.length > 0 && (
-                    <Text style={[styles.subtitle, { color: COLORS.gray }]}>
+                    <Text style={styles.subtitle}>
                         {cravingResultsRecipes.length} recipe{cravingResultsRecipes.length !== 1 ? 's' : ''} found
                     </Text>
                 )}
@@ -107,11 +107,10 @@ export default function CravingResults() {
     );
 }
 
-
 const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.colors.background,
     },
     headerBar: {
         flexDirection: 'row',
@@ -119,9 +118,9 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 20,
         paddingVertical: 16,
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.colors.cardBackground,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.lightGray,
+        borderBottomColor: theme.colors.border,
     },
     backButton: {
         padding: 8,
@@ -138,13 +137,13 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 20,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.lightGray,
-        backgroundColor: COLORS.white,
+        borderBottomColor: theme.colors.border,
+        backgroundColor: theme.colors.cardBackground,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: COLORS.primary,
+        color: theme.colors.text,
     },
     subtitle: {
         fontSize: 14,

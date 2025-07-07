@@ -2,6 +2,7 @@ import React from 'react';
 import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../utils/constants';
+import { useTheme } from '../contexts/ThemeContext';
 import useTabBarHeight from '../hooks/useTabBarHeight';
 
 const CravingLayout = ({ 
@@ -13,8 +14,9 @@ const CravingLayout = ({
     onBack,
     showBackButton = true 
 }) => {
+    const { theme } = useTheme();
     const tabBarHeight = useTabBarHeight();
-    const styles = createStyles(tabBarHeight);
+    const styles = createStyles(theme, tabBarHeight);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -45,10 +47,10 @@ const CravingLayout = ({
     );
 };
 
-const createStyles = (tabBarHeight) => StyleSheet.create({
+const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     container: { 
         flex: 1, 
-        backgroundColor: COLORS.white 
+        backgroundColor: theme.colors.background 
     },
     headerBar: {
         flexDirection: 'row',
@@ -56,9 +58,14 @@ const createStyles = (tabBarHeight) => StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 20,
         paddingVertical: 16,
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.colors.cardBackground,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.lightGray,
+        borderBottomColor: theme.colors.border,
+        shadowColor: theme.colors.shadow,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     backButton: {
         padding: 8,
@@ -74,7 +81,8 @@ const createStyles = (tabBarHeight) => StyleSheet.create({
     scrollContent: { 
         padding: 20, 
         paddingBottom: tabBarHeight + 20, 
-        alignItems: 'center' 
+        alignItems: 'center',
+        backgroundColor: theme.colors.background,
     },
     header: { 
         alignItems: 'center', 
@@ -84,13 +92,13 @@ const createStyles = (tabBarHeight) => StyleSheet.create({
     title: { 
         fontSize: 26, 
         fontWeight: 'bold', 
-        color: COLORS.primary, 
+        color: theme.colors.text, 
         marginBottom: 8,
         textAlign: 'center'
     },
     subtitle: { 
         fontSize: 16, 
-        color: COLORS.gray,
+        color: theme.colors.textSecondary,
         textAlign: 'center'
     },
 });

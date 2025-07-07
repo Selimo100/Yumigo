@@ -1,8 +1,12 @@
 import React from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
-import {ALLERGENS, CATEGORIES, COLORS, DIETARY} from '../utils/constants';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { COLORS, CATEGORIES, ALLERGENS, DIETARY } from '../utils/constants';
+import { useTheme } from '../contexts/ThemeContext';
 
-const CravingSummary = ({cravings = [], allergies = [], preferences = []}) => {
+const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => {
+    const { theme } = useTheme();
+    const styles = createStyles(theme);
+    
     const getCravingItems = () => CATEGORIES.filter(item => cravings.includes(item.id));
     const getAllergyItems = () => ALLERGENS.filter(item => allergies.includes(item.id));
     const getPreferenceItems = () => DIETARY.filter(item => preferences.includes(item.id));
@@ -27,10 +31,10 @@ const CravingSummary = ({cravings = [], allergies = [], preferences = []}) => {
                     {items.map((item) => (
                         <View
                             key={item.id}
-                            style={[styles.tag, {backgroundColor: item.color + '20', borderColor: item.color}]}
+                            style={[styles.tag, { backgroundColor: item.color + '20', borderColor: item.color }]}
                         >
                             <Text style={styles.tagEmoji}>{item.icon}</Text>
-                            <Text style={[styles.tagText, {color: item.color}]}>{item.label}</Text>
+                            <Text style={[styles.tagText, { color: item.color }]}>{item.label}</Text>
                         </View>
                     ))}
                 </ScrollView>
@@ -39,34 +43,32 @@ const CravingSummary = ({cravings = [], allergies = [], preferences = []}) => {
     };
 
     return (
-        <>
-            <View style={styles.container}>
-                <Text style={styles.title}>Your Selections</Text>
-                {renderSection('Cravings', getCravingItems())}
-
-                {/* Allergies und Preferences nebeneinander */}
-                <View style={styles.compactRow}>
-                    {renderSection('Allergies', getAllergyItems(), true, true)}
-                    {renderSection('Preferences', getPreferenceItems(), true, true)}
-                </View>
+        <View style={styles.container}>
+            <Text style={styles.title}>Your Selections</Text>
+            {renderSection('Cravings', getCravingItems())}
+            
+            {/* Allergies und Preferences nebeneinander */}
+            <View style={styles.compactRow}>
+                {renderSection('Allergies', getAllergyItems(), true, true)}
+                {renderSection('Preferences', getPreferenceItems(), true, true)}
             </View>
-        </>
+        </View>
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.colors.cardBackground,
         borderRadius: 12,
         padding: 10,
         marginBottom: 10,
-        shadowColor: COLORS.primary,
-        shadowOffset: {width: 0, height: 1},
+        shadowColor: theme.colors.shadow,
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.08,
         shadowRadius: 4,
         elevation: 2,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.lightGray,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     title: {
         fontSize: 15,
@@ -90,7 +92,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 11,
         fontWeight: '600',
-        color: COLORS.gray,
+        color: theme.colors.textSecondary,
         marginBottom: 4,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
@@ -119,12 +121,14 @@ const styles = StyleSheet.create({
     noneContainer: {
         paddingVertical: 4,
         paddingHorizontal: 6,
-        backgroundColor: COLORS.lightGray,
+        backgroundColor: theme.colors.disabled,
         borderRadius: 6,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     noneText: {
         fontSize: 10,
-        color: COLORS.gray,
+        color: theme.colors.textSecondary,
         fontStyle: 'italic',
     },
 });

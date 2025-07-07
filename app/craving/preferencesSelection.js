@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { DIETARY, COLORS } from '../../utils/constants';
 import CravingLayout from '../../components/CravingLayout';
 import CravingSelector from '../../components/CravingSelector';
+import { useTheme } from '../../contexts/ThemeContext';
 
 // Add "None" option to dietary preferences
 const PREFERENCE_OPTIONS = [
@@ -17,6 +18,8 @@ export default function PreferencesSelection() {
     const params = useLocalSearchParams();
     const cravings = params.cravings ? JSON.parse(params.cravings) : [];
     const allergies = params.allergies ? JSON.parse(params.allergies) : [];
+    const { theme } = useTheme();
+    const styles = createStyles(theme);
 
     const togglePreference = (id) => {
         setSelectedPreferences((prev) => {
@@ -58,12 +61,12 @@ export default function PreferencesSelection() {
                             style={[
                                 styles.preferenceCard,
                                 {
-                                    backgroundColor: isSelected ? COLORS.primary : COLORS.white,
-                                    borderColor: isSelected ? COLORS.primary : '#e0e0e0',
+                                    backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
+                                    borderColor: isSelected ? COLORS.primary : theme.colors.border,
                                 },
                             ]}
                             labelStyle={{
-                                color: isSelected ? COLORS.white : COLORS.primary,
+                                color: isSelected ? COLORS.white : theme.colors.text,
                             }}
                         />
                     );
@@ -74,14 +77,14 @@ export default function PreferencesSelection() {
                 <TouchableOpacity
                     style={[
                         styles.submitButton, 
-                        { backgroundColor: selectedPreferences.length === 0 ? COLORS.lightGray : COLORS.primary }
+                        { backgroundColor: selectedPreferences.length === 0 ? theme.colors.disabled : COLORS.primary }
                     ]}
                     onPress={handleNext}
                     disabled={selectedPreferences.length === 0}
                 >
                     <Text style={[
                         styles.submitButtonText,
-                        { color: selectedPreferences.length === 0 ? COLORS.gray : COLORS.white }
+                        { color: selectedPreferences.length === 0 ? theme.colors.textSecondary : COLORS.white }
                     ]}>
                         {selectedPreferences.length === 0 ? 'Please select at least one preference' : 'Find Recipes →'}
                     </Text>
@@ -91,7 +94,7 @@ export default function PreferencesSelection() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     grid: { 
         flexDirection: 'row', 
         flexWrap: 'wrap', 
@@ -108,7 +111,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
+        shadowColor: theme.colors.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
