@@ -28,7 +28,7 @@ export default function CravingSelection() {
                 : [...prev, id];
 
             if (newSelection.includes('hot') && newSelection.includes('cold')) {
-                setError('"Cold" and "Hot"cannot be selected together.');
+                setError('"Cold" and "Hot" cannot be selected together.');
             } else if (newSelection.length > 2) {
                 setError('Please select up to 2 cravings only.');
             } else {
@@ -63,9 +63,9 @@ export default function CravingSelection() {
                                 style={[
                                     styles.cravingButton,
                                     {
-                                        backgroundColor: isSelected ? COLORS.primary : COLORS.white,
-                                        borderColor: COLORS.primary,
-                                        shadowColor: COLORS.primary,
+                                        backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
+                                        borderColor: isSelected ? COLORS.primary : theme.colors.border,
+                                        shadowColor: theme.colors.shadow,
                                         transform: [{ scale: isSelected ? 1.02 : 1 }],
                                     },
                                 ]}
@@ -77,7 +77,7 @@ export default function CravingSelection() {
                                     </Text>
                                     <Text style={[
                                         styles.cravingLabel, 
-                                        { color: isSelected ? COLORS.white : COLORS.primary }
+                                        { color: isSelected ? COLORS.white : theme.colors.text }
                                     ]}>
                                         {craving.label}
                                     </Text>
@@ -101,14 +101,14 @@ export default function CravingSelection() {
                         <TouchableOpacity
                             style={[
                                 styles.submitButton,
-                                { backgroundColor: selectedCravings.length === 0 ? COLORS.lightGray : COLORS.primary },
+                                { backgroundColor: selectedCravings.length === 0 ? theme.colors.disabled : COLORS.primary },
                             ]}
                             onPress={handleNextButton}
                             disabled={selectedCravings.length === 0}
                         >
                             <Text style={[
                                 styles.submitButtonText,
-                                { color: selectedCravings.length === 0 ? COLORS.gray : COLORS.white }
+                                { color: selectedCravings.length === 0 ? theme.colors.textSecondary : COLORS.white }
                             ]}>
                                 {selectedCravings.length === 0 ? 'Please select at least one craving' : 'Next →'}
                             </Text>
@@ -120,10 +120,10 @@ export default function CravingSelection() {
     );
 }
 
-const createStyles = ( tabBarHeight) => StyleSheet.create({
+const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     container: { 
         flex: 1, 
-        backgroundColor: COLORS.white 
+        backgroundColor: theme.colors.background 
     },
     scrollContent: { 
         padding: 20, 
@@ -142,14 +142,14 @@ const createStyles = ( tabBarHeight) => StyleSheet.create({
     title: { 
         fontSize: 24, 
         fontWeight: 'bold', 
-        color: COLORS.primary, 
+        color: theme.colors.text, 
         marginBottom: 8, 
         marginTop: 16,
         textAlign: 'center'
     },
     subsubtitle: { 
         fontSize: 16, 
-        color: COLORS.gray, 
+        color: theme.colors.textSecondary, 
         textAlign: 'center'
     },
     grid: { 
@@ -233,7 +233,7 @@ const createStyles = ( tabBarHeight) => StyleSheet.create({
     },
     errorContainer: {
         width: '100%',
-        backgroundColor: '#fce8e8',
+        backgroundColor: theme.colors.errorBackground || '#fce8e8',
         borderColor: COLORS.error,
         borderWidth: 1,
         borderRadius: 12,

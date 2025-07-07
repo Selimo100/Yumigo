@@ -1,8 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { COLORS, CATEGORIES, ALLERGENS, DIETARY } from '../utils/constants';
+import { useTheme } from '../contexts/ThemeContext';
 
 const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => {
+    const { theme } = useTheme();
+    const styles = createStyles(theme);
+    
     const getCravingItems = () => CATEGORIES.filter(item => cravings.includes(item.id));
     const getAllergyItems = () => ALLERGENS.filter(item => allergies.includes(item.id));
     const getPreferenceItems = () => DIETARY.filter(item => preferences.includes(item.id));
@@ -52,31 +56,33 @@ const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => 
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.colors.cardBackground,
         borderRadius: 12,
-        padding: 10, // Noch weiter reduziert
-        marginBottom: 10, // Noch weiter reduziert
-        shadowColor: COLORS.primary,
+        padding: 10,
+        marginBottom: 10,
+        shadowColor: theme.colors.shadow,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.08,
         shadowRadius: 4,
         elevation: 2,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     title: {
-        fontSize: 15, // Noch kleiner
+        fontSize: 15,
         fontWeight: 'bold',
         color: COLORS.primary,
-        marginBottom: 6, // Reduziert
+        marginBottom: 6,
         textAlign: 'center',
     },
     section: {
-        marginBottom: 6, // Reduziert
+        marginBottom: 6,
     },
     compactSection: {
         flex: 1,
-        marginRight: 8, // Abstand zwischen den beiden Spalten
+        marginRight: 8,
         marginBottom: 0,
     },
     compactRow: {
@@ -84,43 +90,45 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     sectionTitle: {
-        fontSize: 11, // Noch kleiner
+        fontSize: 11,
         fontWeight: '600',
-        color: COLORS.gray,
-        marginBottom: 4, // Reduziert
+        color: theme.colors.textSecondary,
+        marginBottom: 4,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
     tagContainer: {
         flexDirection: 'row',
-        maxHeight: 30, // Noch kleiner
+        maxHeight: 30,
     },
     tag: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 3, // Noch kleiner
-        paddingHorizontal: 6, // Noch kleiner
-        borderRadius: 12, // Kleiner
+        paddingVertical: 3,
+        paddingHorizontal: 6,
+        borderRadius: 12,
         borderWidth: 1,
-        marginRight: 4, // Kleiner
+        marginRight: 4,
     },
     tagEmoji: {
-        fontSize: 12, // Kleiner
-        marginRight: 3, // Kleiner
+        fontSize: 12,
+        marginRight: 3,
     },
     tagText: {
-        fontSize: 10, // Kleiner
+        fontSize: 10,
         fontWeight: '600',
     },
     noneContainer: {
-        paddingVertical: 4, // Kleiner
-        paddingHorizontal: 6, // Kleiner
-        backgroundColor: COLORS.lightGray,
-        borderRadius: 6, // Kleiner
+        paddingVertical: 4,
+        paddingHorizontal: 6,
+        backgroundColor: theme.colors.disabled,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     noneText: {
-        fontSize: 10, // Kleiner
-        color: COLORS.gray,
+        fontSize: 10,
+        color: theme.colors.textSecondary,
         fontStyle: 'italic',
     },
 });
