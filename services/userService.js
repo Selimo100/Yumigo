@@ -13,7 +13,6 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-// Get user profile data from Firestore
 export const getUserProfile = async (userId) => {
   try {
     if (!userId) {
@@ -29,12 +28,9 @@ export const getUserProfile = async (userId) => {
     if (userDoc.exists()) {
       const userData = userDoc.data();
       
-      // Prüfen ob username existiert und nicht der E-Mail-Teil ist
       let username = userData.username;
       
-      // Falls username fehlt oder gleich dem E-Mail-Teil ist, versuche displayName zu verwenden
       if (!username || (userData.email && username === userData.email.split('@')[0])) {
-        // Versuche displayName aus Firebase Auth zu holen
         try {
           const { auth } = await import('../lib/firebaseconfig');
           const currentUser = auth.currentUser;
@@ -42,7 +38,6 @@ export const getUserProfile = async (userId) => {
           if (currentUser && currentUser.uid === userId && currentUser.displayName) {
             username = currentUser.displayName;
             
-            // Update username in Firestore für zukünftige Verwendung
             try {
               await updateDoc(doc(db, 'users', userId), {
                 username: currentUser.displayName,
@@ -50,11 +45,11 @@ export const getUserProfile = async (userId) => {
                 updatedAt: serverTimestamp(),
               });
             } catch (updateError) {
-              // Update error handled silently
+              
             }
           }
         } catch (authError) {
-          // Auth error handled silently
+          
         }
       }
       
@@ -70,7 +65,6 @@ export const getUserProfile = async (userId) => {
   }
 };
 
-// Create a new user profile in Firestore
 export const createUserProfile = async (userId, profileData) => {
   try {
     const userRef = doc(db, 'users', userId);
@@ -85,7 +79,6 @@ export const createUserProfile = async (userId, profileData) => {
   }
 };
 
-// Update user profile in Firestore
 export const updateUserProfile = async (userId, updates) => {
   try {
     const userRef = doc(db, 'users', userId);
@@ -99,7 +92,6 @@ export const updateUserProfile = async (userId, updates) => {
   }
 };
 
-// Get current user profile (using auth.currentUser)
 export const getCurrentUserProfile = async () => {
   try {
     const currentUser = auth.currentUser;
@@ -113,24 +105,21 @@ export const getCurrentUserProfile = async () => {
   }
 };
 
-// Initialize user profile with default values
 export const initializeUserProfile = async (userId, email, username = null) => {
   try {
-    // Check if profile already exists
+    
     const existingProfile = await getUserProfile(userId);
     if (existingProfile) {
       return existingProfile;
     }
 
-    // Username verwenden oder aus E-Mail extrahieren als Fallback
     const displayUsername = username || email.split('@')[0];
 
-    // Create new profile with default values
     const defaultProfile = {
       uid: userId,
       email: email,
       username: displayUsername,
-      displayName: displayUsername, // Zusätzlich hier speichern
+      displayName: displayUsername, 
       bio: 'Food enthusiast | Making cooking simple',
       avatar: null,
       followerCount: 0,
@@ -146,7 +135,7 @@ export const initializeUserProfile = async (userId, email, username = null) => {
     throw error;
   }
 };
-// Update user recipe count
+
 export const updateUserRecipeCount = async (userId, increment = true) => {
   try {
     const userRef = doc(db, 'users', userId);
@@ -168,12 +157,10 @@ export const updateUserRecipeCount = async (userId, increment = true) => {
   }
 };
 
-// Sync user recipe count with actual recipes in database
 export const syncUserRecipeCount = async (userId) => {
   try {
     const userRef = doc(db, 'users', userId);
-    
-    // Get actual count of recipes from database
+
     const recipesQuery = query(
       collection(db, 'recipes'),
       where('authorId', '==', userId)
@@ -181,8 +168,7 @@ export const syncUserRecipeCount = async (userId) => {
     
     const querySnapshot = await getDocs(recipesQuery);
     const actualCount = querySnapshot.size;
-    
-    // Update user profile with correct count
+
     await updateDoc(userRef, {
       recipeCount: actualCount,
       updatedAt: serverTimestamp(),
@@ -194,13 +180,11 @@ export const syncUserRecipeCount = async (userId) => {
   }
 };
 
-// Follow/Unfollow user functionality
 export const followUser = async (currentUserId, targetUserId) => {
   try {
     const currentUserRef = doc(db, 'users', currentUserId);
     const targetUserRef = doc(db, 'users', targetUserId);
-    
-    // Get current user data
+
     const currentUserDoc = await getDoc(currentUserRef);
     const targetUserDoc = await getDoc(targetUserRef);
     
@@ -212,17 +196,15 @@ export const followUser = async (currentUserId, targetUserId) => {
       const isAlreadyFollowing = following.includes(targetUserId);
       
       if (!isAlreadyFollowing) {
-        // Add to following list
-        following.push(targetUserId);
         
-        // Update current user
+        following.push(targetUserId);
+
         await updateDoc(currentUserRef, {
           following: following,
           followingCount: following.length,
           updatedAt: serverTimestamp(),
         });
-        
-        // Update target user follower count
+
         const newFollowerCount = (targetUserData.followerCount || 0) + 1;
         await updateDoc(targetUserRef, {
           followerCount: newFollowerCount,
@@ -242,8 +224,7 @@ export const unfollowUser = async (currentUserId, targetUserId) => {
   try {
     const currentUserRef = doc(db, 'users', currentUserId);
     const targetUserRef = doc(db, 'users', targetUserId);
-    
-    // Get current user data
+
     const currentUserDoc = await getDoc(currentUserRef);
     const targetUserDoc = await getDoc(targetUserRef);
     
@@ -255,17 +236,15 @@ export const unfollowUser = async (currentUserId, targetUserId) => {
       const followingIndex = following.indexOf(targetUserId);
       
       if (followingIndex > -1) {
-        // Remove from following list
-        following.splice(followingIndex, 1);
         
-        // Update current user
+        following.splice(followingIndex, 1);
+
         await updateDoc(currentUserRef, {
           following: following,
           followingCount: following.length,
           updatedAt: serverTimestamp(),
         });
-        
-        // Update target user follower count
+
         const newFollowerCount = Math.max(0, (targetUserData.followerCount || 0) - 1);
         await updateDoc(targetUserRef, {
           followerCount: newFollowerCount,
@@ -281,7 +260,6 @@ export const unfollowUser = async (currentUserId, targetUserId) => {
   }
 };
 
-// Upload profile image to Firebase Storage
 export const uploadProfileImage = async (uri, userId) => {
   try {
     const response = await fetch(uri);
@@ -297,23 +275,20 @@ export const uploadProfileImage = async (uri, userId) => {
   }
 };
 
-// Get recipes created by a specific user
 export const getUserRecipes = async (userId, currentUserId = null) => {
   try {
-    // Simple query without orderBy to avoid index issues
+    
     const recipesQuery = query(
       collection(db, 'recipes'),
       where('authorId', '==', userId)
     );
     
     const querySnapshot = await getDocs(recipesQuery);
-    
-    // Fetch likes and ratings data for each recipe (same logic as in home.js)
+
     const recipesWithLikesAndStatus = await Promise.all(
       querySnapshot.docs.map(async (docSnapshot) => {
         const recipeData = { id: docSnapshot.id, ...docSnapshot.data() };
 
-        // Get likes count and user like status
         const likesCollectionRef = collection(db, 'recipes', docSnapshot.id, 'likes');
         const likesSnapshot = await getDocs(likesCollectionRef);
         const likesCount = likesSnapshot.size;
@@ -325,14 +300,13 @@ export const getUserRecipes = async (userId, currentUserId = null) => {
           isLikedByCurrentUser = userLikeDoc.exists();
         }
 
-        // Get ratings count and average
         const ratingsCollectionRef = collection(db, 'recipes', docSnapshot.id, 'ratings');
         const ratingsSnapshot = await getDocs(ratingsCollectionRef);
         const reviewsCount = ratingsSnapshot.size;
         
         let averageRating = recipeData.rating || 0;
         if (reviewsCount > 0 && !recipeData.rating) {
-          // Calculate average if not stored in recipe document
+          
           let totalRating = 0;
           ratingsSnapshot.docs.forEach(doc => {
             totalRating += doc.data().rating;
@@ -346,13 +320,12 @@ export const getUserRecipes = async (userId, currentUserId = null) => {
           isLikedByCurrentUser,
           rating: averageRating,
           reviews: reviewsCount,
-          // Keep old 'likes' property for backward compatibility
+          
           likes: likesCount
         };
       })
     );
-    
-    // Sort by createdAt in JavaScript instead
+
     recipesWithLikesAndStatus.sort((a, b) => {
       if (a.createdAt && b.createdAt) {
         return b.createdAt.seconds - a.createdAt.seconds;
@@ -366,7 +339,6 @@ export const getUserRecipes = async (userId, currentUserId = null) => {
   }
 };
 
-// Get saved recipes for a user
 export const getUserSavedRecipes = async (userId) => {
   try {
     const userProfile = await getUserProfile(userId);
@@ -397,7 +369,6 @@ export const getUserSavedRecipes = async (userId) => {
   }
 };
 
-// Save/unsave a recipe for a user
 export const toggleSaveRecipe = async (userId, recipeId) => {
   try {
     const userRef = doc(db, 'users', userId);
@@ -409,10 +380,10 @@ export const toggleSaveRecipe = async (userId, recipeId) => {
       const recipeIndex = savedRecipes.indexOf(recipeId);
       
       if (recipeIndex > -1) {
-        // Remove from saved recipes
+        
         savedRecipes.splice(recipeIndex, 1);
       } else {
-        // Add to saved recipes
+        
         savedRecipes.push(recipeId);
       }
       
@@ -429,7 +400,6 @@ export const toggleSaveRecipe = async (userId, recipeId) => {
   }
 };
 
-// Get users that the current user is following
 export const getFollowingUsers = async (userId) => {
   try {
     const userProfile = await getUserProfile(userId);
@@ -437,7 +407,6 @@ export const getFollowingUsers = async (userId) => {
       return [];
     }
 
-    // Get profiles of all following users
     const followingProfiles = await Promise.all(
       userProfile.following.map(async (followingId) => {
         const profile = await getUserProfile(followingId);
@@ -451,7 +420,6 @@ export const getFollowingUsers = async (userId) => {
   }
 };
 
-// Get users who are following the current user
 export const getFollowers = async (userId) => {
   try {
     const followersQuery = query(
@@ -475,7 +443,6 @@ export const getFollowers = async (userId) => {
   }
 };
 
-// Check if current user is following target user
 export const isFollowing = async (currentUserId, targetUserId) => {
   try {
     const currentUserProfile = await getUserProfile(currentUserId);
@@ -488,14 +455,11 @@ export const isFollowing = async (currentUserId, targetUserId) => {
   }
 };
 
-// Get suggested users to follow (intelligent recommendations)
 export const getSuggestedUsers = async (currentUserId, limit = 10) => {
   try {
     const currentUserProfile = await getUserProfile(currentUserId);
     const following = currentUserProfile?.following || [];
-    
-    // Get all users except current user and already following
-    // Simple query without orderBy to avoid index issues
+
     const usersQuery = query(collection(db, 'users'));
     
     const querySnapshot = await getDocs(usersQuery);
@@ -511,7 +475,6 @@ export const getSuggestedUsers = async (currentUserId, limit = 10) => {
       }
     });
 
-    // Sort by intelligent criteria: recipe count, follower count, recent activity
     const suggestedUsers = allUsers
       .sort((a, b) => {
         const scoreA = (a.recipeCount || 0) * 2 + (a.followerCount || 0);
@@ -526,7 +489,6 @@ export const getSuggestedUsers = async (currentUserId, limit = 10) => {
   }
 };
 
-// Get user activity feed from followed users
 export const getFollowingFeed = async (userId) => {
   try {
     const followingUsers = await getFollowingUsers(userId);
@@ -536,8 +498,6 @@ export const getFollowingFeed = async (userId) => {
       return [];
     }
 
-    // Get recent recipes from followed users
-    // Simple query without orderBy to avoid index issues
     const recipesQuery = query(
       collection(db, 'recipes'),
       where('authorId', 'in', followingIds)
@@ -552,8 +512,7 @@ export const getFollowingFeed = async (userId) => {
         ...doc.data()
       });
     });
-    
-    // Sort by createdAt in JavaScript instead
+
     feedRecipes.sort((a, b) => {
       if (a.createdAt && b.createdAt) {
         return b.createdAt.seconds - a.createdAt.seconds;
@@ -567,7 +526,6 @@ export const getFollowingFeed = async (userId) => {
   }
 };
 
-// Search users by username or email
 export const searchUsers = async (searchTerm, limit = 20) => {
   try {
     if (!searchTerm.trim()) {
@@ -599,7 +557,6 @@ export const searchUsers = async (searchTerm, limit = 20) => {
   }
 };
 
-// Shopping list functions
 export const getShoppingList = async (userId) => {
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));
@@ -616,13 +573,12 @@ export const getShoppingList = async (userId) => {
 
 export const updateShoppingList = async (userId, shoppingList) => {
   try {
-    // Ensure we have valid data
+    
     if (!userId) {
       const error = new Error('Invalid userId');
       throw error;
     }
 
-    // Ensure shoppingList is always an array and filter out invalid items
     const safeShoppingList = Array.isArray(shoppingList) ? 
       shoppingList.filter(item => item && item.text && item.id) : [];
 
@@ -641,15 +597,14 @@ export const updateShoppingList = async (userId, shoppingList) => {
 
 export const addShoppingListItem = async (userId, item) => {
   try {
-    // Ensure we have valid input
+    
     if (!userId || !item || (!item.text && typeof item !== 'string')) {
       const error = new Error('Invalid input: userId and item with text are required');
       throw error;
     }
 
     const currentList = await getShoppingList(userId);
-    
-    // Handle both string and object input for backward compatibility
+
     const itemText = typeof item === 'string' ? item : item.text;
     
     const newItem = {
@@ -658,8 +613,7 @@ export const addShoppingListItem = async (userId, item) => {
       completed: false,
       addedAt: new Date().toISOString(),
     };
-    
-    // Ensure currentList is always an array
+
     const safeCurrentList = Array.isArray(currentList) ? currentList : [];
     const updatedList = [...safeCurrentList, newItem];
     
@@ -682,7 +636,7 @@ export const toggleShoppingListItem = async (userId, itemId) => {
     
     const updatedList = safeCurrentList.map(item => 
       item && item.id === itemId ? { ...item, completed: !item.completed } : item
-    ).filter(item => item); // Remove any invalid items
+    ).filter(item => item); 
     
     await updateShoppingList(userId, updatedList);
     return updatedList;

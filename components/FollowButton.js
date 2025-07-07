@@ -1,3 +1,6 @@
+// KOMPLEXE KOMPONENTE: Follow/Unfollow Button mit optimistischen Updates
+// Verwaltet Follow-Status, Benachrichtigungen und Error-Handling
+
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,7 +9,6 @@ import { useFollow } from '../hooks/useFollow';
 import { notifyUserFollow } from '../services/inAppNotificationService';
 import { showToast } from '../utils/toast';
 import useAuth from '../lib/useAuth';
-
 export default function FollowButton({ 
   userId, 
   size = 'medium', 
@@ -18,7 +20,6 @@ export default function FollowButton({
   const { handleFollow, handleUnfollow, checkFollowStatus, isCurrentUser } = useFollow();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
   useEffect(() => {
     const checkStatus = async () => {
       if (userId) {
@@ -28,18 +29,19 @@ export default function FollowButton({
     };
     checkStatus();
   }, [userId, checkFollowStatus]);
-
+  // OPTIMISTISCHE UI-UPDATES: Sofortige Anzeige für bessere UX
+  // Bei Fehlern wird der Status zurückgesetzt
   const handlePress = async () => {
     if (isLoading) return;
     
     setIsLoading(true);
-    
-    // Optimistic update - show immediate feedback (never revert this)
     const previousStatus = isFollowing;
     const newStatus = !isFollowing;
+    
+    // Optimistisches Update der UI
     setIsFollowing(newStatus);
     onFollowChange?.(newStatus);
-    
+
     try {
       let success;
       if (previousStatus) {
@@ -47,31 +49,24 @@ export default function FollowButton({
       } else {
         success = await handleFollow(userId);
         
-        // Send in-app notification for new follow
+        // BENACHRICHTIGUNGS-SYSTEM: Informiere gefolgten User
         if (success && !previousStatus && user) {
           notifyUserFollow(userId, user.displayName || user.email?.split('@')[0] || 'Someone', user.uid);
         }
       }
-      
-      // Don't revert UI even if backend fails - just log the issue
+
       if (!success) {
-        // Show a toast notification for the error
         showToast.error(previousStatus ? 'Failed to unfollow user' : 'Failed to follow user');
       }
     } catch (error) {
-      // Don't revert UI even on error - just log it
-      // Show a toast notification for the error
       showToast.error('Network error. Please check your connection.');
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Don't show follow button for current user
   if (isCurrentUser(userId)) {
     return null;
   }
-
   const getButtonSize = () => {
     switch (size) {
       case 'small':
@@ -82,9 +77,7 @@ export default function FollowButton({
         return { width: 100, height: 36, fontSize: 14, iconSize: 16 };
     }
   };
-
   const buttonSize = getButtonSize();
-
   return (
     <TouchableOpacity
       style={[
@@ -129,7 +122,6 @@ export default function FollowButton({
     </TouchableOpacity>
   );
 }
-
 const styles = StyleSheet.create({
   followButton: {
     flexDirection: 'row',

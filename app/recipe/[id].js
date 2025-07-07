@@ -20,7 +20,6 @@ import { notifyRecipeRating } from '../../services/inAppNotificationService';
 import { addShoppingListItem } from '../../services/userService';
 import { showToast } from '../../utils/toast';
 import useAuth from '../../lib/useAuth';
-
 const formatTime = (timestamp) => {
   try {
     const date = timestamp?.toDate?.() || new Date(timestamp);
@@ -29,8 +28,6 @@ const formatTime = (timestamp) => {
     return 'just now';
   }
 };
-
-// Convert arrays to config objects for easier lookup
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
   acc[allergen.id] = {
     label: allergen.label.replace('Contains ', ''),
@@ -39,7 +36,6 @@ const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
   };
   return acc;
 }, {});
-
 const categoryConfig = CATEGORIES.reduce((acc, category) => {
   acc[category.id] = {
     label: category.label,
@@ -48,37 +44,30 @@ const categoryConfig = CATEGORIES.reduce((acc, category) => {
   };
   return acc;
 }, {});
-
 export default function RecipeDetailScreen() {
   const { id, scrollToComments, created } = useLocalSearchParams();
   const { theme } = useTheme();
-  const { user: currentUser } = useAuth(); // Use useAuth instead of getAuth
+  const { user: currentUser } = useAuth(); 
   const styles = createStyles(theme);
   const scrollViewRef = useRef(null);
   const commentsRef = useRef(null);
   const { profile: userProfile } = useUserProfile();
   const { isFavorite, toggleFavorite } = useFavorites();
-
   const [recipe, setRecipe] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [showRating, setShowRating] = useState(false);
-
-  // Check if this recipe is in favorites
   const isSaved = isFavorite(id);
-
   useEffect(() => {
     const fetchRecipeAndData = async () => {
       setLoading(true);
       try {
         const recipeDocRef = doc(db, 'recipes', id);
         const recipeDocSnap = await getDoc(recipeDocRef);
-
         if (recipeDocSnap.exists()) {
           const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
-
           let authorDisplayName = 'Anonymous';
           if (recipeData.authorId) {
             const userDocRef = doc(db, 'users', recipeData.authorId); 
@@ -89,11 +78,9 @@ export default function RecipeDetailScreen() {
               authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
             }
           }
-
           const ratingsCollectionRef = collection(db, 'recipes', id, 'ratings');
           const ratingsSnapshot = await getDocs(ratingsCollectionRef);
           const reviewsCount = ratingsSnapshot.size;
-          
           let averageRating = recipeData.rating || 0;
           if (reviewsCount > 0 && !recipeData.rating) {
             let totalRating = 0;
@@ -102,14 +89,12 @@ export default function RecipeDetailScreen() {
             });
             averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
           }
-
           setRecipe({ 
             ...recipeData, 
             authorDisplayName,
             rating: averageRating,
             reviews: reviewsCount
           });
-
           if (currentUser) {
             const userCurrentRating = await getUserRating(id, currentUser.uid);
             setUserRating(userCurrentRating);
@@ -119,14 +104,12 @@ export default function RecipeDetailScreen() {
             const recipeLikeSnap = await getDoc(recipeLikeDocRef);
             setIsLiked(recipeLikeSnap.exists());
           }
-
           const commentsSnap = await getDocs(collection(db, 'recipes', id, 'comments'));
           const commentsData = await Promise.all(commentsSnap.docs.map(async docSnapshot => {
             const data = docSnapshot.data();
             let isCommentLikedByUser = false;
             let commentLikesCount = 0;
             let commentAuthorName = data.authorName || data.authorId || 'Anonymous'; 
-
             if (!data.authorName && data.authorId) {
               const commentUserDocRef = doc(db, 'users', data.authorId);
               const commentUserDocSnap = await getDoc(commentUserDocRef);
@@ -134,12 +117,9 @@ export default function RecipeDetailScreen() {
                 commentAuthorName = commentUserDocSnap.data().displayName || commentUserDocSnap.data().email || commentAuthorName;
               }
             }
-
-
             const commentLikesCollectionRef = collection(db, 'recipes', id, 'comments', docSnapshot.id, 'likes');
             const commentLikesSnapshot = await getDocs(commentLikesCollectionRef);
             commentLikesCount = commentLikesSnapshot.size;
-
             if (currentUser) {
               const userCommentLikeDocRef = doc(commentLikesCollectionRef, currentUser.uid);
               const userCommentLikeSnap = await getDoc(userCommentLikeDocRef);
@@ -154,24 +134,18 @@ export default function RecipeDetailScreen() {
               isLiked: isCommentLikedByUser,
             };
           }));
-
           commentsData.sort((a, b) => {
             return 0; 
           });
-
           setComments(commentsData);
-
         }
       } catch (error) {
-        // Error handled silently
       } finally {
         setLoading(false);
       }
     };
     if (id) fetchRecipeAndData();
   }, [id, currentUser]);
-
-  // Show success alert when recipe is newly created
   useEffect(() => {
     if (created === 'true') {
       setTimeout(() => {
@@ -180,10 +154,9 @@ export default function RecipeDetailScreen() {
           'Your recipe has been published successfully!',
           [{ text: 'OK' }]
         );
-      }, 500); // Small delay to ensure the page is loaded
+      }, 500); 
     }
   }, [created]);
-
   useEffect(() => {
     if (scrollToComments === 'true') {
       setTimeout(() => {
@@ -196,15 +169,12 @@ export default function RecipeDetailScreen() {
       }, 500);
     }
   }, [scrollToComments]);
-
   const handleLike = async () => {
     if (!currentUser) {
       Alert.alert("Login Required", "You need to be logged in to like recipes.");
       return;
     }
-
     const recipeLikeDocRef = doc(db, 'recipes', id, 'likes', currentUser.uid);
-
     try {
       if (isLiked) {
         await deleteDoc(recipeLikeDocRef);
@@ -217,13 +187,11 @@ export default function RecipeDetailScreen() {
       Alert.alert("Error", "Could not update like status.");
     }
   };
-
   const handleSave = async () => {
     if (!currentUser) {
       Alert.alert("Login Required", "You need to be logged in to save recipes to favorites.");
       return;
     }
-
     try {
       await toggleFavorite(id);
     } catch (error) {
@@ -237,45 +205,36 @@ export default function RecipeDetailScreen() {
       }
     }
   };
-
   const handleRating = async (rating) => {
     if (!currentUser) {
       Alert.alert("Login Required", "You need to be logged in to rate recipes.");
       return;
     }
-
     try {
       await rateRecipe(id, currentUser.uid, rating);
       setUserRating(rating);
       setShowRating(false);
-      
       await reloadRecipeData();
-      
     } catch (error) {
       Alert.alert("Error", "Could not save your rating.");
     }
   };
-
   const handleCommentLike = (commentId) => {
     if (!currentUser) {
       Alert.alert("Login Required", "You need to be logged in to like comments.");
       return;
     }
-
     const commentLikeDocRef = doc(db, 'recipes', id, 'comments', commentId, 'likes', currentUser.uid);
-
     setComments(prevComments =>
       prevComments.map(comment => {
         if (comment.id === commentId) {
           const newIsLiked = !comment.isLiked;
           const newLikes = newIsLiked ? comment.likes + 1 : comment.likes - 1;
-
           const updatedComment = {
             ...comment,
             isLiked: newIsLiked,
             likes: newLikes,
           };
-
           (async () => {
             try {
               if (newIsLiked) {
@@ -288,25 +247,21 @@ export default function RecipeDetailScreen() {
               Alert.alert("Error", "Could not update comment like status.");
             }
           })();
-
           return updatedComment;
         }
         return comment;
       })
     );
   };
-
   const handleAddComment = async (commentText) => {
     if (!currentUser) {
       Alert.alert("Login Required", "You need to be logged in to post comments.");
       return;
     }
-
     if (!commentText.trim()) {
       Alert.alert("Empty Comment", "Please enter some text for your comment.");
       return;
     }
-
     try {
       const newCommentData = {
         text: commentText,
@@ -315,11 +270,7 @@ export default function RecipeDetailScreen() {
         authorAvatar: userProfile?.avatar || null, 
         createdAt: serverTimestamp(),
       };
-
       const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newCommentData);
-
-      // Note: Comment notifications not implemented yet
-
       const localComment = {
         id: docRef.id,
         user: newCommentData.authorName, 
@@ -329,13 +280,11 @@ export default function RecipeDetailScreen() {
         likes: 0,
         isLiked: false,
       };
-
       setComments(prev => [localComment, ...prev]);
     } catch (error) {
       Alert.alert('Error', 'Failed to post comment.');
     }
   };
-
   const handleDeleteRecipe = () => {
     Alert.alert(
       "Delete Recipe",
@@ -362,16 +311,13 @@ export default function RecipeDetailScreen() {
       ]
     );
   };
-
   const reloadRecipeData = async () => {
     try {
       setLoading(true);
       const recipeDocRef = doc(db, 'recipes', id);
       const recipeDocSnap = await getDoc(recipeDocRef);
-
       if (recipeDocSnap.exists()) {
         const recipeData = { id: recipeDocSnap.id, ...recipeDocSnap.data() };
-
         let authorDisplayName = 'Anonymous';
         if (recipeData.authorId) {
           const userDocRef = doc(db, 'users', recipeData.authorId);
@@ -382,11 +328,9 @@ export default function RecipeDetailScreen() {
             authorDisplayName = currentUser.displayName || currentUser.email || 'Anonymous';
           }
         }
-
         const ratingsCollectionRef = collection(db, 'recipes', id, 'ratings');
         const ratingsSnapshot = await getDocs(ratingsCollectionRef);
         const reviewsCount = ratingsSnapshot.size;
-        
         let averageRating = recipeData.rating || 0;
         if (reviewsCount > 0 && !recipeData.rating) {
           let totalRating = 0;
@@ -395,14 +339,12 @@ export default function RecipeDetailScreen() {
           });
           averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
         }
-
         setRecipe({ 
           ...recipeData, 
           authorDisplayName,
           rating: averageRating,
           reviews: reviewsCount
         });
-
         if (currentUser) {
           const userCurrentRating = await getUserRating(id, currentUser.uid);
           setUserRating(userCurrentRating);
@@ -413,52 +355,40 @@ export default function RecipeDetailScreen() {
       setLoading(false);
     }
   };
-
   const handleEditRecipe = () => {
     router.push(`/recipe/edit-recipe?id=${id}`);
   };
-
   const handleShare = async () => {
     try {
       const shareText = `Check out this delicious recipe: ${recipe.title}\n\nIngredients:\n${recipe.ingredients.map(item => `• ${item.amount} ${item.ingredient}`).join('\n')}\n\nTime: ${recipe.time} min\nRating: ${recipe.rating}⭐\n\nBy ${recipe.authorName}`;
-      
       const result = await Share.share({
         message: shareText,
         title: recipe.title,
-        url: recipe.imageUrl, // Optional: share the image URL
+        url: recipe.imageUrl, 
       });
-      
       if (result.action === Share.sharedAction) {
       }
     } catch (error) {
       Alert.alert('Error', 'Could not share recipe. Please try again.');
     }
   };
-
   const handleAddToShoppingList = async () => {
     if (!currentUser) {
       Alert.alert("Login Required", "You need to be logged in to add items to your shopping list.");
       return;
     }
-
     try {
       let addedCount = 0;
-      
-      // Add each ingredient individually and count successful additions
       for (const ingredient of recipe.ingredients) {
         const itemText = `${ingredient.amount} ${ingredient.ingredient}`.trim();
         if (itemText) {
           try {
-            // Pass an object with text property as expected by addShoppingListItem
             await addShoppingListItem(currentUser.uid, { text: itemText });
             addedCount++;
           } catch (itemError) {
-            // Continue with other ingredients even if one fails
           }
         }
       }
-      
-      // Only show success alert if at least one item was added
       if (addedCount > 0) {
         Alert.alert(
           "Success! 🛒", 
@@ -470,27 +400,21 @@ export default function RecipeDetailScreen() {
             }
           ]
         );
-        
         showToast(`${addedCount} ingredients added to your shopping list!`);
       } else {
         Alert.alert("Error", "No ingredients could be added to your shopping list. Please try again.");
       }
-      
     } catch (error) {
       Alert.alert("Error", "Could not add ingredients to shopping list. Please try again.");
     }
   };
-
   const handleCommentInputFocus = () => {
-    // Kleine Verzögerung um sicherzustellen, dass die Keyboard-Animation startet
     setTimeout(() => {
       if (scrollViewRef.current) {
-        // Einfach zum Ende scrollen, da die Kommentare am Ende sind
         scrollViewRef.current.scrollToEnd({ animated: true });
       }
     }, 100);
   };
-
   useFocusEffect(
     useCallback(() => {
       if (global.recipeEditCompleted) {
@@ -499,9 +423,7 @@ export default function RecipeDetailScreen() {
       }
     }, [])
   );
-
   const isOwner = isRecipeOwner(recipe, currentUser?.uid);
-
   if (loading || !recipe) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
@@ -509,10 +431,9 @@ export default function RecipeDetailScreen() {
       </View>
     );
   }
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
@@ -533,7 +454,6 @@ export default function RecipeDetailScreen() {
           </TouchableOpacity>
         </View>
       </View>
-
       <View style={{ flex: 1 }}>
         <ScrollView
           ref={scrollViewRef}
@@ -541,11 +461,10 @@ export default function RecipeDetailScreen() {
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingBottom: 120 }}
         >
-        {/* Recipe Image with Category Tags */}
+        {}
         <View style={styles.imageContainer}>
           <Image source={{ uri: recipe.imageUrl }} style={styles.recipeImage} />
-
-          {/* Category Tags on Image */}
+          {}
           {recipe.categories && recipe.categories.length > 0 && (
             <View style={styles.imageTags}>
               {recipe.categories.slice(0, 3).map((category) => {
@@ -561,28 +480,23 @@ export default function RecipeDetailScreen() {
             </View>
           )}
         </View>
-
-        {/* Recipe Info */}
+        {}
         <View style={styles.content}>
           <Text style={styles.title}>{recipe.title}</Text>
-
           <View style={styles.metadata}>
             <View style={styles.timeContainer}>
               <Ionicons name="time-outline" size={16} color={theme.colors.textSecondary} />
               <Text style={styles.time}>{recipe.time} min</Text>
             </View>
-
             <View style={styles.ratingContainer}>
               <StarRating rating={recipe.rating} />
               <Text style={styles.rating}>{recipe.rating}</Text>
               <Text style={styles.reviews}>({recipe.reviews} reviews)</Text>
             </View>
           </View>
-
-          {/* Use recipe.authorName here */}
+          {}
           <Text style={styles.author}>by {recipe.authorName}</Text>
-
-          {/* Allergy Information */}
+          {}
           {recipe.allergens && recipe.allergens.length > 0 && (
             <View style={styles.allergySection}>
               <View style={styles.allergyHeader}>
@@ -603,10 +517,8 @@ export default function RecipeDetailScreen() {
               </View>
             </View>
           )}
-
           <Text style={styles.description}>{recipe.description}</Text>
-
-          {/* Action Buttons */}
+          {}
           <View style={styles.actionButtons}>
             <TouchableOpacity
               style={[styles.likeButton, isLiked && styles.likedButton]}
@@ -621,7 +533,6 @@ export default function RecipeDetailScreen() {
                 {isLiked ? 'Liked' : 'Like'}
               </Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={[styles.saveButton, isSaved && styles.savedButton]}
               onPress={handleSave}
@@ -636,8 +547,7 @@ export default function RecipeDetailScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-
-          {/* Rating Section */}
+          {}
           <View style={styles.ratingSection}>
             <Text style={styles.ratingSectionTitle}>Rate this recipe</Text>
             {userRating > 0 ? (
@@ -655,8 +565,7 @@ export default function RecipeDetailScreen() {
               </TouchableOpacity>
             )}
           </View>
-
-          {/* Ingredients */}
+          {}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Ingredients</Text>
@@ -677,12 +586,10 @@ export default function RecipeDetailScreen() {
               </View>
             ))}
           </View>
-
-          {/* Instructions */}
+          {}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Instructions</Text>
             <Text style={styles.sectionSubtitle}>Step-by-step guide</Text>
-
             {recipe.instructions?.length > 0 ? (
               recipe.instructions.map((step, index) => (
                 <View key={index} style={styles.stepCard}>
@@ -699,8 +606,7 @@ export default function RecipeDetailScreen() {
               <Text style={styles.ingredientText}>No instructions provided.</Text>
             )}
           </View>
-
-          {/* Comments Section */}
+          {}
           <CommentsSection
             comments={comments}
             onCommentLike={handleCommentLike}
@@ -709,16 +615,14 @@ export default function RecipeDetailScreen() {
           />
         </View>
       </ScrollView>
-
-      {/* Comment Input */}
+      {}
       <CommentInput 
         onAddComment={handleAddComment} 
         theme={theme} 
         onFocus={handleCommentInputFocus}
       />
       </View>
-
-      {/* Rating Modal */}
+      {}
       <RatingModal
         visible={showRating}
         onClose={() => setShowRating(false)}
@@ -730,7 +634,6 @@ export default function RecipeDetailScreen() {
     </SafeAreaView>
   );
 }
-
 const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
@@ -1090,7 +993,6 @@ const createStyles = (theme) => StyleSheet.create({
     color: theme.colors.text,
     flex: 1,
   },
-
   stepCard: {
     borderWidth: 1,
     borderColor: theme.colors.primary,
@@ -1104,13 +1006,11 @@ const createStyles = (theme) => StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-
   stepHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
-
   stepCircle: {
     width: 26,
     height: 26,
@@ -1122,29 +1022,24 @@ const createStyles = (theme) => StyleSheet.create({
     marginRight: 10,
     backgroundColor: theme.colors.primary,
   },
-
   stepNumber: {
     fontWeight: '600',
     fontSize: 13,
     color: '#FFFFFF',
   },
-
   stepTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: theme.colors.text,
   },
-
   stepDescription: {
     fontSize: 15,
     color: theme.colors.textSecondary,
     lineHeight: 22,
   },
-
   sectionSubtitle: {
     fontSize: 14,
     color: theme.colors.textSecondary,
     marginBottom: 10,
   },
-
 });

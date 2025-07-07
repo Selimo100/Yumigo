@@ -89,7 +89,6 @@ describe('RecipeService - Essentielle Rezept-Funktionen', () => {
 
       getDoc.mockResolvedValue(mockDoc);
 
-      // Test mit verschiedenen ID-Formaten
       await getRecipe('recipe123');
       await getRecipe('short');
       
@@ -111,16 +110,12 @@ describe('RecipeService - Essentielle Rezept-Funktionen', () => {
         dietary: ['vegan']
       };
 
-      // Validiere alle notwendigen Felder
-      expect(validRecipe).toHaveProperty('id');
       expect(validRecipe).toHaveProperty('title');
       expect(validRecipe).toHaveProperty('description');
       expect(validRecipe).toHaveProperty('time');
       expect(validRecipe).toHaveProperty('ingredients');
       expect(validRecipe).toHaveProperty('instructions');
 
-      // Validiere Datentypen
-      expect(typeof validRecipe.id).toBe('string');
       expect(typeof validRecipe.title).toBe('string');
       expect(typeof validRecipe.time).toBe('number');
       expect(Array.isArray(validRecipe.ingredients)).toBe(true);

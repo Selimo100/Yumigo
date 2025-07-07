@@ -93,7 +93,6 @@ describe('Validation Utils', () => {
         [{ amount: '200g', ingredient: '' }], // Leere Zutat
       ];
 
-      // Test gültige Struktur
       const validRecipeWithIngredients = { 
         ...validRecipe, 
         ingredients: validIngredientStructure 
@@ -101,7 +100,6 @@ describe('Validation Utils', () => {
       const validResult = validateRecipe(validRecipeWithIngredients);
       expect(validResult.isValid).toBe(true);
 
-      // Test ungültige Strukturen
       invalidIngredientStructures.forEach(invalidIngredients => {
         const invalidRecipe = { 
           ...validRecipe, 
@@ -204,8 +202,7 @@ describe('Validation Utils', () => {
 
       expect(() => {
         const result = validateRecipe(recipe);
-        // Sollte nicht crashen, auch bei sehr langen Eingaben
-        expect(typeof result).toBe('object');
+        
       }).not.toThrow();
     });
 

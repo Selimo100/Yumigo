@@ -16,8 +16,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { login, register, sendVerificationEmail, logout } from '../../services/authService';
 import { useRouter } from "expo-router";
 import { validateEmail, validatePassword } from '../../utils/validation';
-
-
 export default function Login() {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -25,30 +23,23 @@ export default function Login() {
     const { theme } = useTheme();
     const styles = createStyles(theme);
     const router = useRouter();
-
-
     const handleSubmit = async () => {
-        // Validation
         if (!email || !password) {
             Alert.alert('Missing Information', 'Please fill in all fields to continue.');
             return;
         }
-
         if (!validateEmail(email)) {
             Alert.alert('Invalid Email', 'Please enter a valid email address.');
             return;
         }
-
         if (!validatePassword(password)) {
             Alert.alert('Password Too Short', 'Your password must be at least 8 characters long.');
             return;
         }
-
         try {
             let user;
             if (isLogin) {
                 user = await login(email, password);
-
                 if (!user.emailVerified) {
                     Alert.alert(
                         "Email Verification Required",
@@ -74,7 +65,6 @@ export default function Login() {
                     await logout();
                     return;
                 }
-
                 router.replace('/home');
             } else {
                 user = await register(email, password);
@@ -86,8 +76,6 @@ export default function Login() {
                 setIsLogin(true);
             }
         } catch (error) {
-            
-            // User-friendly error messages
             if (error.code === "auth/user-not-found") {
                 Alert.alert(
                     "Account Not Found", 
@@ -147,13 +135,9 @@ export default function Login() {
             }
         }
     }
-
-
     const toggleMode = () => {
         router.push('/register');
     };
-
-
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView
@@ -176,7 +160,6 @@ export default function Login() {
                             Welcome back to Yumigo.
                         </Text>
                     </View>
-
                     <View style={styles.formContainer}>
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>E-Mail</Text>
@@ -206,7 +189,6 @@ export default function Login() {
                         <TouchableOpacity
                             style={styles.submitButton}
                             onPress={handleSubmit}
-
                         >
                             <Text style={styles.submitButtonText}>
                                 Sign in
@@ -236,7 +218,6 @@ const COLORS = {
     accent: '#0D6159',
     textOnAccent: '#DDE6D5',
 };
-
 const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,

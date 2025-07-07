@@ -6,7 +6,6 @@ export const CATEGORIES = [
   { id: 'cold', label: 'Cold', color: '#50E3C2', icon: '🧊', slug: 'cold' },
   { id: 'hot', label: 'Hot', color: '#FF6F00', icon: '🔥', slug: 'hot' }
 ];
-
 export const ALLERGENS = [
   { id: 'gluten', label: 'Contains Gluten', color: '#FF6B6B', icon: '🌾' },
   { id: 'dairy', label: 'Contains Dairy', color: '#4ECDC4', icon: '🥛' },
@@ -17,7 +16,6 @@ export const ALLERGENS = [
   { id: 'fish', label: 'Contains Fish', color: '#3498DB', icon: '🐟' },
   { id: 'sesame', label: 'Contains Sesame', color: '#F39C12', icon: '🌰' }
 ];
-
 export const DIETARY = [
   { id: 'vegan', label: 'Vegan', color: '#27AE60', icon: '🌱' },
   { id: 'vegetarian', label: 'Vegetarian', color: '#2ECC71', icon: '🥬' },
@@ -28,7 +26,6 @@ export const DIETARY = [
   { id: 'low-carb', label: 'Low Carb', color: '#16A085', icon: '📉' },
   { id: 'high-protein', label: 'High Protein', color: '#C0392B', icon: '💪' }
 ];
-
 export const COLORS = {
   primary: '#0D6159',
   secondary: '#A5B68D',

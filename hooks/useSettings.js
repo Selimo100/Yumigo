@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { auth } from '../lib/firebaseconfig';
 import { getUserProfile, updateUserProfile } from '../services/userService';
-
 export const useSettings = () => {
   const [profile, setProfile] = useState({
     username: '',
@@ -9,16 +8,13 @@ export const useSettings = () => {
     email: '',
     avatar: null,
   });
-
   const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     loadSettings();
   }, []);
   const loadSettings = async () => {
     try {
       setIsLoading(true);
-      
       const currentUser = auth.currentUser;
       if (currentUser) {
         try {
@@ -52,7 +48,6 @@ export const useSettings = () => {
       setIsLoading(false);
     }
   };
-  
   const updateProfile = (updates) => {
     const newProfile = { ...profile, ...updates };
     setProfile(newProfile);
@@ -63,22 +58,18 @@ export const useSettings = () => {
       if (!currentUser) {
         throw new Error('No authenticated user found');
       }
-
       await updateUserProfile(currentUser.uid, {
         username: profile.username,
         bio: profile.bio,
         email: profile.email,
         avatar: profile.avatar,
       });
-      
       await loadSettings();
-      
       return true;
     } catch (error) {
       return false;
     }
   };
-
   return {
     profile,
     isLoading,

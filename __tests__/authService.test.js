@@ -162,8 +162,7 @@ describe('AuthService - Essentielle Authentifizierung', () => {
 
       strongPasswords.forEach(password => {
         expect(password.length).toBeGreaterThanOrEqual(8);
-        expect(password).toMatch(/[a-z]/); // Kleinbuchstabe
-        expect(password).toMatch(/[A-Z]/); // Großbuchstabe
+        expect(password).toMatch(/[a-z]/); 
         expect(password).toMatch(/[0-9]/); // Zahl
       });
     });

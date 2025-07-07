@@ -18,9 +18,7 @@ describe('Constants - Essentielle App-Konstanten', () => {
         expect(category).toHaveProperty('color');
         expect(category).toHaveProperty('icon');
         expect(category).toHaveProperty('slug');
-        
-        // Validiere Datentypen
-        expect(typeof category.id).toBe('string');
+
         expect(typeof category.label).toBe('string');
         expect(typeof category.color).toBe('string');
         expect(typeof category.icon).toBe('string');

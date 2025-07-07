@@ -15,7 +15,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNotifications } from '../contexts/NotificationContext';
 import { router } from 'expo-router';
-
 const NotificationModal = ({ visible, onClose }) => {
   const { theme } = useTheme();
   const {
@@ -27,10 +26,8 @@ const NotificationModal = ({ visible, onClose }) => {
     getNotificationIcon,
     getNotificationColor,
   } = useNotifications();
-  
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = React.useState(false);
   const styles = createStyles(theme);
-
   const formatTime = (timestamp) => {
     try {
       const date = timestamp?.toDate?.() || new Date(timestamp);
@@ -39,25 +36,19 @@ const NotificationModal = ({ visible, onClose }) => {
       return 'just now';
     }
   };
-
   const handleNotificationPress = async (notification) => {
-    // Mark as read
     if (!notification.read) {
       await markAsRead(notification.id);
     }
-
-    // Navigate to the appropriate screen
     if (notification.actionUrl) {
       onClose();
       router.push(notification.actionUrl);
     }
   };
-
   const handleMarkAllAsRead = async () => {
     if (unreadCount === 0) {
       return;
     }
-
     try {
       setIsMarkingAllAsRead(true);
       await markAllAsRead();
@@ -67,10 +58,8 @@ const NotificationModal = ({ visible, onClose }) => {
       setIsMarkingAllAsRead(false);
     }
   };
-
   const renderNotificationItem = (notification) => {
     const iconColor = getNotificationColor(notification.type);
-    
     return (
       <TouchableOpacity
         key={notification.id}
@@ -105,7 +94,6 @@ const NotificationModal = ({ visible, onClose }) => {
               />
             </View>
           </View>
-
           <View style={styles.textContainer}>
             <Text style={styles.notificationTitle}>
               {notification.title}
@@ -117,7 +105,6 @@ const NotificationModal = ({ visible, onClose }) => {
               {formatTime(notification.createdAt)}
             </Text>
           </View>
-
           {!notification.read && (
             <View style={styles.unreadDot} />
           )}
@@ -125,7 +112,6 @@ const NotificationModal = ({ visible, onClose }) => {
       </TouchableOpacity>
     );
   };
-
   return (
     <Modal
       visible={visible}
@@ -134,7 +120,7 @@ const NotificationModal = ({ visible, onClose }) => {
       onRequestClose={onClose}
     >
       <SafeAreaView style={styles.container}>
-        {/* Header */}
+        {}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Notifications</Text>
           <View style={styles.headerActions}>
@@ -158,8 +144,7 @@ const NotificationModal = ({ visible, onClose }) => {
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* Content */}
+        {}
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {isLoading ? (
             <View style={styles.loadingContainer}>
@@ -188,7 +173,6 @@ const NotificationModal = ({ visible, onClose }) => {
     </Modal>
   );
 };
-
 const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
@@ -344,5 +328,4 @@ const createStyles = (theme) => StyleSheet.create({
     marginTop: 4,
   },
 });
-
 export default NotificationModal;

@@ -1,5 +1,4 @@
 import { TextInput, View, StyleSheet } from 'react-native';
-
 export default function SearchBar({ placeholder, onSearch }) {
   return (
     <View style={styles.container}>
@@ -11,7 +10,6 @@ export default function SearchBar({ placeholder, onSearch }) {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     margin: 10,

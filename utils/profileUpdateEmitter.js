@@ -1,4 +1,3 @@
-// Simple event emitter for profile updates
 class ProfileUpdateEmitter {
   constructor() {
     this.listeners = [];
@@ -7,7 +6,6 @@ class ProfileUpdateEmitter {
 
   subscribe(callback) {
     this.listeners.push(callback);
-    // Return unsubscribe function
     return () => {
       this.listeners = this.listeners.filter(listener => listener !== callback);
     };
@@ -15,7 +13,6 @@ class ProfileUpdateEmitter {
 
   subscribeToFollowChanges(callback) {
     this.followListeners.push(callback);
-    // Return unsubscribe function
     return () => {
       this.followListeners = this.followListeners.filter(listener => listener !== callback);
     };
@@ -27,7 +24,6 @@ class ProfileUpdateEmitter {
 
   emitFollowChange(userId, isFollowing) {
     this.followListeners.forEach(callback => callback(userId, isFollowing));
-    // Also emit general profile update
     this.emit();
   }
 }

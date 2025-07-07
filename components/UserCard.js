@@ -9,7 +9,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import FollowButton from './FollowButton';
-
 export default function UserCard({ 
   user, 
   onPress, 
@@ -17,9 +16,7 @@ export default function UserCard({
   onFollowChange 
 }) {
   const { theme } = useTheme();
-
   if (!user) return null;
-
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
       <TouchableOpacity
@@ -39,7 +36,6 @@ export default function UserCard({
               <Ionicons name="person" size={24} color={theme.colors.textSecondary} />
             )}
           </View>
-
           <View style={styles.details}>
             <Text style={[styles.username, { color: theme.colors.text }]}>
               {user.username}
@@ -55,7 +51,6 @@ export default function UserCard({
           </View>
         </View>
       </TouchableOpacity>
-
       {showFollowButton && (
         <FollowButton
           userId={user.id}
@@ -66,7 +61,6 @@ export default function UserCard({
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',

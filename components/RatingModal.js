@@ -2,16 +2,13 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, Animated } from 'react
 import { StarRating } from './Comment/CommentComponents';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
-
 export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitle, theme }) => {
   const [selectedRating, setSelectedRating] = useState(userRating);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
     setSelectedRating(userRating);
   }, [userRating]);
-
   useEffect(() => {
     if (visible) {
       Animated.parallel([
@@ -42,10 +39,8 @@ export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitl
       ]).start();
     }
   }, [visible]);
-
   const handleRatingPress = (rating) => {
     setSelectedRating(rating);
-    // Kleine Animation für das ausgewählte Rating
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 1.1,
@@ -59,13 +54,11 @@ export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitl
       })
     ]).start();
   };
-
   const handleSubmit = () => {
     if (selectedRating > 0) {
       onRating(selectedRating);
     }
   };
-
   const getRatingText = (rating) => {
     switch (rating) {
       case 1: return "Poor";
@@ -76,7 +69,6 @@ export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitl
       default: return "Rate this recipe";
     }
   };
-
   const styles = StyleSheet.create({
     modalOverlay: {
       flex: 1,
@@ -180,7 +172,6 @@ export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitl
       color: theme.colors.textSecondary,
     },
   });
-
   return (
     <Modal
       visible={visible}
@@ -204,7 +195,7 @@ export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitl
             }
           ]}
         >
-          {/* Header Icon */}
+          {}
           <View style={styles.headerIcon}>
             <Ionicons 
               name="star" 
@@ -212,21 +203,17 @@ export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitl
               color={theme.colors.primary} 
             />
           </View>
-
-          {/* Title */}
+          {}
           <Text style={styles.modalTitle}>Rate Recipe</Text>
-          
-          {/* Recipe Title */}
+          {}
           <Text style={styles.recipeTitle} numberOfLines={2}>
             "{recipeTitle}"
           </Text>
-
-          {/* Rating Text */}
+          {}
           <Text style={styles.ratingText}>
             {getRatingText(selectedRating)}
           </Text>
-          
-          {/* Stars */}
+          {}
           <View style={styles.starsContainer}>
             <StarRating 
               rating={selectedRating} 
@@ -235,8 +222,7 @@ export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitl
               size={44}
             />
           </View>
-          
-          {/* Buttons */}
+          {}
           <View style={styles.modalButtons}>
             <TouchableOpacity 
               style={styles.cancelButton} 
@@ -244,7 +230,6 @@ export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitl
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            
             <TouchableOpacity 
               style={[
                 styles.submitButton,

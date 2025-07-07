@@ -50,9 +50,7 @@ describe('SearchBar', () => {
     );
     
     const input = getByPlaceholderText('Test ohne Callback');
-    
-    // Sollte nicht crashen, auch ohne onSearch
-    expect(() => {
+
       fireEvent.changeText(input, 'test');
     }).not.toThrow();
   });

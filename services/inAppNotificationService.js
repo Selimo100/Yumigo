@@ -1,26 +1,23 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebaseconfig';
 
-// Create a simple in-app notification in Firestore
-// No external push notifications - only visible when user opens the app
 export const createInAppNotification = async (notificationData) => {
   try {
     const notification = {
       ...notificationData,
       createdAt: serverTimestamp(),
       read: false,
-      type: 'in-app' // Mark as in-app only
+      type: 'in-app' 
     };    
     
     const docRef = await addDoc(collection(db, 'notifications'), notification);
     return docRef.id;
   } catch (error) {
-    // Silent error handling - notifications are optional
+    
     return null;
   }
 };
 
-// Notify when someone likes a recipe
 export const notifyRecipeLike = async (recipeId, recipeTitle, likerName, recipeAuthorId) => {
   if (!recipeAuthorId) return;
   
@@ -38,11 +35,10 @@ export const notifyRecipeLike = async (recipeId, recipeTitle, likerName, recipeA
       }
     });
   } catch (error) {
-    // Silent error handling
+    
   }
 };
 
-// Notify when someone follows a user
 export const notifyUserFollow = async (followedUserId, followerName, followerId) => {
   if (!followedUserId) return;
   
@@ -59,11 +55,10 @@ export const notifyUserFollow = async (followedUserId, followerName, followerId)
       }
     });
   } catch (error) {
-    // Silent error handling
+    
   }
 };
 
-// Notify when someone rates a recipe
 export const notifyRecipeRating = async (recipeId, recipeTitle, raterName, rating, recipeAuthorId) => {
   if (!recipeAuthorId) return;
   
@@ -82,13 +77,10 @@ export const notifyRecipeRating = async (recipeId, recipeTitle, raterName, ratin
       }
     });
   } catch (error) {
-    // Silent error handling
+    
   }
 };
 
-// Clean up old notifications (older than 30 days)
 export const cleanupOldNotifications = async (userId) => {
-  // This could be implemented as a periodic cleanup
-  // For now, we'll let them accumulate
-  // In production, you might want to implement this with Cloud Functions
+
 };

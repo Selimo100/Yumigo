@@ -23,77 +23,40 @@ import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
 import { useFollow } from '../../hooks/useFollow';
 import ShoppingListModal from '../../components/ShoppingListModal';
 import { useTabBarHeight } from '../../hooks/useTabBarHeight';
-
 const { width } = Dimensions.get('window');
-
 export default function ProfileScreen() {
   const { theme, toggleTheme, isDarkMode } = useTheme();
   const tabBarHeight = useTabBarHeight();
   const styles = createStyles(theme, tabBarHeight);
   const { user } = useAuth();
-  // Ensure useUserProfile is managing its own loading state correctly.
   const { profile: userProfile, recipes: userRecipes, isLoading: profileLoading, refreshProfile } = useUserProfile();
   const { followingList, followersList, followingCount, followerCount, loadFollowingUsers, loadFollowers } = useFollow();
   const router = useRouter();
   const [showShoppingList, setShowShoppingList] = useState(false);
-
-  // Subscribes to profile update events. This seems fine.
   useEffect(() => {
     const unsubscribe = profileUpdateEmitter.subscribe(() => {
-      // These functions should ideally handle their own loading states internally
       if (refreshProfile) {
         refreshProfile();
       }
       loadFollowingUsers();
       loadFollowers();
     });
-
     return unsubscribe;
   }, [refreshProfile, loadFollowingUsers, loadFollowers]);
-
-  // Load follow data when component mounts or user changes - This is also fine.
   useEffect(() => {
     if (user?.uid) {
       loadFollowingUsers();
       loadFollowers();
     }
   }, [user?.uid, loadFollowingUsers, loadFollowers]);
-
-  // *** Potentially problematic useFocusEffect - This is the primary candidate for flickering ***
-  // We are REMOVING or SIGNIFICANTLY REFINING the condition here.
-  // If `refreshProfile` is already called by `useUserProfile` on mount/user change,
-  // and `userRecipes` is initially empty, this will cause repeated fetches.
-  /*
-  useFocusEffect(
-    useCallback(() => {
-      // Only refresh if we don't have recent data - THIS IS THE PROBLEM LINE
-      // If userRecipes is empty (e.g., during initial load), this will trigger refreshProfile repeatedly.
-      // Rely on useUserProfile's internal loading logic instead for initial data fetch.
-      if (refreshProfile && (!userRecipes || userRecipes.length === 0)) {
-        refreshProfile();
-      }
-    }, [refreshProfile, userRecipes]) // Keep dependencies minimal and correct
-  );
-  */
-  // Let's replace the above with a focus effect that truly only refreshes if it detects
-  // that the profile data might be stale, and not just because userRecipes is empty.
-  // A better approach might be to have `useUserProfile` handle this internally,
-  // or to introduce a `lastFetched` timestamp if a re-fetch on focus is genuinely desired.
-  // For now, let's remove this specific condition to stop the flickering.
-
-  // Listen for global flag to reload profile data after recipe deletion - This one seems appropriate.
   useFocusEffect(
     useCallback(() => {
       if (global.profileNeedsReload && refreshProfile) {
         refreshProfile();
-        global.profileNeedsReload = false; // Reset flag immediately after triggering refresh
+        global.profileNeedsReload = false; 
       }
     }, [refreshProfile])
   );
-
-
-  // Render loading state if profileLoading is true.
-  // This is correctly placed, assuming `profileLoading` from `useUserProfile` is accurate.
   if (profileLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -106,7 +69,6 @@ export default function ProfileScreen() {
       </SafeAreaView>
     );
   }
-
   const currentUser = userProfile || {
     username: user?.email?.split('@')[0] || 'User',
     bio: 'Food enthusiast | Making cooking simple',
@@ -115,13 +77,9 @@ export default function ProfileScreen() {
     recipeCount: 0,
     avatar: null,
   };
-
-  // Use real-time counts from useFollow hook with fallback to profile data
   const displayFollowingCount = followingCount ?? followingList?.length ?? currentUser.followingCount ?? 0;
   const displayFollowerCount = followerCount ?? followersList?.length ?? currentUser.followerCount ?? 0;
-
   const recipeList = userRecipes || [];
-
   const renderRecipeCard = (recipe) => (
     <TouchableOpacity
       key={recipe.id}
@@ -149,7 +107,6 @@ export default function ProfileScreen() {
           <Text style={styles.timeText}>{recipe.cookingTime || recipe.time || '-- min'}</Text>
         </View>
       </View>
-
       <View style={styles.recipeInfo}>
         <View style={styles.recipeContent}>
           <Text style={[styles.recipeTitle, { color: theme.colors.text }]}>
@@ -159,7 +116,6 @@ export default function ProfileScreen() {
             by {recipe.authorName || 'You'}
           </Text>
         </View>
-
         <View style={styles.recipeStats}>
           <View style={styles.ratingContainer}>
             <Ionicons name="star" size={14} color="#ffc107" />
@@ -167,7 +123,6 @@ export default function ProfileScreen() {
               {recipe.rating || '0.0'}
             </Text>
           </View>
-
           <View style={styles.likesContainer}>
             <Ionicons name="heart-outline" size={14} color="#6c757d" />
             <Text style={[styles.likesText, { color: theme.colors.textSecondary }]}>
@@ -178,49 +133,38 @@ export default function ProfileScreen() {
       </View>
     </TouchableOpacity>
   );
-
   const handleLogout = async () => {
     try {
       await logout();
       router.replace('/login');
     } catch (error) {
-      // Error handled silently
     }
   };
-
   const handleShareProfile = async () => {
     try {
       const shareText = `👨‍🍳 Check out ${currentUser.username}'s profile on Yumigo!
-
 📝 ${currentUser.bio || 'Food enthusiast | Making cooking simple'}
-
 📊 Stats:
 👥 ${displayFollowerCount} followers
 👤 ${displayFollowingCount} following
 🍽️ ${recipeList.length} delicious recipes
-
 Join the Yumigo community and discover amazing recipes!`;
-
       const result = await Share.share({
         message: shareText,
         title: `${currentUser.username}'s Yumigo Profile`,
       });
-
       if (result.action === Share.sharedAction) {
-        // Profile shared successfully
       }
     } catch (error) {
       Alert.alert('Error', 'Could not share profile. Please try again.');
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={theme.colors.background}
       />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -233,11 +177,9 @@ Join the Yumigo community and discover amazing recipes!`;
               <Ionicons name="person" size={50} color={theme.colors.textSecondary} />
             )}
           </View>
-
           <Text style={styles.username}>
             {currentUser.username}
           </Text>
-
           <View style={styles.statsContainer}>
             <TouchableOpacity
               style={styles.statItem}
@@ -276,11 +218,9 @@ Join the Yumigo community and discover amazing recipes!`;
               </Text>
             </View>
           </View>
-
           <Text style={styles.bio}>
             {currentUser.bio}
           </Text>
-
           <View style={styles.actionButtons}>
             <TouchableOpacity
               style={styles.editButton}
@@ -318,8 +258,7 @@ Join the Yumigo community and discover amazing recipes!`;
               </TouchableOpacity>
             )}
           </View>
-
-          {profileLoading ? ( // This check should be sufficient if useUserProfile is handling loading correctly
+          {profileLoading ? ( 
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={theme.colors.primary} />
               <Text style={styles.loadingText}>
@@ -349,7 +288,6 @@ Join the Yumigo community and discover amazing recipes!`;
             </View>
           )}
         </View>
-
         <View style={styles.logoutSection}>
           <TouchableOpacity
             style={styles.logoutButton}
@@ -360,8 +298,7 @@ Join the Yumigo community and discover amazing recipes!`;
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Shopping List Modal */}
+      {}
       <ShoppingListModal
         visible={showShoppingList}
         onClose={() => setShowShoppingList(false)}
@@ -369,14 +306,13 @@ Join the Yumigo community and discover amazing recipes!`;
     </SafeAreaView>
   );
 }
-
 const createStyles = (theme, tabBarHeight) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
   },
   scrollContent: {
-    paddingBottom: tabBarHeight + 24, // Add padding for tab bar plus existing padding
+    paddingBottom: tabBarHeight + 24, 
   },
   profileHeader: {
     alignItems: 'center',

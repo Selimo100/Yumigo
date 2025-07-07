@@ -3,7 +3,6 @@ import { auth } from '../lib/firebaseconfig';
 import { getUserProfile, getUserRecipes } from '../services/userService';
 import { onAuthStateChanged } from 'firebase/auth';
 import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
-
 export const useUserProfile = () => {
     const [profile, setProfile] = useState(null);
     const [recipes, setRecipes] = useState([]);
@@ -12,7 +11,6 @@ export const useUserProfile = () => {
         try {
             setIsLoading(true);
             setError(null);
-
             const userProfile = await getUserProfile(user.uid);
             if (userProfile) {
                 setProfile(userProfile);
@@ -30,7 +28,7 @@ export const useUserProfile = () => {
                 setProfile(fallbackProfile);
             }
             try {
-                const userRecipes = await getUserRecipes(user.uid, user.uid); // Pass current user ID for like status
+                const userRecipes = await getUserRecipes(user.uid, user.uid); 
                 setRecipes(userRecipes);
             } catch (recipeError) {
                 setRecipes([]);
@@ -52,7 +50,6 @@ export const useUserProfile = () => {
             setIsLoading(false);
         }
     };
-
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -63,43 +60,33 @@ export const useUserProfile = () => {
                 setIsLoading(false);
             }
         });
-
         return unsubscribe;
     }, []);
-
-    // Listen for profile updates (like follow/unfollow changes)
     useEffect(() => {
         const unsubscribe = profileUpdateEmitter.subscribe(async () => {
             const user = auth.currentUser;
-            if (user && !isLoading) { // Prevent multiple simultaneous updates
-                // Refresh both profile data and recipes
+            if (user && !isLoading) { 
                 try {
                     setIsLoading(true);
                     const userProfile = await getUserProfile(user.uid);
                     if (userProfile) {
                         setProfile(userProfile);
                     }
-                    
-                    // Also refresh recipes when profile updates
                     const userRecipes = await getUserRecipes(user.uid, user.uid);
                     setRecipes(userRecipes);
                 } catch (error) {
-                    // Error handled silently
                 } finally {
                     setIsLoading(false);
                 }
             }
         });
-
         return unsubscribe;
-    }, [isLoading]); // Add isLoading dependency
-
+    }, [isLoading]); 
     const refreshProfile = async () => {
         const user = auth.currentUser;
         if (user) {
             await loadUserData(user);
         }
     };
-
     return { profile, recipes, isLoading, error, refreshProfile };
 };

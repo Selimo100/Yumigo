@@ -16,8 +16,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { getRecipe, updateRecipe, isRecipeOwner } from '../../services/recipeService';
 import { validateRecipe } from '../../utils/validation';
 import useAuth from '../../lib/useAuth';
-
-// Import form components
 import ImageUpload from '../../components/RecipeForm/ImageUpload';
 import CategorySelector from '../../components/RecipeForm/CategorySelector';
 import DietarySelector from '../../components/RecipeForm/DietarySelector';
@@ -25,18 +23,15 @@ import AllergenSelector from '../../components/RecipeForm/AllergenSelector';
 import IngredientInput from '../../components/RecipeForm/IngredientInput';
 import InstructionInput from '../../components/RecipeForm/InstructionInput';
 import TimePicker from '../../components/RecipeForm/TimePicker';
-
 export default function EditRecipeScreen() {
   const { id } = useLocalSearchParams();
   const { theme } = useTheme();
   const { user } = useAuth();
   const styles = createStyles(theme);
-  
   const [originalRecipe, setOriginalRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
-
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -48,22 +43,17 @@ export default function EditRecipeScreen() {
     instructions: [''],
     time: 15,
   });
-
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.title || formData.title.trim().length < 3) {
       newErrors.title = 'Recipe title must be at least 3 characters long';
     }
-
     if (!formData.description || formData.description.trim().length < 10) {
       newErrors.description = 'Description must be at least 10 characters long';
     }
-
     if (!formData.categories || formData.categories.length === 0) {
       newErrors.categories = 'Please select at least one category';
     }
-
     if (!formData.ingredients || formData.ingredients.length === 0) {
       newErrors.ingredients = 'Please add at least one ingredient';
     } else {
@@ -74,7 +64,6 @@ export default function EditRecipeScreen() {
         newErrors.ingredients = 'Please add at least one complete ingredient';
       }
     }
-
     if (!formData.instructions || formData.instructions.length === 0) {
       newErrors.instructions = 'Please add at least one instruction step';
     } else {
@@ -85,59 +74,46 @@ export default function EditRecipeScreen() {
         newErrors.instructions = 'Please add at least one instruction step';
       }
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   useEffect(() => {
     loadRecipe();
   }, [id]);
-
   const loadRecipe = async () => {
     if (!id) {
       Alert.alert('Error', 'Recipe ID not found');
       router.back();
       return;
     }
-
     try {
       setLoading(true);
       const recipe = await getRecipe(id);
-      
       if (!recipe) {
         Alert.alert('Error', 'Recipe not found');
         router.back();
         return;
       }
-
-      // Check if current user is the owner
       if (!isRecipeOwner(recipe, user?.uid)) {
         Alert.alert('Access Denied', 'You can only edit your own recipes');
         router.back();
         return;
       }
-
       setOriginalRecipe(recipe);
-      
-      // Populate form with existing data - handle different ingredient structures
       const ingredients = recipe.ingredients || [];
       const formattedIngredients = ingredients.length > 0 
         ? ingredients.map(ing => {
             if (typeof ing === 'string') {
-              // If ingredient is a string, split it into amount and ingredient
               const parts = ing.split(' ');
               const amount = parts[0] || '';
               const ingredient = parts.slice(1).join(' ') || '';
               return { amount, ingredient };
             } else if (ing.name) {
-              // If it has 'name' property, map it to 'ingredient'
               return { 
                 amount: ing.amount || '', 
                 ingredient: ing.name || ''
               };
             } else {
-              // Already in correct format
               return { 
                 amount: ing.amount || '', 
                 ingredient: ing.ingredient || ''
@@ -145,7 +121,6 @@ export default function EditRecipeScreen() {
             }
           })
         : [{ amount: '', ingredient: '' }];
-
       setFormData({
         title: recipe.title || '',
         description: recipe.description || '',
@@ -164,25 +139,21 @@ export default function EditRecipeScreen() {
       setLoading(false);
     }
   };
-
   const handleSave = async () => {
     if (!validateForm()) {
       Alert.alert('Please fix the errors', 'Some fields are missing or invalid');
       return;
     }
-
     try {
       setSaving(true);
-      
       const updatedRecipe = await updateRecipe(
         id,
         {
           ...formData,
-          imageUrl: originalRecipe.imageUrl // Keep original URL for now
+          imageUrl: originalRecipe.imageUrl 
         },
         formData.image !== originalRecipe.imageUrl ? formData.image : null
       );
-
       Alert.alert(
         'Recipe Updated',
         'Your recipe has been updated successfully!',
@@ -190,7 +161,6 @@ export default function EditRecipeScreen() {
           {
             text: 'OK',
             onPress: () => {
-              // Set flags to indicate edit was completed for both detail and profile reload
               global.recipeEditCompleted = true;
               global.profileNeedsReload = true;
               router.back();
@@ -204,7 +174,6 @@ export default function EditRecipeScreen() {
       setSaving(false);
     }
   };
-
   const handleCancel = () => {
     Alert.alert(
       'Discard Changes',
@@ -222,7 +191,6 @@ export default function EditRecipeScreen() {
       ]
     );
   };
-
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -235,10 +203,9 @@ export default function EditRecipeScreen() {
       </SafeAreaView>
     );
   }
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Header */}
+      {}
       <View style={[styles.header, { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.border }]}>
         <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
           <Ionicons name="close" size={24} color={theme.colors.text} />
@@ -260,7 +227,6 @@ export default function EditRecipeScreen() {
           )}
         </TouchableOpacity>
       </View>
-
       <ScrollView 
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -272,7 +238,6 @@ export default function EditRecipeScreen() {
             onImageSelect={(image) => setFormData({ ...formData, image: image.uri })}
             error={errors.image}
           />
-
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Recipe Title *</Text>
             <TextInput
@@ -285,7 +250,6 @@ export default function EditRecipeScreen() {
             />
             {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
           </View>
-
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Description *</Text>
             <TextInput
@@ -301,13 +265,11 @@ export default function EditRecipeScreen() {
             />
             {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
           </View>
-
           <TimePicker
             time={formData.time}
             onTimeChange={(time) => setFormData({ ...formData, time })}
             error={errors.time}
           />
-
           <CategorySelector
             selectedCategories={formData.categories}
             onToggleCategory={(categoryId) => {
@@ -318,7 +280,6 @@ export default function EditRecipeScreen() {
             }}
             error={errors.categories}
           />
-
           <AllergenSelector
             selectedAllergens={formData.allergens}
             onToggleAllergen={(allergenId) => {
@@ -328,7 +289,6 @@ export default function EditRecipeScreen() {
               setFormData({ ...formData, allergens: updated });
             }}
           />
-
           <DietarySelector
             selectedDietary={formData.dietary}
             onToggleDietary={(dietaryId) => {
@@ -338,7 +298,6 @@ export default function EditRecipeScreen() {
               setFormData({ ...formData, dietary: updated });
             }}
           />
-
           <IngredientInput
             ingredients={formData.ingredients}
             onUpdateIngredient={(index, field, value) => {
@@ -358,7 +317,6 @@ export default function EditRecipeScreen() {
             }}
             error={errors.ingredients}
           />
-
           <InstructionInput
             instructions={formData.instructions}
             onUpdateInstruction={(index, value) => {
@@ -383,7 +341,6 @@ export default function EditRecipeScreen() {
     </SafeAreaView>
   );
 }
-
 const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,

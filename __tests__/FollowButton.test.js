@@ -1,9 +1,8 @@
 import React from 'react';
 
-// Einfacher Test ohne komplizierte Mocks
 describe('FollowButton', () => {
   test('Placeholder test - Component existiert', () => {
-    // Dieser Test stellt sicher, dass die Test-Suite läuft
+    
     expect(true).toBe(true);
   });
 

@@ -12,7 +12,6 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { useRouter } from 'expo-router';
 import { CATEGORIES, COLORS } from '../../utils/constants';
 import useTabBarHeight from '../../hooks/useTabBarHeight';
-
 export default function CravingSelection() {
     const [selectedCravings, setSelectedCravings] = useState([]);
     const { theme } = useTheme();
@@ -20,13 +19,11 @@ export default function CravingSelection() {
     const styles = createStyles(theme, tabBarHeight);
     const [error, setError] = useState('');
     const router = useRouter();
-
     const toggleCraving = (id) => {
         setSelectedCravings((prev) => {
             let newSelection = prev.includes(id)
                 ? prev.filter((c) => c !== id)
                 : [...prev, id];
-
             if (newSelection.includes('hot') && newSelection.includes('cold')) {
                 setError('"Cold" and "Hot" cannot be selected together.');
             } else if (newSelection.length > 2) {
@@ -34,18 +31,15 @@ export default function CravingSelection() {
             } else {
                 setError('');
             }
-
             return newSelection;
         });
     };
-
     const handleNextButton = () => {
         router.push({
             pathname: '/craving/allergySelection',
             params: { cravings: JSON.stringify(selectedCravings) },
         });
     };
-
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -53,7 +47,6 @@ export default function CravingSelection() {
                     <Text style={styles.title}>What are you craving for today?</Text>
                     <Text style={styles.subsubtitle}>Tell us your mood, we'll find your food</Text>
                 </View>
-
                 <View style={styles.grid}>
                     {CATEGORIES.map((craving) => {
                         const isSelected = selectedCravings.includes(craving.id);
@@ -91,7 +84,6 @@ export default function CravingSelection() {
                         );
                     })}
                 </View>
-
                 <View style={styles.buttonsContainer}>
                     {error ? (
                         <View style={styles.errorContainer}>
@@ -119,7 +111,6 @@ export default function CravingSelection() {
         </SafeAreaView>
     );
 }
-
 const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     container: { 
         flex: 1, 

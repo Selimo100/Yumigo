@@ -1,3 +1,6 @@
+// SERVICE: Rezept-Verwaltung mit Firebase Integration
+// Komplexe CRUD-Operationen, Bildverwaltung und Engagement-Features
+
 import { 
   doc, 
   getDoc, 
@@ -18,7 +21,6 @@ import { updateUserRecipeCount } from './userService';
 import { notifyRecipeLike } from './inAppNotificationService';
 import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
 
-// Get a specific recipe by ID
 export const getRecipe = async (recipeId) => {
   try {
     const recipeDoc = await getDoc(doc(db, 'recipes', recipeId));
@@ -31,30 +33,27 @@ export const getRecipe = async (recipeId) => {
   }
 };
 
-// Update an existing recipe
 export const updateRecipe = async (recipeId, recipeData, imageUri = null) => {
   try {
     let imageUrl = recipeData.imageUrl;
 
-    // If a new image is provided, upload it
     if (imageUri && imageUri !== recipeData.imageUrl) {
       try {
-        // Delete old image if it exists and is different
+        
         if (recipeData.imageUrl) {
           const oldImageRef = ref(storage, recipeData.imageUrl);
           await deleteObject(oldImageRef).catch(() => {
-            // Image deletion error handled silently
+            
           });
         }
 
-        // Upload new image
         const response = await fetch(imageUri);
         const blob = await response.blob();
         const imageRef = ref(storage, `recipes/${recipeId}_${Date.now()}`);
         const snapshot = await uploadBytes(imageRef, blob);
         imageUrl = await getDownloadURL(snapshot.ref);
       } catch (imageError) {
-        // Image update error handled silently
+        
       }
     }
 
@@ -73,7 +72,8 @@ export const updateRecipe = async (recipeId, recipeData, imageUri = null) => {
   }
 };
 
-// Delete a recipe and all its associated data
+// KOMPLEXE LÖSCH-OPERATION: Cascading Delete für komplettes Rezept-Ökosystem
+// Entfernt Rezept, Bilder, Kommentare, Likes und aktualisiert User-Statistiken
 export const deleteRecipe = async (recipeId, authorId) => {
   try {
     const recipeRef = doc(db, 'recipes', recipeId);
@@ -85,47 +85,42 @@ export const deleteRecipe = async (recipeId, authorId) => {
 
     const recipeData = recipeDoc.data();
 
-    // Delete the recipe image from storage
+    // BILD-VERWALTUNG: Entferne gespeicherte Bilder aus Storage
     if (recipeData.imageUrl) {
       try {
         const imageRef = ref(storage, recipeData.imageUrl);
         await deleteObject(imageRef);
       } catch (imageError) {
-        // Image deletion error handled silently
+        
       }
     }
 
-    // Delete all comments associated with the recipe
+    // CASCADE DELETE: Entferne alle zugehörigen Kommentare und deren Likes
     const commentsCollection = collection(db, 'recipes', recipeId, 'comments');
     const commentsSnapshot = await getDocs(commentsCollection);
     
     const deleteCommentPromises = commentsSnapshot.docs.map(async (commentDoc) => {
-      // Delete comment likes
+      
       const likesCollection = collection(db, 'recipes', recipeId, 'comments', commentDoc.id, 'likes');
       const likesSnapshot = await getDocs(likesCollection);
       const deleteLikePromises = likesSnapshot.docs.map(likeDoc => deleteDoc(likeDoc.ref));
       await Promise.all(deleteLikePromises);
-      
-      // Delete the comment itself
+
       await deleteDoc(commentDoc.ref);
     });
     
     await Promise.all(deleteCommentPromises);
 
-    // Delete all likes associated with the recipe
     const likesCollection = collection(db, 'recipes', recipeId, 'likes');
     const likesSnapshot = await getDocs(likesCollection);
     const deleteLikePromises = likesSnapshot.docs.map(likeDoc => deleteDoc(likeDoc.ref));
     await Promise.all(deleteLikePromises);
 
-    // Delete the recipe document
     await deleteDoc(recipeRef);
 
-    // Update user's recipe count
     if (authorId) {
       await updateUserRecipeCount(authorId, false);
-      
-      // Emit profile update to refresh UI
+
       setTimeout(() => {
         profileUpdateEmitter.emit();
       }, 100);
@@ -137,12 +132,10 @@ export const deleteRecipe = async (recipeId, authorId) => {
   }
 };
 
-// Check if user is the owner of a recipe
 export const isRecipeOwner = (recipe, userId) => {
   return recipe && recipe.authorId === userId;
 };
 
-// Get all recipes by a specific user
 export const getUserRecipes = async (userId) => {
   try {
     const recipesCollection = collection(db, 'recipes');
@@ -163,24 +156,22 @@ export const getUserRecipes = async (userId) => {
   }
 };
 
-// Like/Unlike a recipe
 export const toggleRecipeLike = async (recipeId, userId) => {
   try {
     const likeDocRef = doc(db, 'recipes', recipeId, 'likes', userId);
     const likeDoc = await getDoc(likeDocRef);
     
     if (likeDoc.exists()) {
-      // Unlike - remove the like document
+      
       await deleteDoc(likeDocRef);
-      return false; // Not liked anymore
+      return false; 
     } else {
-      // Like - create the like document
+      
       await setDoc(likeDocRef, {
         userId,
         timestamp: serverTimestamp()
       });
-      
-      // Create notification for the recipe owner
+
       try {
         const recipeDoc = await getDoc(doc(db, 'recipes', recipeId));
         if (recipeDoc.exists()) {
@@ -188,7 +179,7 @@ export const toggleRecipeLike = async (recipeId, userId) => {
           const recipeOwnerId = recipeData.authorId;
           
           if (recipeOwnerId && recipeOwnerId !== userId) {
-            // Get user info for notification
+            
             const userDoc = await getDoc(doc(db, 'users', userId));
             const userData = userDoc.exists() ? userDoc.data() : {};
             const userName = userData.username || userData.email?.split('@')[0] || 'Someone';
@@ -197,7 +188,7 @@ export const toggleRecipeLike = async (recipeId, userId) => {
           }
         }
       } catch (notificationError) {
-        // Notification error handled silently
+        
       }
       
       return true;
@@ -207,7 +198,6 @@ export const toggleRecipeLike = async (recipeId, userId) => {
   }
 };
 
-// Rate a recipe
 export const rateRecipe = async (recipeId, userId, rating) => {
   try {
     const ratingDocRef = doc(db, 'recipes', recipeId, 'ratings', userId);
@@ -216,8 +206,7 @@ export const rateRecipe = async (recipeId, userId, rating) => {
       rating,
       timestamp: serverTimestamp()
     });
-    
-    // Update the recipe's average rating
+
     await updateRecipeAverageRating(recipeId);
     
     return true;
@@ -226,7 +215,6 @@ export const rateRecipe = async (recipeId, userId, rating) => {
   }
 };
 
-// Get user's rating for a recipe
 export const getUserRating = async (recipeId, userId) => {
   try {
     const ratingDocRef = doc(db, 'recipes', recipeId, 'ratings', userId);
@@ -241,14 +229,13 @@ export const getUserRating = async (recipeId, userId) => {
   }
 };
 
-// Update recipe's average rating
 const updateRecipeAverageRating = async (recipeId) => {
   try {
     const ratingsCollection = collection(db, 'recipes', recipeId, 'ratings');
     const ratingsSnapshot = await getDocs(ratingsCollection);
     
     if (ratingsSnapshot.size === 0) {
-      // No ratings yet
+      
       const recipeRef = doc(db, 'recipes', recipeId);
       await updateDoc(recipeRef, {
         rating: 0,
@@ -263,7 +250,7 @@ const updateRecipeAverageRating = async (recipeId) => {
     });
     
     const averageRating = totalRating / ratingsSnapshot.size;
-    const roundedRating = Math.round(averageRating * 10) / 10; // Round to 1 decimal place
+    const roundedRating = Math.round(averageRating * 10) / 10; 
     
     const recipeRef = doc(db, 'recipes', recipeId);
     await updateDoc(recipeRef, {
@@ -271,6 +258,6 @@ const updateRecipeAverageRating = async (recipeId) => {
       reviews: ratingsSnapshot.size
     });
   } catch (error) {
-    // Error handled silently
+    
   }
 };

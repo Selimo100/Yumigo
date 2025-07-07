@@ -6,34 +6,24 @@ import RecipeCard from '../../components/RecipeCard';
 import { useTheme } from '../../contexts/ThemeContext';
 import useFavorites from '../../hooks/useFavorites';
 import { useTabBarHeight } from '../../hooks/useTabBarHeight';
-
 export default function FavoritesScreen() {
   const { theme } = useTheme();
   const { favorites, isLoading } = useFavorites();
   const tabBarHeight = useTabBarHeight();
   const styles = createStyles(theme, tabBarHeight);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Simple filter function for favorites
   const getFilteredFavorites = useCallback(() => {
     if (!searchQuery.trim()) {
       return favorites;
     }
-    
     const query = searchQuery.toLowerCase();
-    
     return favorites.filter(recipe => {
-      // Check title
       if (recipe.title?.toLowerCase().includes(query)) {
         return true;
       }
-      
-      // Check description
       if (recipe.description?.toLowerCase().includes(query)) {
         return true;
       }
-      
-      // Check ingredients (handle different data structures)
       if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
         return recipe.ingredients.some(ingredient => {
           if (typeof ingredient === 'string') {
@@ -45,11 +35,9 @@ export default function FavoritesScreen() {
           return false;
         });
       }
-      
       return false;
     });
   }, [favorites, searchQuery]);
-
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -65,7 +53,6 @@ export default function FavoritesScreen() {
       </SafeAreaView>
     );
   }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -76,8 +63,7 @@ export default function FavoritesScreen() {
           </Text>
         )}
       </View>
-
-      {/* Search Bar */}
+      {}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Ionicons name="search" size={20} color={theme.colors.textSecondary} />
@@ -95,7 +81,6 @@ export default function FavoritesScreen() {
           )}
         </View>
       </View>
-
       {getFilteredFavorites().length > 0 ? (
         <ScrollView 
           style={styles.feed} 
@@ -126,7 +111,6 @@ export default function FavoritesScreen() {
     </SafeAreaView>
   );
 }
-
 const createStyles = (theme, tabBarHeight) => StyleSheet.create({
   container: {
     flex: 1,
@@ -164,7 +148,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     paddingTop: 10,
   },
   feedContent: {
-    paddingBottom: tabBarHeight, // Add padding to prevent content being hidden behind tab bar
+    paddingBottom: tabBarHeight, 
   },
   emptyState: {
     flex: 1,

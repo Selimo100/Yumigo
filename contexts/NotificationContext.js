@@ -28,10 +28,8 @@ export const NotificationProvider = ({ children }) => {
 
     setIsLoading(true);
 
-    // Listen to real-time notifications
     const notificationsRef = collection(db, 'notifications');
-    
-    // Simplified query without ordering until index is created
+
     const q = query(
       notificationsRef,
       where('recipientId', '==', user.uid)
@@ -51,7 +49,6 @@ export const NotificationProvider = ({ children }) => {
         }
       });
 
-      // Sort notifications manually by creation date (newest first)
       notificationsList.sort((a, b) => {
         const dateA = a.createdAt?.toDate?.() || new Date(0);
         const dateB = b.createdAt?.toDate?.() || new Date(0);
@@ -70,7 +67,7 @@ export const NotificationProvider = ({ children }) => {
 
   const markAsRead = async (notificationId) => {
     try {
-      // Immediately update local state for instant UI feedback
+      
       setNotifications(prevNotifications => 
         prevNotifications.map(notification => 
           notification.id === notificationId 
@@ -78,15 +75,13 @@ export const NotificationProvider = ({ children }) => {
             : notification
         )
       );
-      
-      // Update unread count
+
       setUnreadCount(prevCount => Math.max(0, prevCount - 1));
-      
-      // Update Firestore
+
       const notificationRef = doc(db, 'notifications', notificationId);
       await updateDoc(notificationRef, { read: true });
     } catch (error) {
-      // The onSnapshot listener will restore correct state on error
+      
     }
   };
 
@@ -95,10 +90,9 @@ export const NotificationProvider = ({ children }) => {
       const unreadNotifications = notifications.filter(notification => !notification.read);
       
       if (unreadNotifications.length === 0) {
-        return true; // Success, nothing to do
+        return true; 
       }
-      
-      // Immediately update local state for instant UI feedback
+
       setNotifications(prevNotifications => 
         prevNotifications.map(notification => ({
           ...notification,
@@ -106,8 +100,7 @@ export const NotificationProvider = ({ children }) => {
         }))
       );
       setUnreadCount(0);
-      
-      // Use batch write for better performance
+
       const batch = writeBatch(db);
       
       unreadNotifications.forEach(notification => {
@@ -118,8 +111,7 @@ export const NotificationProvider = ({ children }) => {
       await batch.commit();
       return true;
     } catch (error) {
-      // Revert local state on error by reloading from Firestore
-      // The onSnapshot listener will automatically restore the correct state
+
       throw error;
     }
   };

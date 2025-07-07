@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { validateRecipe } from '../utils/validation';
-
 export const useRecipeForm = () => {
   const [recipe, setRecipe] = useState({
     title: '',
     description: '',
-    time: 15, // Default to 15 minutes
+    time: 15, 
     categories: [],
     allergens: [],
     dietary: [],
@@ -13,32 +12,26 @@ export const useRecipeForm = () => {
     instructions: [''],
     image: null
   });
-
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-
   const updateField = (field, value) => {
     setRecipe(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }));
     }
   };
-
   const addIngredient = () => {
     setRecipe(prev => ({
       ...prev,
       ingredients: [...prev.ingredients, { amount: '', ingredient: '' }]
     }));
   };
-
   const removeIngredient = (index) => {
     setRecipe(prev => ({
       ...prev,
       ingredients: prev.ingredients.filter((_, i) => i !== index)
     }));
   };
-
   const updateIngredient = (index, field, value) => {
     setRecipe(prev => ({
       ...prev,
@@ -47,21 +40,18 @@ export const useRecipeForm = () => {
       )
     }));
   };
-
   const addInstruction = () => {
     setRecipe(prev => ({
       ...prev,
       instructions: [...prev.instructions, '']
     }));
   };
-
   const removeInstruction = (index) => {
     setRecipe(prev => ({
       ...prev,
       instructions: prev.instructions.filter((_, i) => i !== index)
     }));
   };
-
   const updateInstruction = (index, value) => {
     setRecipe(prev => ({
       ...prev,
@@ -70,7 +60,6 @@ export const useRecipeForm = () => {
       )
     }));
   };
-
   const toggleCategory = (categoryId) => {
     setRecipe(prev => ({
       ...prev,
@@ -79,7 +68,6 @@ export const useRecipeForm = () => {
         : [...prev.categories, categoryId]
     }));
   };
-
   const toggleAllergen = (allergenId) => {
     setRecipe(prev => ({
       ...prev,
@@ -88,7 +76,6 @@ export const useRecipeForm = () => {
         : [...prev.allergens, allergenId]
     }));
   };
-
   const toggleDietary = (dietaryId) => {
     setRecipe(prev => ({
       ...prev,
@@ -97,13 +84,11 @@ export const useRecipeForm = () => {
         : [...prev.dietary, dietaryId]
     }));
   };
-
   const validateForm = () => {
     const validation = validateRecipe(recipe);
     setErrors(validation.errors);
     return validation.isValid;
   };
-
   const resetForm = () => {
     setRecipe({
       title: '',
@@ -118,7 +103,6 @@ export const useRecipeForm = () => {
     });
     setErrors({});
   };
-
   return {
     recipe,
     errors,

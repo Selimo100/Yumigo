@@ -5,23 +5,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import RecipeForm from '../../components/RecipeForm/RecipeForm';
 import { useTheme } from '../../contexts/ThemeContext';
-
 export default function CreateRecipeScreen() {
   const { theme } = useTheme();
   const styles = createStyles(theme);
-
   const handleRecipeSuccess = (recipeId) => {
-    // Navigate to the newly created recipe's detail page with success flag
     router.push(`/recipe/${recipeId}?created=true`);
   };
-
   const handleCancel = () => {
     router.back();
   };
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header - Same style as recipe detail */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
@@ -31,12 +26,10 @@ export default function CreateRecipeScreen() {
           <Ionicons name="close" size={24} color={theme.colors.text} />
         </TouchableOpacity>
       </View>
-
       <RecipeForm onSuccess={handleRecipeSuccess} onCancel={handleCancel} />
     </SafeAreaView>
   );
 }
-
 const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,

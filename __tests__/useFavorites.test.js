@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Einfacher Test ohne komplizierte Mocks
 describe('useFavorites Hook', () => {
   test('Placeholder test - Hook Logic', () => {
     // Simuliere Hook-Logic ohne echte Implementation

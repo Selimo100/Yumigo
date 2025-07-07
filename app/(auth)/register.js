@@ -16,7 +16,6 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { register } from "../../services/authService";
 import { useRouter } from "expo-router";
 import { validateEmail, validatePassword, validateUsername } from "../../utils/validation";
-
 export default function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
@@ -24,31 +23,24 @@ export default function Register() {
     const { theme } = useTheme();
     const styles = createStyles(theme);
     const router = useRouter();
-
     const handleSubmit = async () => {
-        // Validation
         if (!username || !email || !password) {
             Alert.alert("Missing Information", "Please fill in all fields to continue");
             return;
         }
-
         if (!validateUsername(username)) {
             Alert.alert("Invalid Username", "Username must be between 3 and 20 characters long");
             return;
         }
-
         if (!validateEmail(email)) {
             Alert.alert("Invalid Email", "Please enter a valid email address");
             return;
         }
-
         if (!validatePassword(password)) {
             Alert.alert("Password Too Short", "Password must be at least 8 characters long");
             return;
         }
-
         try {
-            // Register user (verification email is sent automatically)
             const user = await register(email, password, username);
             Alert.alert(
                 "Registration Successful",
@@ -56,8 +48,6 @@ export default function Register() {
             );
             router.replace("/home");
         } catch (error) {
-            
-            // User-friendly error messages
             if (error.code === "auth/email-already-in-use") {
                 Alert.alert(
                     "Email Already Registered", 
@@ -106,11 +96,9 @@ export default function Register() {
             }
         }
     };
-
     const goToLogin = () => {
         router.push("/login");
     };
-
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView 
@@ -129,7 +117,6 @@ export default function Register() {
                         <Text style={styles.subtitle}>Hungry on the go?</Text>
                         <Text style={styles.subtitle}>Sign up now with Yumigo!</Text>
                     </View>
-
                     <View style={styles.formContainer}>
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>Username</Text>
@@ -143,7 +130,6 @@ export default function Register() {
                                 autoCorrect={false}
                             />
                         </View>
-
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>E-Mail</Text>
                             <TextInput
@@ -157,7 +143,6 @@ export default function Register() {
                                 autoCorrect={false}
                             />
                         </View>
-
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>Password</Text>
                             <TextInput
@@ -170,12 +155,10 @@ export default function Register() {
                                 autoCapitalize="none"
                             />
                         </View>
-
                         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                             <Text style={styles.submitButtonText}>Sign up</Text>
                         </TouchableOpacity>
                     </View>
-
                     <View style={styles.switchContainer}>
                         <Text style={styles.switchText}>Already have an account?</Text>
                         <TouchableOpacity onPress={goToLogin}>
@@ -187,7 +170,6 @@ export default function Register() {
         </SafeAreaView>
     );
 }
-
 const COLORS = {
     background: "#DDE6D5",
     surface: "#D1DEC8",
@@ -196,7 +178,6 @@ const COLORS = {
     accent: "#0D6159",
     textOnAccent: "#DDE6D5",
 };
-
 const createStyles = (theme) =>
     StyleSheet.create({
         container: {

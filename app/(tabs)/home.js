@@ -27,7 +27,7 @@ export default function HomeScreen() {
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [showNotificationModal, setShowNotificationModal] = useState(false);
     const [seasonalFilterActive, setSeasonalFilterActive] = useState(false);
-    const [countryName, setCountryName] = useState('Switzerland'); // Default fallback
+    const [countryName, setCountryName] = useState('Switzerland');
     const [currentMonth, setCurrentMonth] = useState(() => new Date().toLocaleString('en-US', { month: 'long' }));
 
     const { theme } = useTheme();
@@ -39,13 +39,16 @@ export default function HomeScreen() {
     const { user, isLoading: isLoadingAuth } = useAuth();
     const { followingFeed, loadFollowingFeed, isLoading: isLoadingFeed } = useFollow();
 
-    // Hilfsfunktion: Name zu ID (für Gemüse und Früchte)
+    // KOMPLEXE KOMPONENTE: Saisonale Zutaten Filter System
+    // Konvertiert Zutatennamen zu IDs für saisonale Prüfung
     function getIngredientIdByName(name) {
         const lower = name.trim().toLowerCase();
         const found = ingredientsData.find(ing => ing.names.some(n => n.toLowerCase() === lower));
         return found ? found.id : null;
     }
-    // Hilfsfunktion: Prüft, ob eine ID oder ein Name saisonal ist
+    
+    // FACHGESPRÄCH: Intelligente Zutat-zu-Saison Zuordnung
+    // Behandelt verschiedene Datenstrukturen (String, Object) für Zutaten
     function isAnyIngredientSeasonal(ingredient, country, month) {
         let id = null;
         if (typeof ingredient === 'string') {
@@ -54,13 +57,11 @@ export default function HomeScreen() {
             id = ingredient.id || getIngredientIdByName(ingredient.ingredient || ingredient.name || '');
         }
         if (!id) return false;
-        // Prüfe auf saisonal für Gemüse und Früchte
         return recipeHasSeasonalIngredient({ ingredients: [id] }, country, month);
     }
 
-    // Simple filter function for recipes
-    // Filterfunktion mit saisonalem Toggle
-    // Debug: Logge Zutaten-IDs und Filter-Entscheidung
+    // KOMPLEXER ALGORITHMUS: Multi-Parameter Rezept-Filter
+    // Kombiniert Textsuche, saisonale Filter und Feed-Auswahl
     const getFilteredRecipes = useCallback(() => {
         const currentRecipes = activeTab === 'discover' ? recipeList : followingFeed;
         let filtered = currentRecipes;
@@ -88,6 +89,8 @@ export default function HomeScreen() {
         });
     }, [recipeList, followingFeed, activeTab, searchQuery, seasonalFilterActive, countryName, currentMonth]);
 
+    // KOMPLEXE DATENVERARBEITUNG: Rezept-Laden mit Engagement-Daten
+    // Lädt Rezepte mit Likes, Ratings und User-Status in einem optimierten Query
     const getRecipes = useCallback(async () => {
         if (!user) { 
             setIsLoadingRecipes(false);
@@ -100,11 +103,11 @@ export default function HomeScreen() {
             const recipesCollectionRef = collection(db, 'recipes');
             const data = await getDocs(recipesCollectionRef);
 
+            // PERFORMANCE-KRITISCH: Parallel Firebase-Abfragen für alle Rezepte
             const recipesWithLikesAndStatus = await Promise.all(
                 data.docs.map(async (docSnapshot) => {
                     const recipeData = { id: docSnapshot.id, ...docSnapshot.data() };
 
-                    // Get likes count and user like status
                     const likesCollectionRef = collection(db, 'recipes', docSnapshot.id, 'likes');
                     const likesSnapshot = await getDocs(likesCollectionRef);
                     const likesCount = likesSnapshot.size;
@@ -115,15 +118,12 @@ export default function HomeScreen() {
                         const userLikeDoc = await getDoc(userLikeDocRef);
                         isLikedByCurrentUser = userLikeDoc.exists();
                     }
-
-                    // Get ratings count and average
                     const ratingsCollectionRef = collection(db, 'recipes', docSnapshot.id, 'ratings');
                     const ratingsSnapshot = await getDocs(ratingsCollectionRef);
                     const reviewsCount = ratingsSnapshot.size;
                     
                     let averageRating = recipeData.rating || 0;
                     if (reviewsCount > 0 && !recipeData.rating) {
-                        // Calculate average if not stored in recipe document
                         let totalRating = 0;
                         ratingsSnapshot.docs.forEach(doc => {
                             totalRating += doc.data().rating;
@@ -147,16 +147,15 @@ export default function HomeScreen() {
         } finally {
             setIsLoadingRecipes(false);
         }
-    }, [user]); // Re-create getRecipes if the user object changes
+    }, [user]);
 
-    // Use useFocusEffect to re-fetch recipes when the screen comes into focus
     useFocusEffect(
         useCallback(() => {
             (async () => {
                 try {
                     let { status } = await Location.requestForegroundPermissionsAsync();
                     if (status !== 'granted') {
-                        setCountryName('Switzerland'); // fallback
+                        setCountryName('Switzerland');
                         return;
                     }
                     let location = await Location.getCurrentPositionAsync({});
@@ -188,7 +187,7 @@ export default function HomeScreen() {
 
     const handleRecipeSuccess = (recipeId) => {
         setShowCreateModal(false);
-        getRecipes(); // Refresh the list to include the new recipe and its like count
+        getRecipes();
     };
 
     const handleCloseModal = () => {
@@ -196,7 +195,6 @@ export default function HomeScreen() {
     };
 
     const handleLikeUpdate = (recipeId, isLiked, newLikesCount) => {
-        // Update the recipe in both discover and following feeds
         setRecipeList(prevRecipes => 
             prevRecipes.map(recipe => 
                 recipe.id === recipeId 
@@ -205,14 +203,12 @@ export default function HomeScreen() {
             )
         );
         
-        // Update following feed if it exists
         if (followingFeed.length > 0) {
-            loadFollowingFeed(); // Refresh following feed
+            loadFollowingFeed();
         }
     };
 
     const handleRatingUpdate = (recipeId) => {
-        // Refresh recipes to get updated rating
         getRecipes();
         if (activeTab === 'following') {
             loadFollowingFeed();
@@ -223,26 +219,21 @@ export default function HomeScreen() {
         setShowNotificationModal(true);
     };
 
-    // --- Simple ranking: newest first, then by likes ---
     const getRankedFilteredRecipes = useCallback(() => {
         const filtered = getFilteredRecipes();
         
-        // Simple sort: newest first, then by likes count
         return filtered.sort((a, b) => {
-            // First by creation date (newest first)
             if (a.createdAt && b.createdAt) {
                 const dateCompare = b.createdAt.seconds - a.createdAt.seconds;
-                if (Math.abs(dateCompare) > 86400) { // More than 1 day difference
+                if (Math.abs(dateCompare) > 86400) {
                     return dateCompare;
                 }
             }
             
-            // Then by likes count (most liked first)
             return (b.likesCount || 0) - (a.likesCount || 0);
         });
     }, [getFilteredRecipes]);
 
-    // --- Pull-to-refresh state ---
     const [refreshing, setRefreshing] = useState(false);
     const onRefresh = async () => {
       setRefreshing(true);
@@ -630,7 +621,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         borderRadius: 20,
         backgroundColor: theme.colors.cardAccent,
         position: 'relative',
-        minWidth: 44, // Ensure minimum touch target size
+        minWidth: 44,
         minHeight: 44,
         justifyContent: 'center',
         alignItems: 'center',
@@ -647,7 +638,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         alignItems: 'center',
         borderWidth: 2,
         borderColor: theme.colors.background,
-        pointerEvents: 'none', // This allows touches to pass through to the parent
+        pointerEvents: 'none',
         zIndex: 1,
     },
     notificationBadgeText: {
@@ -661,7 +652,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         paddingTop: 10,
     },
     feedContent: {
-        paddingBottom: tabBarHeight, // Add padding to prevent content being hidden behind tab bar
+        paddingBottom: tabBarHeight,
     },
     modalContainer: {
         flex: 1,

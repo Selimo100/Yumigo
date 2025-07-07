@@ -14,7 +14,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useShoppingList } from '../hooks/useShoppingList';
 import { showToast } from '../utils/toast';
-
 export const ShoppingListModal = ({ visible, onClose }) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);
@@ -29,20 +28,15 @@ export const ShoppingListModal = ({ visible, onClose }) => {
     completedCount,
     pendingCount,
   } = useShoppingList();
-
   const [newItemText, setNewItemText] = useState('');
   const [isAdding, setIsAdding] = useState(false);
-
-  // Refresh shopping list when modal becomes visible
   React.useEffect(() => {
     if (visible) {
       refreshList();
     }
-  }, [visible]); // Remove refreshList from dependencies to prevent infinite loop
-
+  }, [visible]); 
   const handleAddItem = async () => {
     if (!newItemText.trim()) return;
-
     setIsAdding(true);
     try {
       await addItem(newItemText);
@@ -54,7 +48,6 @@ export const ShoppingListModal = ({ visible, onClose }) => {
       setIsAdding(false);
     }
   };
-
   const handleToggleItem = async (itemId) => {
     try {
       await toggleItem(itemId);
@@ -62,7 +55,6 @@ export const ShoppingListModal = ({ visible, onClose }) => {
       showToast('Failed to update item. Please try again.', 'error');
     }
   };
-
   const handleRemoveItem = (itemId) => {
     Alert.alert(
       'Remove Item',
@@ -84,10 +76,8 @@ export const ShoppingListModal = ({ visible, onClose }) => {
       ]
     );
   };
-
   const handleClearCompleted = () => {
     if (completedCount === 0) return;
-
     Alert.alert(
       'Clear Completed',
       `Remove ${completedCount} completed item${completedCount > 1 ? 's' : ''}?`,
@@ -108,7 +98,6 @@ export const ShoppingListModal = ({ visible, onClose }) => {
       ]
     );
   };
-
   return (
     <Modal
       visible={visible}
@@ -117,7 +106,7 @@ export const ShoppingListModal = ({ visible, onClose }) => {
       onRequestClose={onClose}
     >
       <View style={styles.container}>
-        {/* Header */}
+        {}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Ionicons name="basket-outline" size={24} color={theme.colors.primary} />
@@ -127,8 +116,7 @@ export const ShoppingListModal = ({ visible, onClose }) => {
             <Ionicons name="close" size={24} color={theme.colors.text} />
           </TouchableOpacity>
         </View>
-
-        {/* Stats */}
+        {}
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{pendingCount}</Text>
@@ -148,8 +136,7 @@ export const ShoppingListModal = ({ visible, onClose }) => {
             </TouchableOpacity>
           )}
         </View>
-
-        {/* Add Item Input */}
+        {}
         <View style={styles.addItemContainer}>
           <TextInput
             style={styles.textInput}
@@ -176,8 +163,7 @@ export const ShoppingListModal = ({ visible, onClose }) => {
             )}
           </TouchableOpacity>
         </View>
-
-        {/* Shopping List */}
+        {}
         <ScrollView 
           style={styles.listContainer}
           showsVerticalScrollIndicator={false}
@@ -195,7 +181,7 @@ export const ShoppingListModal = ({ visible, onClose }) => {
             </View>
           ) : (
             <View style={styles.itemsList}>
-              {/* Pending items first */}
+              {}
               {shoppingList
                 .filter(item => !item.completed)
                 .map((item) => (
@@ -207,8 +193,7 @@ export const ShoppingListModal = ({ visible, onClose }) => {
                     theme={theme}
                   />
                 ))}
-
-              {/* Completed items after */}
+              {}
               {shoppingList
                 .filter(item => item.completed)
                 .map((item) => (
@@ -227,10 +212,8 @@ export const ShoppingListModal = ({ visible, onClose }) => {
     </Modal>
   );
 };
-
 const ShoppingListItem = ({ item, onToggle, onRemove, theme }) => {
   const styles = createStyles(theme);
-
   return (
     <View style={[
       styles.listItem,
@@ -268,7 +251,6 @@ const ShoppingListItem = ({ item, onToggle, onRemove, theme }) => {
     </View>
   );
 };
-
 const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
@@ -443,5 +425,4 @@ const createStyles = (theme) => StyleSheet.create({
     marginLeft: 8,
   },
 });
-
 export default ShoppingListModal;
