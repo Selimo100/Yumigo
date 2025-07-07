@@ -10,11 +10,11 @@ import {
     View,
     Platform,
 } from "react-native"
-import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useState} from 'react';
-import {useTheme} from '../../contexts/ThemeContext';
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 import { login, register, sendVerificationEmail, logout } from '../../services/authService';
-import {useNavigation, useRouter} from "expo-router";
+import { useRouter } from "expo-router";
 
 
 
@@ -22,7 +22,7 @@ export default function Login() {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const {theme} = useTheme();
+    const { theme } = useTheme();
     const styles = createStyles(theme);
     const router = useRouter();
 
@@ -65,7 +65,7 @@ export default function Login() {
 
                 router.replace('/home');
             } else {
-                user = await register(email, password);
+                user = await register(email, password, username);
                 await sendVerificationEmail();
                 Alert.alert(
                     "Registrierung erfolgreich",
@@ -98,13 +98,13 @@ export default function Login() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
             >
-                <ScrollView 
+                <ScrollView
                     contentContainerStyle={styles.scrollContainer}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
                     <View style={styles.headerContainer}>
-                        <Image source={require('../../assets/icon.png')} style={styles.logo}/>
+                        <Image source={require('../../assets/icon.png')} style={styles.logo} />
                         <Text style={styles.title}>Yumigo</Text>
                         <Text style={styles.subtitle}>
                             Hungry on the go?
