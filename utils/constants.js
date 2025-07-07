@@ -43,4 +43,6 @@ export const COLORS = {
   error: '#DC3545'
 };
 
+
+
 export const DEFAULT_IMAGE = "https://example.com/default-image.png";
