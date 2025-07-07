@@ -3,12 +3,34 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     sendEmailVerification,
-    signOut
+    signOut,
+    updateProfile
 } from 'firebase/auth';
 import { initializeUserProfile } from './userService';
 
 export const login = async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+    // Prüfen ob displayName gesetzt ist, wenn nicht aus Firestore laden
+    if (!userCredential.user.displayName) {
+        try {
+            const { getDoc, doc } = await import('firebase/firestore');
+            const { db } = await import('../lib/firebaseconfig');
+            
+            const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                if (userData.username) {
+                    await updateProfile(userCredential.user, {
+                        displayName: userData.username
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error updating displayName during login:', error);
+        }
+    }
+    
     return userCredential.user;
 };
 
@@ -18,6 +40,18 @@ export const register = async (email, password, username = null) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         console.log('User created successfully:', userCredential.user.uid);
+        
+        // Username als displayName in Firebase Auth setzen
+        if (username) {
+            try {
+                await updateProfile(userCredential.user, {
+                    displayName: username
+                });
+                console.log('DisplayName set successfully:', username);
+            } catch (error) {
+                console.error('Error setting displayName:', error);
+            }
+        }
         
         // Send verification email immediately after registration
         try {

@@ -16,23 +16,57 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 // Get user profile data from Firestore
 export const getUserProfile = async (userId) => {
   try {
-    
     if (!userId) {
-      throw new Error('userId is required');
+      throw new Error('User ID is required');
     }
     
     if (!db) {
-      throw new Error('Firestore database not initialized');
+      throw new Error('Database connection not available');
     }
     
     const userDoc = await getDoc(doc(db, 'users', userId));
     
     if (userDoc.exists()) {
-      return userDoc.data();
+      const userData = userDoc.data();
+      
+      // Prüfen ob username existiert und nicht der E-Mail-Teil ist
+      let username = userData.username;
+      
+      // Falls username fehlt oder gleich dem E-Mail-Teil ist, versuche displayName zu verwenden
+      if (!username || (userData.email && username === userData.email.split('@')[0])) {
+        // Versuche displayName aus Firebase Auth zu holen
+        try {
+          const { auth } = await import('../lib/firebaseconfig');
+          const currentUser = auth.currentUser;
+          
+          if (currentUser && currentUser.uid === userId && currentUser.displayName) {
+            username = currentUser.displayName;
+            
+            // Update username in Firestore für zukünftige Verwendung
+            try {
+              await updateDoc(doc(db, 'users', userId), {
+                username: currentUser.displayName,
+                displayName: currentUser.displayName,
+                updatedAt: serverTimestamp(),
+              });
+            } catch (updateError) {
+              console.warn('Could not update username in Firestore:', updateError);
+            }
+          }
+        } catch (authError) {
+          console.warn('Could not fetch displayName from auth:', authError);
+        }
+      }
+      
+      return {
+        ...userData,
+        username: username || userData.email?.split('@')[0] || 'Unknown User'
+      };
     }
     
     return null;
   } catch (error) {
+    console.error('Error getting user profile:', error);
     throw error;
   }
 };
@@ -92,11 +126,15 @@ export const initializeUserProfile = async (userId, email, username = null) => {
       return existingProfile;
     }
 
+    // Username verwenden oder aus E-Mail extrahieren als Fallback
+    const displayUsername = username || email.split('@')[0];
+
     // Create new profile with default values
     const defaultProfile = {
       uid: userId,
       email: email,
-      username: username || email.split('@')[0], // Use email prefix as default username
+      username: displayUsername,
+      displayName: displayUsername, // Zusätzlich hier speichern
       bio: 'Food enthusiast | Making cooking simple',
       avatar: null,
       followerCount: 0,
@@ -113,7 +151,6 @@ export const initializeUserProfile = async (userId, email, username = null) => {
     throw error;
   }
 };
-
 // Update user recipe count
 export const updateUserRecipeCount = async (userId, increment = true) => {
   try {
