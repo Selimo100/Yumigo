@@ -87,27 +87,44 @@ export const register = async (email, password, username = null) => {
     }
 };
 
-export const sendVerificationEmail = async () => {
-    if (auth.currentUser) {
+// export const sendVerificationEmail = async () => {
+//     if (auth.currentUser) {
+//         try {
+//             console.log('Attempting to send verification email to:', auth.currentUser.email);
+//             console.log('User emailVerified status:', auth.currentUser.emailVerified);
+//
+//             await sendEmailVerification(auth.currentUser);
+//             console.log('Verification email sent successfully to:', auth.currentUser.email);
+//
+//             return true;
+//         } catch (error) {
+//             console.error('Error sending verification email:', error);
+//             console.error('Error code:', error.code);
+//             console.error('Error message:', error.message);
+//             throw new Error('Fehler beim Senden der Bestätigungs-E-Mail: ' + error.message);
+//         }
+//     } else {
+//         console.error('No current user found when trying to send verification email');
+//         throw new Error('Kein Benutzer angemeldet');
+//     }
+// };
+
+export const sendVerificationEmail = async (user = null) => {
+    const currentUser = user || auth.currentUser;
+    if (currentUser) {
         try {
-            console.log('Attempting to send verification email to:', auth.currentUser.email);
-            console.log('User emailVerified status:', auth.currentUser.emailVerified);
-            
-            await sendEmailVerification(auth.currentUser);
-            console.log('Verification email sent successfully to:', auth.currentUser.email);
-            
+            console.log('Sende Bestätigungs-E-Mail an:', currentUser.email);
+            await sendEmailVerification(currentUser);
             return true;
         } catch (error) {
-            console.error('Error sending verification email:', error);
-            console.error('Error code:', error.code);
-            console.error('Error message:', error.message);
+            console.error('Fehler beim Senden der Bestätigungs-E-Mail:', error);
             throw new Error('Fehler beim Senden der Bestätigungs-E-Mail: ' + error.message);
         }
     } else {
-        console.error('No current user found when trying to send verification email');
         throw new Error('Kein Benutzer angemeldet');
     }
 };
+
 
 export const checkEmailVerification = async () => {
     if (auth.currentUser) {
