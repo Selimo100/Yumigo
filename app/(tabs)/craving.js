@@ -7,12 +7,13 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Platform,
 } from 'react-native';
 import { useTheme } from "../../contexts/ThemeContext";
 import { useRouter } from 'expo-router';
 import { CATEGORIES, COLORS } from '../../utils/constants';
 import useTabBarHeight from '../../hooks/useTabBarHeight';
-import { smartShadow, smartButton, smartBorder } from '../../utils/platformStyles';
+import { smartShadow, smartButton, smartBorder, androidStyleCleanup, smartGridTwoColumns, smartGridItemTwoColumns } from '../../utils/platformStyles';
 export default function CravingSelection() {
     const [selectedCravings, setSelectedCravings] = useState([]);
     const { theme } = useTheme();
@@ -52,36 +53,70 @@ export default function CravingSelection() {
                     {CATEGORIES.map((craving) => {
                         const isSelected = selectedCravings.includes(craving.id);
                         return (
-                            <TouchableOpacity
-                                key={craving.id}
-                                style={[
-                                    styles.cravingButton,
-                                    {
-                                        backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
-                                        shadowColor: theme.colors.shadow,
-                                        transform: [{ scale: isSelected ? 1.02 : 1 }],
-                                        ...smartBorder(2, isSelected ? COLORS.primary : theme.colors.border),
-                                    },
-                                ]}
-                                onPress={() => toggleCraving(craving.id)}
-                            >
-                                <View style={styles.cravingContent}>
-                                    <Text style={styles.cravingEmoji}>
-                                        {craving.icon}
-                                    </Text>
-                                    <Text style={[
-                                        styles.cravingLabel, 
-                                        { color: isSelected ? COLORS.white : theme.colors.text }
-                                    ]}>
-                                        {craving.label}
-                                    </Text>
-                                </View>
-                                {isSelected && (
-                                    <View style={[styles.checkmarkWrapper, { backgroundColor: COLORS.white }]}>
-                                        <Text style={[styles.checkmark, { color: COLORS.primary }]}>✓</Text>
+                            <View key={craving.id} style={styles.gridItem}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.cravingButton,
+                                        {
+                                            backgroundColor: isSelected ? COLORS.primary : theme.colors.cardBackground,
+                                            transform: [{ scale: isSelected ? 1.02 : 1 }],
+                                        },
+                                        // Plattformspezifische Styles
+                                        Platform.OS === 'ios' ? {
+                                            borderWidth: 2,
+                                            borderColor: isSelected ? COLORS.primary : theme.colors.border,
+                                            shadowColor: isSelected ? COLORS.primary : theme.colors.shadow,
+                                            shadowOffset: { width: 0, height: 2 },
+                                            shadowOpacity: isSelected ? 0.25 : 0.1,
+                                            shadowRadius: 4,
+                                            elevation: 0,
+                                        } : {
+                                            borderWidth: 1,
+                                            borderColor: isSelected ? COLORS.primary : '#e0e0e0',
+                                            shadowColor: 'transparent',
+                                            shadowOffset: { width: 0, height: 0 },
+                                            shadowOpacity: 0,
+                                            shadowRadius: 0,
+                                            elevation: 0,
+                                        }
+                                    ]}
+                                    onPress={() => toggleCraving(craving.id)}
+                                >
+                                    <View style={styles.cravingContent}>
+                                        <Text style={styles.cravingEmoji}>
+                                            {craving.icon}
+                                        </Text>
+                                        <Text style={[
+                                            styles.cravingLabel, 
+                                            { color: isSelected ? COLORS.white : theme.colors.text }
+                                        ]}>
+                                            {craving.label}
+                                        </Text>
                                     </View>
-                                )}
-                            </TouchableOpacity>
+                                    {isSelected && (
+                                        <View style={[
+                                            styles.checkmarkWrapper, 
+                                            { backgroundColor: COLORS.white },
+                                            // Plattformspezifische Schatten für Checkmark
+                                            Platform.OS === 'ios' ? {
+                                                shadowOffset: { width: 0, height: 1 },
+                                                shadowRadius: 2,
+                                                shadowOpacity: 0.2,
+                                                shadowColor: '#000',
+                                                elevation: 0,
+                                            } : {
+                                                shadowColor: 'transparent',
+                                                shadowOffset: { width: 0, height: 0 },
+                                                shadowOpacity: 0,
+                                                shadowRadius: 0,
+                                                elevation: 0,
+                                            }
+                                        ]}>
+                                            <Text style={[styles.checkmark, { color: COLORS.primary }]}>✓</Text>
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
                         );
                     })}
                 </View>
@@ -145,30 +180,21 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         textAlign: 'center'
     },
     grid: { 
-        flexDirection: 'row', 
-        flexWrap: 'wrap', 
-        justifyContent: 'space-between',
-        width: '100%',
-        paddingHorizontal: 4,
+        ...smartGridTwoColumns(),
+    },
+    gridItem: {
+        ...smartGridItemTwoColumns(),
     },
     cravingButton: {
-        width: '47%',
+        width: '100%',
         borderRadius: 16,
         height: 110,
-        marginBottom: 12,
         paddingVertical: 16,
         paddingHorizontal: 12,
         position: 'relative',
         justifyContent: 'center',
         alignItems: 'center',
-        ...smartShadow(
-            {
-                shadowOffset: { width: 0, height: 2 },
-                shadowRadius: 4,
-                shadowOpacity: 0.1,
-            },
-            2
-        ),
+        // Komplett ohne Schatten/Borders - werden nur per Platform inline gesetzt
     },
     cravingContent: {
         flexDirection: 'column',
@@ -196,10 +222,7 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         height: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowOffset: { width: 0, height: 1 },
-        shadowRadius: 2,
-        shadowOpacity: 0.2,
-        elevation: 2,
+        // Komplett ohne Schatten - werden nur per Platform inline gesetzt
     },
     checkmark: {
         fontSize: 14,
@@ -212,14 +235,12 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         paddingHorizontal: 4,
     },
     submitButton: {
-        paddingVertical: 16,
-        paddingHorizontal: 32,
-        borderRadius: 12,
-        width: '100%',
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        shadowOpacity: 0.1,
-        elevation: 3,
+        ...smartButton({ colors: { primary: COLORS.primary } }, true, {
+            paddingVertical: 16,
+            paddingHorizontal: 32,
+            borderRadius: 12,
+            width: '100%',
+        }),
     },
     submitButtonText: {
         fontWeight: '600',

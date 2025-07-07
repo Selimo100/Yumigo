@@ -14,6 +14,8 @@ export {
   smartGrid,
   smartGridItem,
   smartGridPadding,
+  smartGridTwoColumns,
+  smartGridItemTwoColumns,
 } from '../platformStyles';
 
 // Re-export für bequeme Verwendung

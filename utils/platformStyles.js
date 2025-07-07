@@ -264,6 +264,32 @@ export const smartGridPadding = () => ({
     paddingVertical: Platform.OS === 'ios' ? 0 : 4,
 });
 
+/**
+ * Plattformspezifisches 2-Spalten Grid-Layout für Craving-Auswahl
+ * iOS: Behält das aktuelle Layout bei
+ * Android: Optimiert für bessere Ausrichtung ohne Borders
+ */
+export const smartGridTwoColumns = () => ({
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: Platform.OS === 'ios' ? 'space-between' : 'space-evenly',
+    alignItems: 'flex-start',
+    width: '100%',
+    paddingHorizontal: Platform.OS === 'ios' ? 4 : 8,
+});
+
+/**
+ * Plattformspezifische Kartengröße für 2-Spalten Grid-Items
+ * iOS: 47% Breite (2 Spalten mit Zwischenräumen)
+ * Android: Optimierte Breite für bessere Verteilung
+ */
+export const smartGridItemTwoColumns = (customStyle = {}) => ({
+    width: Platform.OS === 'ios' ? '47%' : '45%',
+    marginHorizontal: Platform.OS === 'ios' ? 0 : 4,
+    marginBottom: Platform.OS === 'ios' ? 12 : 14,
+    ...customStyle,
+});
+
 export default {
   createPlatformStyles,
   smartBorder,
@@ -275,4 +301,6 @@ export default {
   smartGrid,
   smartGridItem,
   smartGridPadding,
+  smartGridTwoColumns,
+  smartGridItemTwoColumns,
 };
