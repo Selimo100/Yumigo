@@ -56,8 +56,6 @@ export default function Register() {
             );
             router.replace("/home");
         } catch (error) {
-            // Entferne das console.error um Firebase Errors zu unterdrücken
-            // console.error(error.message);
             
             // User-friendly error messages
             if (error.code === "auth/email-already-in-use") {

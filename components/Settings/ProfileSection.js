@@ -48,7 +48,6 @@ export const ProfileSection = ({ profile, updateProfile, styles, theme }) => {
           updateProfile({ avatar: imageUrl });
           
         } catch (error) {
-          console.error('Error uploading profile image:', error);
           Alert.alert('Error', 'Failed to upload image. Please try again.');
         } finally {
           setIsUploadingImage(false);

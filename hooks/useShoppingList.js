@@ -26,8 +26,7 @@ export const useShoppingList = () => {
       const safeList = Array.isArray(list) ? list : [];
       setShoppingList(safeList);
     } catch (error) {
-      console.error('Error loading shopping list:', error);
-      setShoppingList([]); // Set empty array on error
+      setShoppingList([]);
     } finally {
       setIsLoading(false);
     }
@@ -41,7 +40,6 @@ export const useShoppingList = () => {
       setShoppingList(prev => [...prev, newItem]);
       return newItem;
     } catch (error) {
-      console.error('Error adding item:', error);
       throw error;
     }
   };
@@ -53,7 +51,6 @@ export const useShoppingList = () => {
       const updatedList = await toggleShoppingListItem(user.uid, itemId);
       setShoppingList(updatedList);
     } catch (error) {
-      console.error('Error toggling item:', error);
       throw error;
     }
   };
@@ -65,7 +62,6 @@ export const useShoppingList = () => {
       const updatedList = await removeShoppingListItem(user.uid, itemId);
       setShoppingList(updatedList);
     } catch (error) {
-      console.error('Error removing item:', error);
       throw error;
     }
   };
@@ -78,9 +74,8 @@ export const useShoppingList = () => {
       for (const item of completedItems) {
         await removeShoppingListItem(user.uid, item.id);
       }
-      await loadShoppingList(); // Reload the list
+      await loadShoppingList();
     } catch (error) {
-      console.error('Error clearing completed items:', error);
       throw error;
     }
   };

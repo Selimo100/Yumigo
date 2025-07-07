@@ -86,7 +86,6 @@ export default function RecipeForm({ onSuccess, onCancel }) {
       resetForm();
       onSuccess && onSuccess(recipeId);
     } catch (error) {
-      console.error('Error publishing recipe:', error);
       Alert.alert('Error', 'Failed to publish recipe. Please try again.');
     } finally {
       setIsLoading(false);

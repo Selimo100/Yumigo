@@ -39,7 +39,6 @@ export const useSettings = () => {
             });
           }
         } catch (error) {
-          console.error('Error loading user profile:', error);
           setProfile({
             username: currentUser.email?.split('@')[0] || '',
             bio: 'Food enthusiast | Making cooking simple',
@@ -49,7 +48,6 @@ export const useSettings = () => {
         }
       }
     } catch (error) {
-      console.error('Failed to load settings:', error);
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +75,6 @@ export const useSettings = () => {
       
       return true;
     } catch (error) {
-      console.error('Failed to save all settings:', error);
       return false;
     }
   };

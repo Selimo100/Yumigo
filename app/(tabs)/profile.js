@@ -26,10 +26,7 @@ import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 
 const { width } = Dimensions.get('window');
 
-export default function ProfileScreen({
-  onShareProfile, // Not used in this component, but left for completeness if props are passed externally
-  onRecipePress, // Not used, handled by router.push
-}) {
+export default function ProfileScreen() {
   const { theme, toggleTheme, isDarkMode } = useTheme();
   const tabBarHeight = useTabBarHeight();
   const styles = createStyles(theme, tabBarHeight);
@@ -187,7 +184,7 @@ export default function ProfileScreen({
       await logout();
       router.replace('/login');
     } catch (error) {
-      console.error("Logout error:", error);
+      // Error handled silently
     }
   };
 
@@ -210,10 +207,9 @@ Join the Yumigo community and discover amazing recipes!`;
       });
 
       if (result.action === Share.sharedAction) {
-        console.log('Profile shared successfully!');
+        // Profile shared successfully
       }
     } catch (error) {
-      console.error('Error sharing profile:', error);
       Alert.alert('Error', 'Could not share profile. Please try again.');
     }
   };

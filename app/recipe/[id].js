@@ -16,7 +16,7 @@ import { serverTimestamp } from 'firebase/firestore';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
 import { deleteRecipe, isRecipeOwner, rateRecipe, getUserRating } from '../../services/recipeService';
-import { createCommentNotification } from '../../services/notificationService';
+import { notifyRecipeRating } from '../../services/inAppNotificationService';
 import { addShoppingListItem } from '../../services/userService';
 import { showToast } from '../../utils/toast';
 import useAuth from '../../lib/useAuth';
@@ -26,7 +26,6 @@ const formatTime = (timestamp) => {
     const date = timestamp?.toDate?.() || new Date(timestamp);
     return formatDistanceToNow(date, { addSuffix: true });
   } catch (e) {
-    console.error("Error formatting time:", e);
     return 'just now';
   }
 };
@@ -162,11 +161,9 @@ export default function RecipeDetailScreen() {
 
           setComments(commentsData);
 
-        } else {
-          console.warn('❌ Recipe not found');
         }
       } catch (error) {
-        console.error('❌ Error fetching recipe and data:', error);
+        // Error handled silently
       } finally {
         setLoading(false);
       }
@@ -217,7 +214,6 @@ export default function RecipeDetailScreen() {
         setIsLiked(true);
       }
     } catch (error) {
-      console.error("Error updating recipe like:", error);
       Alert.alert("Error", "Could not update like status.");
     }
   };
@@ -231,7 +227,6 @@ export default function RecipeDetailScreen() {
     try {
       await toggleFavorite(id);
     } catch (error) {
-      console.error('Error toggling favorite:', error);
       if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
         Alert.alert(
           "Setup Required", 
@@ -257,7 +252,6 @@ export default function RecipeDetailScreen() {
       await reloadRecipeData();
       
     } catch (error) {
-      console.error('Error rating recipe:', error);
       Alert.alert("Error", "Could not save your rating.");
     }
   };
@@ -290,7 +284,6 @@ export default function RecipeDetailScreen() {
                 await deleteDoc(commentLikeDocRef);
               }
             } catch (error) {
-              console.error("Error updating comment like in Firestore:", error);
               setComments(prev => prev.map(c => c.id === commentId ? comment : c)); 
               Alert.alert("Error", "Could not update comment like status.");
             }
@@ -325,15 +318,7 @@ export default function RecipeDetailScreen() {
 
       const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newCommentData);
 
-      // Create notification for recipe owner if commenter is not the owner
-      if (recipe.authorId && recipe.authorId !== currentUser.uid) {
-        try {
-          await createCommentNotification(id, currentUser.uid, recipe.authorId, commentText);
-        } catch (notificationError) {
-          console.error('Error creating comment notification:', notificationError);
-          // Don't show error to user for notification failures
-        }
-      }
+      // Note: Comment notifications not implemented yet
 
       const localComment = {
         id: docRef.id,
@@ -347,7 +332,6 @@ export default function RecipeDetailScreen() {
 
       setComments(prev => [localComment, ...prev]);
     } catch (error) {
-      console.error('❌ Failed to post comment:', error);
       Alert.alert('Error', 'Failed to post comment.');
     }
   };
@@ -371,7 +355,6 @@ export default function RecipeDetailScreen() {
               Alert.alert("Recipe Deleted", "Your recipe has been deleted successfully.");
               router.back();
             } catch (error) {
-              console.error('Error deleting recipe:', error);
               Alert.alert("Error", "Failed to delete recipe. Please try again.");
             }
           }
@@ -426,7 +409,6 @@ export default function RecipeDetailScreen() {
         }
       }
     } catch (error) {
-      console.error('Error reloading recipe:', error);
     } finally {
       setLoading(false);
     }
@@ -447,10 +429,8 @@ export default function RecipeDetailScreen() {
       });
       
       if (result.action === Share.sharedAction) {
-        console.log('Recipe shared successfully!');
       }
     } catch (error) {
-      console.error('Error sharing recipe:', error);
       Alert.alert('Error', 'Could not share recipe. Please try again.');
     }
   };
@@ -473,7 +453,6 @@ export default function RecipeDetailScreen() {
             await addShoppingListItem(currentUser.uid, { text: itemText });
             addedCount++;
           } catch (itemError) {
-            console.error(`Error adding ingredient "${itemText}":`, itemError);
             // Continue with other ingredients even if one fails
           }
         }
@@ -498,7 +477,6 @@ export default function RecipeDetailScreen() {
       }
       
     } catch (error) {
-      console.error('Error adding to shopping list:', error);
       Alert.alert("Error", "Could not add ingredients to shopping list. Please try again.");
     }
   };

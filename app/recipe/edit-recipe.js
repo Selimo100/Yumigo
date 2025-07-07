@@ -158,7 +158,6 @@ export default function EditRecipeScreen() {
         time: recipe.time || 15,
       });
     } catch (error) {
-      console.error('Error loading recipe:', error);
       Alert.alert('Error', 'Failed to load recipe');
       router.back();
     } finally {
@@ -200,7 +199,6 @@ export default function EditRecipeScreen() {
         ]
       );
     } catch (error) {
-      console.error('Error updating recipe:', error);
       Alert.alert('Error', 'Failed to update recipe. Please try again.');
     } finally {
       setSaving(false);

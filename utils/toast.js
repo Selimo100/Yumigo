@@ -1,29 +1,16 @@
-import { Alert } from 'react-native';
-
 // Simple toast utility for showing messages
-// In a real app, you might want to use a library like react-native-toast-message
-
-// Main function for backward compatibility
 export const showToast = (message, type = 'success') => {
-  console.log(`Toast ${type}:`, message);
-  // For now, just log to console
-  // In production, you could show a native alert or use a toast library
+  // Toast messages are silently handled for production
 };
 
-// Object methods for specific types
 showToast.error = (message) => {
-  console.warn('Toast Error:', message);
-  // For now, just log to console
-  // In production, you could show a native alert or use a toast library
-  // Alert.alert('Error', message);
+  // Error toast silently handled for production
 };
 
 showToast.success = (message) => {
-  console.log('Toast Success:', message);
-  // For now, just log to console
+  // Success toast silently handled for production
 };
 
 showToast.info = (message) => {
-  console.log('Toast Info:', message);
-  // For now, just log to console
+  // Info toast silently handled for production
 };

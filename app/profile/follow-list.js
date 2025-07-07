@@ -113,11 +113,9 @@ export default function FollowListScreen() {
 
   const handleUserPress = (user) => {
     // Navigate to user profile
-    console.log('Navigating to user profile:', user);
     if (user && user.id) {
       router.push(`/profile/user-profile?userId=${user.id}`);
     } else {
-      console.error('User object or user.id is missing:', user);
     }
   };
 
@@ -279,7 +277,6 @@ export default function FollowListScreen() {
             onFollowChange={(isNowFollowing) => {
               // Immediately update the lists optimistically
               updateListsOptimistically(item.id, isNowFollowing, item);
-              console.log('Follow status changed for user:', item.id, 'Now following:', isNowFollowing);
             }}
           />
         )}

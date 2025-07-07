@@ -8,6 +8,7 @@ import useAuth from '../lib/useAuth';
 import useFavorites from '../hooks/useFavorites';
 import { useState, useRef } from 'react';
 import { toggleRecipeLike, rateRecipe, getUserRating } from '../services/recipeService';
+import { notifyRecipeLike, notifyRecipeRating } from '../services/inAppNotificationService';
 import { RatingModal } from './RatingModal';
 
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
@@ -48,7 +49,8 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
     // Check if this recipe is in favorites
     const isRecipeFavorite = isFavorite(recipe.id);
 
-    // Die echte Kommentaranzahl aus dem Rezeptobjekt verwenden
+    // Basic recipe data - only use what actually exists
+    // Note: commentsCount is not implemented yet, defaulting to 0
     const commentCount = typeof recipe.commentsCount === 'number' ? recipe.commentsCount : 0;
 
 
@@ -99,11 +101,15 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
             setIsLiked(newLikedState);
             setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
             
+            // Send in-app notification if liked (not for unlike)
+            if (newLikedState && recipe.authorId && recipe.authorId !== user.uid) {
+                notifyRecipeLike(recipe.id, recipe.title, user.displayName || user.email?.split('@')[0] || 'Someone', recipe.authorId);
+            }
+            
             if (onLikeUpdate) {
                 onLikeUpdate(recipe.id, newLikedState, newLikedState ? likesCount + 1 : likesCount - 1);
             }
         } catch (error) {
-            console.error('Error toggling like:', error);
             Alert.alert("Error", "Could not update like status.");
         } finally {
             setIsLiking(false);
@@ -122,7 +128,7 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
         // Load user's current rating
         getUserRating(recipe.id, user.uid).then(rating => {
             setUserRating(rating);
-        }).catch(console.error);
+        });
     };
 
     const handleRating = async (rating) => {
@@ -131,13 +137,16 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
             setUserRating(rating);
             setShowRatingModal(false);
             
+            // Send in-app notification for rating
+            if (recipe.authorId && recipe.authorId !== user.uid) {
+                notifyRecipeRating(recipe.id, recipe.title, user.displayName || user.email?.split('@')[0] || 'Someone', rating, recipe.authorId);
+            }
+            
             if (onRatingUpdate) {
                 onRatingUpdate(recipe.id);
             }
             
-            // Alert entfernt - nur stille Bestätigung
         } catch (error) {
-            console.error('Error rating recipe:', error);
             Alert.alert("Error", "Could not save your rating.");
         }
     };
@@ -154,10 +163,8 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
             });
             
             if (result.action === Share.sharedAction) {
-                console.log('Recipe shared successfully from card!');
             }
         } catch (error) {
-            console.error('Error sharing recipe:', error);
             Alert.alert('Error', 'Could not share recipe. Please try again.');
         }
     };
@@ -196,7 +203,6 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                                 // No need to show alert here as user gets visual feedback
                                 // from the icon change
                             } catch (error) {
-                                console.error('Error toggling favorite:', error);
                                 if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
                                     Alert.alert(
                                         "Setup Required", 

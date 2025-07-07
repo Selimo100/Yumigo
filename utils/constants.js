@@ -1,5 +1,3 @@
-export const API_URL = "https://api.yumigo.com/v1";
-
 export const CATEGORIES = [
   { id: 'salty', label: 'Salty', color: '#4A90E2', icon: '🧂', slug: 'salty' },
   { id: 'sweet', label: 'Sweet', color: '#F5A623', icon: '🍯', slug: 'sweet' },
@@ -42,7 +40,3 @@ export const COLORS = {
   success: '#0D6159',
   error: '#DC3545'
 };
-
-
-
-export const DEFAULT_IMAGE = "https://example.com/default-image.png";

@@ -9,7 +9,7 @@ import {
   searchUsers,
   getFollowingFeed
 } from '../services/userService';
-import { createFollowNotification } from '../services/notificationService';
+import { notifyUserFollow } from '../services/inAppNotificationService';
 import useAuth from '../lib/useAuth';
 import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
 import { showToast } from '../utils/toast';
@@ -31,7 +31,6 @@ export const useFollow = () => {
     try {
       return await isFollowing(user.uid, targetUserId);
     } catch (error) {
-      console.error('Error checking follow status:', error);
       return false;
     }
   }, [user?.uid]);
@@ -58,7 +57,8 @@ export const useFollow = () => {
       
       if (success) {
         try {
-          await createFollowNotification(user.uid, targetUserId);
+          const userName = user.displayName || user.email?.split('@')[0] || 'Someone';
+          await notifyUserFollow(targetUserId, userName, user.uid);
         } catch (notificationError) {
           // Don't show error to user for notification failures
         }
@@ -67,14 +67,11 @@ export const useFollow = () => {
       profileUpdateEmitter.emitFollowChange(targetUserId, true);
       
       if (!success) {
-        console.warn('Follow action failed in backend, but UI remains updated');
         showToast.error('Failed to follow user. Please try again.');
       }
       
       return success;
     } catch (error) {
-      console.error('Error following user:', error);
-      console.warn('Follow action failed due to error, but UI remains updated');
       showToast.error('Network error. Please check your connection.');
       return false;
     }
@@ -106,14 +103,11 @@ export const useFollow = () => {
       profileUpdateEmitter.emitFollowChange(targetUserId, false);
       
       if (!success) {
-        console.warn('Unfollow action failed in backend, but UI remains updated');
         showToast.error('Failed to unfollow user. Please try again.');
       }
       
       return success;
     } catch (error) {
-      console.error('Error unfollowing user:', error);
-      console.warn('Unfollow action failed due to error, but UI remains updated');
       showToast.error('Network error. Please check your connection.');
       return false;
     }
@@ -138,7 +132,6 @@ export const useFollow = () => {
       
       return following;
     } catch (error) {
-      console.error('Error loading following users:', error);
       setFollowingList([]);
       return [];
     } finally {
@@ -165,7 +158,6 @@ export const useFollow = () => {
       
       return followers;
     } catch (error) {
-      console.error('Error loading followers:', error);
       setFollowersList([]);
       return [];
     } finally {
@@ -190,7 +182,6 @@ export const useFollow = () => {
       
       return suggested;
     } catch (error) {
-      console.error('Error loading suggested users:', error);
       setSuggestedUsers([]);
       return [];
     } finally {
@@ -205,7 +196,7 @@ export const useFollow = () => {
       const feed = await getFollowingFeed(user.uid);
       setFollowingFeed(feed);
     } catch (error) {
-      console.error('Error loading following feed:', error);
+      // Error handled silently
     } finally {
       setIsLoading(false);
     }
@@ -222,7 +213,6 @@ export const useFollow = () => {
       const results = await searchUsers(searchTerm);
       setSearchResults(results);
     } catch (error) {
-      console.error('Error searching users:', error);
       setSearchResults([]);
     } finally {
       setIsLoading(false);
@@ -268,8 +258,8 @@ export const useFollow = () => {
         loadFollowingUsers(),
         loadFollowers(),
         loadSuggestedUsers()
-      ]).catch(error => {
-        console.error('Error loading initial follow data:', error);
+      ]).catch(() => {
+        // Error handled silently
       });
     }
   }, [user?.uid, loadFollowingUsers, loadFollowers, loadSuggestedUsers]);

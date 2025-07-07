@@ -55,44 +55,29 @@ export default function UserProfileScreen() {
 
   const loadUserData = async () => {
     if (!userId) {
-      console.error('No userId provided to user-profile');
       return;
     }
     
-    console.log('Loading user data for userId:', userId);
     setIsLoading(true);
     try {
-      console.log('Attempting to fetch user profile...');
       const profile = await getUserProfile(userId);
-      console.log('User profile fetched:', profile);
-      
-      console.log('Attempting to fetch user recipes...');
       const recipes = await getUserRecipes(userId);
-      console.log('User recipes fetched:', recipes?.length || 0, 'recipes');
       
       setUserProfile(profile);
       setUserRecipes(recipes);
       
       // Sync recipe count if there's a mismatch
       if (profile && recipes && profile.recipeCount !== recipes.length) {
-        console.log(`Recipe count mismatch: profile shows ${profile.recipeCount}, actual recipes: ${recipes.length}`);
         try {
           await syncUserRecipeCount(userId);
-          // Reload profile to get updated count
           const updatedProfile = await getUserProfile(userId);
           setUserProfile(updatedProfile);
-          console.log('Recipe count synchronized');
         } catch (syncError) {
-          console.warn('Failed to sync recipe count:', syncError);
+          // Sync error handled silently
         }
       }
     } catch (error) {
-      console.error('Error initializing user profile:', error);
-      console.error('Error details:', {
-        code: error.code,
-        message: error.message,
-        userId: userId
-      });
+      // Error handled silently
     } finally {
       setIsLoading(false);
     }

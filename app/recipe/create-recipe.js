@@ -11,7 +11,6 @@ export default function CreateRecipeScreen() {
   const styles = createStyles(theme);
 
   const handleRecipeSuccess = (recipeId) => {
-    console.log('Recipe created with ID:', recipeId);
     // Navigate to the newly created recipe's detail page with success flag
     router.push(`/recipe/${recipeId}?created=true`);
   };

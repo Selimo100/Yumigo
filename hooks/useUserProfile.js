@@ -33,11 +33,9 @@ export const useUserProfile = () => {
                 const userRecipes = await getUserRecipes(user.uid, user.uid); // Pass current user ID for like status
                 setRecipes(userRecipes);
             } catch (recipeError) {
-                console.error('Error loading user recipes:', recipeError);
                 setRecipes([]);
             }
         } catch (err) {
-            console.error('Error loading user data:', err);
             setError(err);
             setProfile({
                 uid: user.uid,
@@ -86,7 +84,7 @@ export const useUserProfile = () => {
                     const userRecipes = await getUserRecipes(user.uid, user.uid);
                     setRecipes(userRecipes);
                 } catch (error) {
-                    console.error('Error refreshing profile:', error);
+                    // Error handled silently
                 } finally {
                     setIsLoading(false);
                 }

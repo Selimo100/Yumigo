@@ -15,7 +15,6 @@ const usePreferences = () => {
         return Array.isArray(parsedPreferences) ? parsedPreferences : [];
     } catch (error) {
         // Falls JSON.parse fehlschlägt, gib eine Warnung aus und ein leeres Array zurück
-        console.warn('Failed to parse preferences:', error);
         return [];
     }
 };

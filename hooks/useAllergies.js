@@ -15,7 +15,6 @@ const useAllergies = () => {
         return Array.isArray(parsedAllergies) ? parsedAllergies : [];
     } catch (error) {
         // Falls JSON.parse fehlschlägt, gib eine Warnung aus und ein leeres Array zurück
-        console.warn('Failed to parse allergies:', error);
         return [];
     }
 };

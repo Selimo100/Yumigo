@@ -3,7 +3,9 @@ import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-nat
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFollow } from '../hooks/useFollow';
+import { notifyUserFollow } from '../services/inAppNotificationService';
 import { showToast } from '../utils/toast';
+import useAuth from '../lib/useAuth';
 
 export default function FollowButton({ 
   userId, 
@@ -12,6 +14,7 @@ export default function FollowButton({
   onFollowChange 
 }) {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const { handleFollow, handleUnfollow, checkFollowStatus, isCurrentUser } = useFollow();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,18 +46,20 @@ export default function FollowButton({
         success = await handleUnfollow(userId);
       } else {
         success = await handleFollow(userId);
+        
+        // Send in-app notification for new follow
+        if (success && !previousStatus && user) {
+          notifyUserFollow(userId, user.displayName || user.email?.split('@')[0] || 'Someone', user.uid);
+        }
       }
       
       // Don't revert UI even if backend fails - just log the issue
       if (!success) {
-        console.warn('Follow/unfollow backend action failed, but UI remains updated');
         // Show a toast notification for the error
         showToast.error(previousStatus ? 'Failed to unfollow user' : 'Failed to follow user');
       }
     } catch (error) {
-      console.error('Error toggling follow:', error);
       // Don't revert UI even on error - just log it
-      console.warn('Follow/unfollow action failed due to error, but UI remains updated');
       // Show a toast notification for the error
       showToast.error('Network error. Please check your connection.');
     } finally {

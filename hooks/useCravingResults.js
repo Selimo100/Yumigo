@@ -25,10 +25,6 @@ const useCravingResults = () => {
                     ...doc.data()
                 }));
 
-                console.log("All Recipes:", allRecipes.length);
-                console.log("Selected Cravings:", selectedCravings);
-                console.log("Selected Preferences:", selectedPreferences);
-                console.log("Selected Allergies:", selectedAllergies);
 
                 const filteredRecipes = allRecipes.filter(recipe => {
                     // 1. Filter by cravings (categories) - if any selected
@@ -63,10 +59,8 @@ const useCravingResults = () => {
                     return true;
                 });
 
-                console.log("Filtered Recipes:", filteredRecipes.length);
                 setCravingResultsRecipes(filteredRecipes);
             } catch (error) {
-                console.error("Error fetching craving results:", error);
                 setCravingResultsRecipes([]);
             } finally {
                 setIsLoading(false);

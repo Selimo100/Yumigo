@@ -67,14 +67,6 @@ export default function HomeScreen() {
         if (seasonalFilterActive) {
             filtered = filtered.filter(recipe => {
                 const isSeasonal = (recipe.ingredients || []).some(ing => isAnyIngredientSeasonal(ing, countryName, currentMonth));
-                console.log('[SEASONAL FILTER]', {
-                    recipeId: recipe.id,
-                    title: recipe.title,
-                    countryName,
-                    currentMonth,
-                    ingredients: recipe.ingredients,
-                    isSeasonal
-                });
                 return isSeasonal;
             });
         }
@@ -98,7 +90,6 @@ export default function HomeScreen() {
 
     const getRecipes = useCallback(async () => {
         if (!user) { 
-            console.log('[HomeScreen] User not authenticated yet, skipping recipe fetch.');
             setIsLoadingRecipes(false);
             return;
         }
@@ -106,7 +97,6 @@ export default function HomeScreen() {
         setIsLoadingRecipes(true);
         setError(null);
         try {
-            console.log('🔍 [HomeScreen] Fetching recipes from Firestore...');
             const recipesCollectionRef = collection(db, 'recipes');
             const data = await getDocs(recipesCollectionRef);
 
@@ -141,8 +131,6 @@ export default function HomeScreen() {
                         averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
                     }
 
-                    console.log(`✅ [HomeScreen] Recipe ID: ${docSnapshot.id}, Likes: ${likesCount}, Liked by current user: ${isLikedByCurrentUser}, Rating: ${averageRating}, Reviews: ${reviewsCount}`);
-
                     return { 
                         ...recipeData, 
                         likesCount, 
@@ -153,10 +141,8 @@ export default function HomeScreen() {
                 })
             );
 
-            console.log('✅ [HomeScreen] All recipes fetched with likes and user status.');
             setRecipeList(recipesWithLikesAndStatus);
         } catch (err) {
-            console.error('❌ [HomeScreen] Error fetching recipes:', err);
             setError(err);
         } finally {
             setIsLoadingRecipes(false);
@@ -201,7 +187,6 @@ export default function HomeScreen() {
     };
 
     const handleRecipeSuccess = (recipeId) => {
-        console.log('[HomeScreen] Recipe created with ID:', recipeId);
         setShowCreateModal(false);
         getRecipes(); // Refresh the list to include the new recipe and its like count
     };
@@ -235,127 +220,30 @@ export default function HomeScreen() {
     };
 
     const handleNotificationPress = () => {
-        console.log('🔔 Notification button pressed!');
-        console.log('Unread count:', unreadCount);
         setShowNotificationModal(true);
     };
 
-    // --- Ranking Algorithm Weights (customizable) ---
-    const ENGAGEMENT_WEIGHTS = { likes: 1, comments: 2, shares: 3, saves: 4 };
-    const FRESHNESS_HALFLIFE_DAYS = 7;
-    const TRENDING_BOOST = 1.5;
-    const PERSONALIZATION_WEIGHTS = { cuisine: 2, dietary: 2, ingredient: 1 };
-    const PROFILE_BOOST_WEIGHT = 3;
-    const LIKES_BOOST_WEIGHT = 2;
-    const FRESHNESS_WEIGHT = 10;
-    const TRENDING_WEIGHT = 5;
+    // --- Simple ranking: newest first, then by likes ---
+    const getRankedFilteredRecipes = useCallback(() => {
+        const filtered = getFilteredRecipes();
+        
+        // Simple sort: newest first, then by likes count
+        return filtered.sort((a, b) => {
+            // First by creation date (newest first)
+            if (a.createdAt && b.createdAt) {
+                const dateCompare = b.createdAt.seconds - a.createdAt.seconds;
+                if (Math.abs(dateCompare) > 86400) { // More than 1 day difference
+                    return dateCompare;
+                }
+            }
+            
+            // Then by likes count (most liked first)
+            return (b.likesCount || 0) - (a.likesCount || 0);
+        });
+    }, [getFilteredRecipes]);
 
-    // --- Engagement Score ---
-    function getEngagementScore(recipe) {
-      return (
-        (recipe.likesCount || 0) * ENGAGEMENT_WEIGHTS.likes +
-        (recipe.commentsCount || 0) * ENGAGEMENT_WEIGHTS.comments +
-        (recipe.sharesCount || 0) * ENGAGEMENT_WEIGHTS.shares +
-        (recipe.savesCount || 0) * ENGAGEMENT_WEIGHTS.saves
-      );
-    }
-    // --- Freshness Factor ---
-    function getFreshnessFactor(createdAt) {
-      if (!createdAt) return 1;
-      const now = Date.now();
-      const created = new Date(createdAt).getTime();
-      const ageDays = (now - created) / (1000 * 60 * 60 * 24);
-      return Math.pow(0.5, ageDays / FRESHNESS_HALFLIFE_DAYS);
-    }
-    // --- Trending Boost ---
-    function getTrendingBoost(recipe) {
-      if (!recipe.engagementHistory) return 1;
-      const last24h = recipe.engagementHistory.filter(
-        e => Date.now() - new Date(e.timestamp).getTime() < 24 * 60 * 60 * 1000
-      );
-      const recent = last24h.reduce((sum, e) => sum + e.value, 0);
-      const total = recipe.totalEngagement || 1;
-      return recent / total > 0.5 ? TRENDING_BOOST : 1;
-    }
-    // --- Personalization Boosts ---
-    function getProfileBoost(recipe, userProfile) {
-      let boost = 1;
-      if (userProfile?.preferredCuisines?.includes(recipe.cuisine)) boost += PERSONALIZATION_WEIGHTS.cuisine;
-      if (userProfile?.dietaryPreferences?.some(d => recipe.dietaryTags?.includes(d))) boost += PERSONALIZATION_WEIGHTS.dietary;
-      if (userProfile?.savedIngredients?.some(i => recipe.ingredients?.includes(i))) boost += PERSONALIZATION_WEIGHTS.ingredient;
-      return boost;
-    }
-    function getLikesBoost(recipe, likedFeatures) {
-      let boost = 1;
-      if (likedFeatures.cuisines?.includes(recipe.cuisine)) boost += 1;
-      if (recipe.ingredients?.some(i => likedFeatures.ingredients?.includes(i))) boost += 1;
-      if (recipe.dietaryTags?.some(d => likedFeatures.dietaryTags?.includes(d))) boost += 1;
-      return boost;
-    }
-    function addRandomnessIfSimilar(scored) {
-      const sorted = [...scored].sort((a, b) => b.score - a.score);
-      let i = 0;
-      while (i < sorted.length) {
-        let j = i + 1;
-        while (j < sorted.length && Math.abs(sorted[j].score - sorted[i].score) <= 5) j++;
-        if (j - i > 1) {
-          const group = sorted.slice(i, j);
-          group.sort(() => Math.random() - 0.5);
-          for (let k = 0; k < group.length; k++) sorted[i + k] = group[k];
-        }
-        i = j;
-      }
-      return sorted;
-    }
-    // --- Extract liked features from user's liked recipes ---
-    function extractCommonFeatures(likedRecipes) {
-      const cuisines = {};
-      const ingredients = {};
-      const dietaryTags = {};
-      likedRecipes.forEach(r => {
-        if (r.cuisine) cuisines[r.cuisine] = (cuisines[r.cuisine] || 0) + 1;
-        if (Array.isArray(r.ingredients)) r.ingredients.forEach(i => { ingredients[i] = (ingredients[i] || 0) + 1; });
-        if (Array.isArray(r.dietaryTags)) r.dietaryTags.forEach(d => { dietaryTags[d] = (dietaryTags[d] || 0) + 1; });
-      });
-      return {
-        cuisines: Object.keys(cuisines).filter(c => cuisines[c] > 1),
-        ingredients: Object.keys(ingredients).filter(i => ingredients[i] > 1),
-        dietaryTags: Object.keys(dietaryTags).filter(d => dietaryTags[d] > 1),
-      };
-    }
-    // --- Main ranking function ---
-    function rankRecipes(recipes, userProfile, likedFeatures) {
-      const scored = recipes.map(recipe => {
-        const engagement = getEngagementScore(recipe);
-        const freshness = getFreshnessFactor(recipe.createdAt);
-        const trending = getTrendingBoost(recipe);
-        const profileBoost = getProfileBoost(recipe, userProfile);
-        const likesBoost = getLikesBoost(recipe, likedFeatures);
-        const score =
-          engagement * 1 +
-          freshness * FRESHNESS_WEIGHT +
-          trending * TRENDING_WEIGHT +
-          profileBoost * PROFILE_BOOST_WEIGHT +
-          likesBoost * LIKES_BOOST_WEIGHT;
-        return { ...recipe, score };
-      });
-      return addRandomnessIfSimilar(scored).sort((a, b) => b.score - a.score);
-    }
     // --- Pull-to-refresh state ---
     const [refreshing, setRefreshing] = useState(false);
-
-    // --- User profile and liked features (mock, replace with real data) ---
-    const userProfile = user?.profile || {};
-    const likedRecipes = recipeList.filter(r => r.isLikedByCurrentUser);
-    const likedFeatures = extractCommonFeatures(likedRecipes);
-
-    // --- Ranked and filtered recipes ---
-    const getRankedFilteredRecipes = useCallback(() => {
-      const filtered = getFilteredRecipes();
-      return rankRecipes(filtered, userProfile, likedFeatures);
-    }, [getFilteredRecipes, userProfile, likedFeatures]);
-
-    // --- Pull-to-refresh handler ---
     const onRefresh = async () => {
       setRefreshing(true);
       await getRecipes();
@@ -632,7 +520,7 @@ export default function HomeScreen() {
                                     color={seasonalFilterActive ? theme.colors.primary : theme.colors.textSecondary}
                                 />
                                 <Text style={{ marginLeft: 8, color: theme.colors.text }}>
-                                    Nur saisonale Zutaten anzeigen
+                                    Show only seasonal ingredients
                                 </Text>
                                 <View style={{
                                     marginLeft: 8,

@@ -15,7 +15,7 @@ import {
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '../lib/firebaseconfig';
 import { updateUserRecipeCount } from './userService';
-import { createLikeNotification } from './notificationService';
+import { notifyRecipeLike } from './inAppNotificationService';
 import { profileUpdateEmitter } from '../utils/profileUpdateEmitter';
 
 // Get a specific recipe by ID
@@ -27,7 +27,6 @@ export const getRecipe = async (recipeId) => {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching recipe:', error);
     throw error;
   }
 };
@@ -43,7 +42,9 @@ export const updateRecipe = async (recipeId, recipeData, imageUri = null) => {
         // Delete old image if it exists and is different
         if (recipeData.imageUrl) {
           const oldImageRef = ref(storage, recipeData.imageUrl);
-          await deleteObject(oldImageRef).catch(console.warn);
+          await deleteObject(oldImageRef).catch(() => {
+            // Image deletion error handled silently
+          });
         }
 
         // Upload new image
@@ -53,8 +54,7 @@ export const updateRecipe = async (recipeId, recipeData, imageUri = null) => {
         const snapshot = await uploadBytes(imageRef, blob);
         imageUrl = await getDownloadURL(snapshot.ref);
       } catch (imageError) {
-        console.warn('Error handling image update:', imageError);
-        // Continue with the update even if image handling fails
+        // Image update error handled silently
       }
     }
 
@@ -69,7 +69,6 @@ export const updateRecipe = async (recipeId, recipeData, imageUri = null) => {
     
     return { id: recipeId, ...updatedData };
   } catch (error) {
-    console.error('Error updating recipe:', error);
     throw error;
   }
 };
@@ -92,7 +91,7 @@ export const deleteRecipe = async (recipeId, authorId) => {
         const imageRef = ref(storage, recipeData.imageUrl);
         await deleteObject(imageRef);
       } catch (imageError) {
-        console.warn('Error deleting recipe image:', imageError);
+        // Image deletion error handled silently
       }
     }
 
@@ -134,7 +133,6 @@ export const deleteRecipe = async (recipeId, authorId) => {
 
     return true;
   } catch (error) {
-    console.error('Error deleting recipe:', error);
     throw error;
   }
 };
@@ -161,7 +159,6 @@ export const getUserRecipes = async (userId) => {
     
     return recipes;
   } catch (error) {
-    console.error('Error fetching user recipes:', error);
     throw error;
   }
 };
@@ -191,18 +188,21 @@ export const toggleRecipeLike = async (recipeId, userId) => {
           const recipeOwnerId = recipeData.authorId;
           
           if (recipeOwnerId && recipeOwnerId !== userId) {
-            await createLikeNotification(recipeId, userId, recipeOwnerId);
+            // Get user info for notification
+            const userDoc = await getDoc(doc(db, 'users', userId));
+            const userData = userDoc.exists() ? userDoc.data() : {};
+            const userName = userData.username || userData.email?.split('@')[0] || 'Someone';
+            
+            await notifyRecipeLike(recipeId, recipeData.title, userName, recipeOwnerId);
           }
         }
       } catch (notificationError) {
-        console.error('Error creating like notification:', notificationError);
-        // Don't throw here to avoid breaking the like functionality
+        // Notification error handled silently
       }
       
-      return true; // Now liked
+      return true;
     }
   } catch (error) {
-    console.error('Error toggling recipe like:', error);
     throw error;
   }
 };
@@ -222,7 +222,6 @@ export const rateRecipe = async (recipeId, userId, rating) => {
     
     return true;
   } catch (error) {
-    console.error('Error rating recipe:', error);
     throw error;
   }
 };
@@ -238,7 +237,6 @@ export const getUserRating = async (recipeId, userId) => {
     }
     return 0;
   } catch (error) {
-    console.error('Error getting user rating:', error);
     return 0;
   }
 };
@@ -273,6 +271,6 @@ const updateRecipeAverageRating = async (recipeId) => {
       reviews: ratingsSnapshot.size
     });
   } catch (error) {
-    console.error('Error updating recipe average rating:', error);
+    // Error handled silently
   }
 };

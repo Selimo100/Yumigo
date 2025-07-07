@@ -17,7 +17,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 export const getUserProfile = async (userId) => {
   try {
     if (!userId) {
-      throw new Error('User ID is required');
+      throw new Error('User ID required');
     }
     
     if (!db) {
@@ -50,11 +50,11 @@ export const getUserProfile = async (userId) => {
                 updatedAt: serverTimestamp(),
               });
             } catch (updateError) {
-              console.warn('Could not update username in Firestore:', updateError);
+              // Update error handled silently
             }
           }
         } catch (authError) {
-          console.warn('Could not fetch displayName from auth:', authError);
+          // Auth error handled silently
         }
       }
       
@@ -66,7 +66,6 @@ export const getUserProfile = async (userId) => {
     
     return null;
   } catch (error) {
-    console.error('Error getting user profile:', error);
     throw error;
   }
 };
@@ -82,7 +81,6 @@ export const createUserProfile = async (userId, profileData) => {
     });
     return true;
   } catch (error) {
-    console.error('Error creating user profile:', error);
     throw error;
   }
 };
@@ -97,7 +95,6 @@ export const updateUserProfile = async (userId, updates) => {
     });
     return true;
   } catch (error) {
-    console.error('Error updating user profile:', error);
     throw error;
   }
 };
@@ -112,7 +109,6 @@ export const getCurrentUserProfile = async () => {
     
     return await getUserProfile(currentUser.uid);
   } catch (error) {
-    console.error('Error getting current user profile:', error);
     throw error;
   }
 };
@@ -147,7 +143,6 @@ export const initializeUserProfile = async (userId, email, username = null) => {
     await createUserProfile(userId, defaultProfile);
     return defaultProfile;
   } catch (error) {
-    console.error('Error initializing user profile:', error);
     throw error;
   }
 };
@@ -169,7 +164,6 @@ export const updateUserRecipeCount = async (userId, increment = true) => {
     }
     return 0;
   } catch (error) {
-    console.error('Error updating recipe count:', error);
     throw error;
   }
 };
@@ -194,10 +188,8 @@ export const syncUserRecipeCount = async (userId) => {
       updatedAt: serverTimestamp(),
     });
     
-    console.log(`Synced recipe count for user ${userId}: ${actualCount} recipes`);
     return actualCount;
   } catch (error) {
-    console.error('Error syncing recipe count:', error);
     throw error;
   }
 };
@@ -237,13 +229,11 @@ export const followUser = async (currentUserId, targetUserId) => {
           updatedAt: serverTimestamp(),
         });
         
-        console.log(`✅ User ${currentUserId} is now following ${targetUserId}`);
         return true;
       }
     }
     return false;
   } catch (error) {
-    console.error('Error following user:', error);
     throw error;
   }
 };
@@ -282,13 +272,11 @@ export const unfollowUser = async (currentUserId, targetUserId) => {
           updatedAt: serverTimestamp(),
         });
         
-        console.log(`✅ User ${currentUserId} unfollowed ${targetUserId}`);
         return true;
       }
     }
     return false;
   } catch (error) {
-    console.error('Error unfollowing user:', error);
     throw error;
   }
 };
@@ -305,7 +293,6 @@ export const uploadProfileImage = async (uri, userId) => {
     const downloadURL = await getDownloadURL(imageRef);
     return downloadURL;
   } catch (error) {
-    console.error('Error uploading profile image:', error);
     throw error;
   }
 };
@@ -375,7 +362,6 @@ export const getUserRecipes = async (userId, currentUserId = null) => {
     
     return recipesWithLikesAndStatus;
   } catch (error) {
-    console.error('Error fetching user recipes:', error);
     throw error;
   }
 };
@@ -407,7 +393,6 @@ export const getUserSavedRecipes = async (userId) => {
     
     return savedRecipes;
   } catch (error) {
-    console.error('Error fetching saved recipes:', error);
     throw error;
   }
 };
@@ -440,7 +425,6 @@ export const toggleSaveRecipe = async (userId, recipeId) => {
     }
     return false;
   } catch (error) {
-    console.error('Error toggling save recipe:', error);
     throw error;
   }
 };
@@ -463,7 +447,6 @@ export const getFollowingUsers = async (userId) => {
 
     return followingProfiles.filter(profile => profile !== null);
   } catch (error) {
-    console.error('Error fetching following users:', error);
     throw error;
   }
 };
@@ -488,7 +471,6 @@ export const getFollowers = async (userId) => {
     
     return followers;
   } catch (error) {
-    console.error('Error fetching followers:', error);
     throw error;
   }
 };
@@ -502,7 +484,6 @@ export const isFollowing = async (currentUserId, targetUserId) => {
     }
     return currentUserProfile.following.includes(targetUserId);
   } catch (error) {
-    console.error('Error checking follow status:', error);
     return false;
   }
 };
@@ -541,7 +522,6 @@ export const getSuggestedUsers = async (currentUserId, limit = 10) => {
 
     return suggestedUsers;
   } catch (error) {
-    console.error('Error fetching suggested users:', error);
     return [];
   }
 };
@@ -583,7 +563,6 @@ export const getFollowingFeed = async (userId) => {
     
     return feedRecipes;
   } catch (error) {
-    console.error('Error fetching following feed:', error);
     return [];
   }
 };
@@ -616,7 +595,6 @@ export const searchUsers = async (searchTerm, limit = 20) => {
     
     return users.slice(0, limit);
   } catch (error) {
-    console.error('Error searching users:', error);
     return [];
   }
 };
@@ -632,7 +610,6 @@ export const getShoppingList = async (userId) => {
     }
     return [];
   } catch (error) {
-    console.error('Error fetching shopping list:', error);
     throw error;
   }
 };
@@ -658,7 +635,6 @@ export const updateShoppingList = async (userId, shoppingList) => {
     
     return true;
   } catch (error) {
-    console.error('Error updating shopping list:', error);
     throw error;
   }
 };
@@ -691,7 +667,6 @@ export const addShoppingListItem = async (userId, item) => {
     
     return newItem;
   } catch (error) {
-    console.error('Error adding shopping list item:', error);
     throw error;
   }
 };
@@ -712,7 +687,6 @@ export const toggleShoppingListItem = async (userId, itemId) => {
     await updateShoppingList(userId, updatedList);
     return updatedList;
   } catch (error) {
-    console.error('Error toggling shopping list item:', error);
     throw error;
   }
 };
@@ -730,7 +704,6 @@ export const removeShoppingListItem = async (userId, itemId) => {
     await updateShoppingList(userId, updatedList);
     return updatedList;
   } catch (error) {
-    console.error('Error removing shopping list item:', error);
     throw error;
   }
 };
