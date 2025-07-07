@@ -188,12 +188,35 @@ Ganz unten befindet sich wieder unsere Bottom Navigation Bar, mit den vier Tabs:
 ---
 
 ## 5.4 Createform
+Auf dem Createrecipescreen kann der Nutzer ein neues Rezept anlegen. Zuoberst gibt es die Möglichkeit, ein Foto hochzuladen. Darunter befinden sich Eingabefelder für den Rezepttitel, eine Beschreibung und die Kategorie (Salty, Sweet, Spicy, ect.).
 
+Scrollt man weiter nach unten, können Zutaten mit Menge und Einheit hinzugefügt werden. Ausserdem gibt es ein Feld für die Zubereitungsschritte. Unten am Screen befindet sich ein Button, um das Rezept zu veröffentlichen.
+
+Auch hier ist die Bottom Navigation Bar mit den Tabs Home, Craving, Favorite und Profile jederzeit sichtbar.
 
 ![Createform Mockup.png](assets/Createform%20Mockup.png)
 
 
+---
+## 5.5 Profilescreen
 
+Auf dem Profilescreen sieht man alle Infos zum eigenen Nutzerkonto. Oben werden Profilbild, Username, Follower- und Following-Anzahl sowie die Anzahl der eigenen Rezepte angezeigt. Darunter gibt es eine kurze Beschreibung.
+
+Man hat die Möglichkeit, das Profil zu bearbeiten oder den Link zum Profil zu teilen. Unter dem Bereich „Your Recipes“ werden alle eigenen Rezepte als Karten aufgelistet.
+
+Unten befindet sich die Bottom Navigation Bar mit den Tabs Home, Craving, Favorites und Profile.
+
+![ProfileScreen Mockup.png](assets/ProfileScreen%20Mockup.png)
+
+--- 
+## 5.6 Favoritesscreen
+Im Favoritesscreen werden alle gespeicherten Lieblingsrezepte angezeigt. Oben gibt es eine Searchbar, um nach Favoriten zu suchen oder nach Kategorien wie Sweet, Salty oder Spicy zu filtern.
+
+Darunter sind die Favoriten als Liste dargestellt. Jedes Rezept zeigt Titel, Bild, Bewertung, Icons zum Speichern, Liken oder Teilen und einen Follow-Button für den Rezept-Ersteller.
+
+Ganz unten ist wie immer die Bottom Navigation Bar mit den Tabs Home, Craving, Favorites und Profile.
+
+![Favorite Mockup.png](assets/Favorite%20Mockup.png)
 
 ---
 
