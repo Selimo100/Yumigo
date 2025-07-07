@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Keyboard, P
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useUserProfile } from '../hooks/useUserProfile';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
 export const CommentInput = ({ onAddComment, theme, onFocus: onParentFocus }) => {
   const [newComment, setNewComment] = useState('');

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Animated } from 'react-native';
-import { StarRating } from './CommentComponents';
+import { StarRating } from './Comment/CommentComponents';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 

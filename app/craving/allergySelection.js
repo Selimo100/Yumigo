@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ALLERGENS, COLORS } from '../../utils/constants';
-import CravingLayout from '../../components/CravingLayout';
-import CravingSelector from '../../components/CravingSelector';
+import CravingLayout from '../../components/Craving/CravingLayout';
+import CravingSelector from '../../components/Craving/CravingSelector';
 import { useTheme } from '../../contexts/ThemeContext';
 
 // Add "None" option to allergens

@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import useAuth from '../lib/useAuth';
+import useAuth from '../../lib/useAuth';
 
 export const CommentItem = ({ comment, onLike, theme }) => {
   const router = useRouter();

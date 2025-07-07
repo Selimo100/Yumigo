@@ -1,9 +1,9 @@
 import React from 'react';
 import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../utils/constants';
-import { useTheme } from '../contexts/ThemeContext';
-import useTabBarHeight from '../hooks/useTabBarHeight';
+import { COLORS } from '../../utils/constants';
+import { useTheme } from '../../contexts/ThemeContext';
+import useTabBarHeight from '../../hooks/useTabBarHeight';
 
 const CravingLayout = ({ 
     children, 

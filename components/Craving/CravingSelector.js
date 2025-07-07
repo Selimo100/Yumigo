@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, Animated } from 'react-native';
-import { COLORS } from '../utils/constants';
+import { COLORS } from '../../utils/constants';
 
 const CravingSelector = ({ 
     item, 

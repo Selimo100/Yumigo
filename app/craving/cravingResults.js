@@ -2,7 +2,7 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import RecipeCard from "../../components/RecipeCard";
-import CravingSummary from "../../components/CravingSummary";
+import CravingSummary from "../../components/Craving/CravingSummary";
 import {useCallback, useState} from "react";
 import {useTheme} from "../../contexts/ThemeContext";
 import useTabBarHeight from "../../hooks/useTabBarHeight";
