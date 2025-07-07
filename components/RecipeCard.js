@@ -10,23 +10,6 @@ import { useState, useRef } from 'react';
 import { toggleRecipeLike, rateRecipe, getUserRating } from '../services/recipeService';
 import { RatingModal } from './RatingModal';
 
-// mockCommentCounts is still here, as per your previous code.
-// If you want real comment counts, you'd fetch them in HomeScreen.js
-// similarly to how likes are fetched and pass them via the recipe prop.
-const mockCommentCounts = {
-    1: 8,
-    2: 3,
-    3: 12,
-    4: 5,
-    5: 2,
-    6: 15,
-    7: 7,
-    8: 4,
-    9: 11,
-    10: 6
-};
-
-
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
     acc[allergen.id] = {
         label: allergen.label.replace('Contains ', ''),
@@ -65,8 +48,8 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
     // Check if this recipe is in favorites
     const isRecipeFavorite = isFavorite(recipe.id);
 
-    // Use mockCommentCounts as per your original code for comments
-    const commentCount = mockCommentCounts[recipe.id] || 0;
+    // Die echte Kommentaranzahl aus dem Rezeptobjekt verwenden
+    const commentCount = typeof recipe.commentsCount === 'number' ? recipe.commentsCount : 0;
 
 
     const handlePress = () => {

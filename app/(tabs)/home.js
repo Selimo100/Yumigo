@@ -98,6 +98,11 @@ export default function HomeScreen() {
                         isLikedByCurrentUser = userLikeDoc.exists();
                     }
 
+                    // Get comments count
+                    const commentsCollectionRef = collection(db, 'recipes', docSnapshot.id, 'comments');
+                    const commentsSnapshot = await getDocs(commentsCollectionRef);
+                    const commentsCount = commentsSnapshot.size;
+
                     // Get ratings count and average
                     const ratingsCollectionRef = collection(db, 'recipes', docSnapshot.id, 'ratings');
                     const ratingsSnapshot = await getDocs(ratingsCollectionRef);
@@ -113,11 +118,12 @@ export default function HomeScreen() {
                         averageRating = Math.round((totalRating / reviewsCount) * 10) / 10;
                     }
 
-                    console.log(`✅ [HomeScreen] Recipe ID: ${docSnapshot.id}, Likes: ${likesCount}, Liked by current user: ${isLikedByCurrentUser}, Rating: ${averageRating}, Reviews: ${reviewsCount}`);
+                    console.log(`✅ [HomeScreen] Recipe ID: ${docSnapshot.id}, Likes: ${likesCount}, Comments: ${commentsCount}, Liked by current user: ${isLikedByCurrentUser}, Rating: ${averageRating}, Reviews: ${reviewsCount}`);
 
                     return { 
                         ...recipeData, 
                         likesCount, 
+                        commentsCount,
                         isLikedByCurrentUser,
                         rating: averageRating,
                         reviews: reviewsCount
