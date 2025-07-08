@@ -295,42 +295,42 @@ Ein Algorithmus mit anpassbaren Gewichtungen sorgt für eine dynamische, persona
 ### Testfall: Saisonfilter aktivieren
 
 | **ID**            | T-C03                                                                                  |
-|-------------------|-----------------------------------------------------------------------------------------|
+|-------------------|----------------------------------------------------------------------------------------|
 | **Anforderungen** | C-03 (Saisonale Zutaten filtern)                                                       |
-| **Ablauf**        | Nutzer:in aktiviert den Saisonfilter für den Monat Juni.                               |
-| **Erwartet**      | Nur Rezepte mit saisonal verfügbaren Zutaten (z. B. Spargel, Erdbeeren) werden gezeigt. |
+| **Ablauf**        | Nutzer:in aktiviert den Saisonfilter.                                                  |
+| **Erwartet**      | Nur Rezepte mit saisonal verfügbaren Zutaten (z.B. Spargel, Erdbeeren) werden gezeigt. |
 
 ### Testfall: Rezeptdetailseite aufrufen
 
-| **ID**            | T-C04                                                                    |
-|-------------------|---------------------------------------------------------------------------|
-| **Anforderungen** | C-04 (Rezeptdetails anzeigen)                                             |
-| **Ablauf**        | Nutzer:in klickt auf das Rezept „Ofenkartoffeln mit Quark“.              |
-| **Erwartet**      | Detailansicht mit Zutatenliste, Bildern und Zubereitung wird angezeigt.  |
+| **ID**            | T-C04                                                                   |
+|-------------------|-------------------------------------------------------------------------|
+| **Anforderungen** | C-04 (Rezeptdetails anzeigen)                                           |
+| **Ablauf**        | Nutzer:in klickt auf das Rezept „Garlic Parmesan Popcorn“.              |
+| **Erwartet**      | Detailansicht mit Zutatenliste, Bildern und Zubereitung wird angezeigt. |
 
 ### Testfall: Rezept favorisieren
 
-| **ID**            | T-R02                                                                       |
-|-------------------|------------------------------------------------------------------------------|
-| **Anforderungen** | R-02 (Rezepte favorisieren)                                                  |
-| **Ablauf**        | Nutzer:in klickt auf das Herzsymbol beim Rezept „Kichererbsen-Curry“.       |
-| **Erwartet**      | Rezept wird als Favorit gespeichert und ist im Profil unter Favoriten sichtbar. |
+| **ID**            | T-R02                                                                                                  |
+|-------------------|--------------------------------------------------------------------------------------------------------|
+| **Anforderungen** | R-02 (Rezepte favorisieren)                                                                            |
+| **Ablauf**        | Nutzer:in klickt auf das Speichernsymbol beim Rezept „Garlic Parmesan Popcorn“.                        |
+| **Erwartet**      | Rezept „Garlic Parmesan Popcorn“ wird als Favorit gespeichert und ist auf der Favoritenseite sichtbar. |
 
 ### Testfall: Person folgen
 
-| **ID**            | T-P01                                                    |
-|-------------------|-----------------------------------------------------------|
-| **Anforderungen** | P-01 (Personen folgen)                                    |
-| **Ablauf**        | Nutzer:in klickt im Profil von „@kochliebe“ auf „Folgen“. |
-| **Erwartet**      | @kochliebe wird in der „Gefolgt“-Liste des Nutzers angezeigt. |
+| **ID**            | T-P01                                                              |
+|-------------------|--------------------------------------------------------------------|
+| **Anforderungen** | P-01 (Personen folgen)                                             |
+| **Ablauf**        | Nutzer:in klickt im Profil von „Florin Furter“ auf „Follow“.       |
+| **Erwartet**      | Florin Furter wird in der „Following“ Liste des Nutzers angezeigt. |
 
 ### Testfall: Profil & eigene Rezepte anzeigen
 
-| **ID**            | T-P02                                                                        |
-|-------------------|-------------------------------------------------------------------------------|
-| **Anforderungen** | P-02 (Eigenes Profil einsehen)                                                |
-| **Ablauf**        | Nutzer:in öffnet den Reiter „Mein Profil“ in der Navigationsleiste.           |
-| **Erwartet**      | Alle hochgeladenen Rezepte und gespeicherten Favoriten sind dort sichtbar.    |
+| **ID**            | T-P02                                                       |
+|-------------------|-------------------------------------------------------------|
+| **Anforderungen** | P-02 (Eigenes Profil einsehen)                              |
+| **Ablauf**        | Nutzer:in öffnet den Tab „Profil“ in der Navigationsleiste. |
+| **Erwartet**      | Alle eigenen hochgeladenen Rezepte sind dort sichtbar.      |
 
 
 ---
@@ -338,30 +338,23 @@ Ein Algorithmus mit anpassbaren Gewichtungen sorgt für eine dynamische, persona
 # 8. 📑 Testprotokoll
 
 | **ID** | **Erfolgreich** | **Wer?** | **Datum und Uhrzeit** |
-|--------|-----------------|----------|-----------------------|
-| T-01   | ✅               | Rasim    | 14.04.2025, 16:00 Uhr |
-| T-02   | ✅               | Lysandro | 14.04.2025, 15:00 Uhr |
-| T-03   | ✅               | Serra    | 14.04.2025, 14:10 Uhr |
-| T-04   | ✅               | Serra    | 14.04.2025, 14:10 Uhr |
-| T-05   | ✅               | Rasim    | 14.04.2025, 16:00 Uhr |
-| T-06   | ✅               | Lysandro | 14.04.2025, 15:00 Uhr |
-| T-07   | ✅               | Rasim    | 14.04.2025, 16:00 Uhr |
-| T-08   | ✅               | Mateo    | 15.04.2025, 9:30 Uhr  |
-| T-09   | ✅               | Mateo    | 14.04.2025, 9:30 Uhr  |
-| T-10   | ✅               | Rasim    | 14.04.2025, 16:00 Uhr |
-| T-11   | ✅ ❌             | Rasim    | 14.04.2025, 16:00 Uhr |
-
-**Bemerkung T-11:**  
-Die Datei wird erfolgreich hochgeladen und ist für *den Uploader* sichtbar.  
-Allerdings können andere Benutzer aktuell nicht auf die hochgeladene Datei zugreifen.  
-Um dies zu ermöglichen, wäre ein serverseitiger Datei-Host notwendig – dieses Thema werden wir voraussichtlich demnächst
-gemeinsam mit Ivan besprechen.
+|--------|---------------|----------|-----------------------|
+| T-C01  | ✅             | Florent  | 30.6.2025, 14:03 Uhr  |
+| T-R01   | ✅             | León     | 30.6.2025, 14:10 Uhr  |
+|T-C02  | ✅             | Lysandro | 30.6.2025, 14:18 Uhr  |
+| T-C03  | ✅             | Mateo    | 30.6.2025, 14:35 Uhr  |
+| T-C04   | ✅             | Florent  | 30.6.2025, 15:07 Uhr  |
+| T-R02   | ✅             | Lysandro | 30.6.2025, 15:33 Uhr  |
+| T-P01  | ✅             | León     | 30.6.2025, 15:45 Uhr  |
+| T-P02    | ✅             | Mäx      | 01.7.2025, 9:30 Uhr   |
 
 
 ---
 # 9. 📌 Übersicht unseren automatisierten Tests
 
 Wir haben eine umfassende Test-Suite entwickelt, die verschiedene Aspekte der Yumigo-App abdeckt. Hier ist eine detaillierte Übersicht:
+
+Die Tests können laufengelassen werden, wenn man in der Konsole **npm test** eingibt und Enter drückt. 
 
 ## 9.1 🔐 Authentifizierung Tests
 ___
@@ -512,58 +505,70 @@ login.test.js
 
 ### ✅ Was lief gut?
 
-- Die Strukturierung des Projekts in Module half beim schnellen Fortschritt.
-- Authentifizierung mit JWT funktionierte nach kurzer Einarbeitung gut.
-- React-Komponentenstruktur machte die Wiederverwendung effizient.
-- Die Trennung von Frontend und Backend war sauber, wodurch die Teamarbeit flüssig ablief.
+- Unser gesamtes Projekt lief sehr gut – wir hatten eine klare Struktur, eine effiziente Zeiteinteilung und eine gute Kommunikation im Team.
+- Die Aufteilung in React-Komponenten half dabei, schneller und strukturierter zu arbeiten.
+- Die Verbindung von Firebase (Backend) mit dem Frontend funktionierte nach der Einrichtung reibungslos.
+- Das Projekt war sauber aufgebaut, was allen im Team half, den Überblick zu behalten.
+- Wir arbeiteten mit einem klaren Git-Flow auf separaten Branches – dadurch konnten viele Mergekonflikte vermieden werden.
+
+---
 
 ### ❌ Herausforderungen
 
-- Beim Einrichten der Datenbank gab es kleinere Verbindungsprobleme, deshalb haben wir danach mit Flyway gearbeitet, um
-  uns die Arbeit zu erleichtern.
-- Die Umsetzung der To-dos inklusive Ordnerstruktur war technisch herausfordernd, da viele Datenabhängigkeiten und
-  verschachtelte Strukturen berücksichtigt werden mussten.
-- Auch die Strukturierung der gesamten App und die Aufteilung in sinnvolle Module (Frontend wie Backend) erforderte zu
-  Beginn viel Planung und Abstimmung.
-- Das Loginsystem hätte Selina weniger Zeit gekostet, wenn wir es von Anfang an gemacht hätten.
-- Frontend und Backend parallel entwickelt – aber Schnittstellenabstimmung war herausfordernd:
-  Selina hat das Frontend und Timea das Backend gleichzeitig umgesetzt. Obwohl diese parallele Entwicklung effizient schien, stellte sich das anschliessende Zusammenführen als aufwändig heraus. Viele API-Endpunkte mussten im Frontend manuell angepasst werden, weil sie zunächst nicht exakt auf die Backend-Logik abgestimmt waren.
+- Die Implementierung von Login und Registrierung war anfangs schwierig – die Konfigurationen von Firebase haben nicht direkt funktioniert, was viel Zeit gekostet hat.
+- Das Styling auf Android war teilweise deutlich anders als auf iOS – hier mussten wir vieles doppelt anpassen.
+- Der Craving-Algorithmus war technisch anspruchsvoll: Wir brauchten lange, bis wir ein gutes System fanden, das die Rezepte sinnvoll nach Lust und Geschmack filtert.
+- Es war nicht immer jede Person anwesend – durch Überstundenabbau, Resturlaub oder Krankheit fehlte manchmal jemand, was die Planung etwas erschwert hat.
 
+---
 
 ### 💡 Was haben wir gelernt?
 
-- Sicherheit mit Spring Security praktisch umzusetzen
-- REST-API Design und React-Kommunikation im Detail
-- Umgang mit komplexen Datenstrukturen (z.B. verschachtelte Entitäten bei Schule → Semester → Fach → Noten)
-- Kollaboratives Arbeiten mit GitFlow und allgemein Git(regelmässige Commits, saubere Branches, Merge-Konflikte vermeiden)
-- Frontend und Backend sollten in kleineren, aufeinander abgestimmten Schritten entwickelt werden – idealerweise jeweils basierend auf zuvor definierten oder getesteten Schnittstellen. So kann die Integration deutlich reibungsloser und effizienter erfolgen. Eine kontinuierliche und frühzeitige Abstimmung bei der API-Planung ist entscheidend für eine erfolgreiche Fullstack-Entwicklung.
+- Aufgaben flexibel im Team zu übernehmen, wenn jemand kurzfristig fehlt.
+- Bessere Kommunikation im Team und wie man Ideen gemeinsam sinnvoll vereint.
+- Programmieren mit React Native und die praktische Nutzung von Firebase als Backend.
+- Bilder speichern und hochladen mit Firebase Storage.
+- Arbeiten unter Zeitdruck und dennoch strukturiert bleiben.
+- Mockups zuerst durchdenken und als Grundlage für die Entwicklung verwenden.
+- Wie man Features sinnvoll aufteilt und realistisch plant.
 
-### 🚀 Zukunftsideen und Erweiterungspotential
+---
 
-Während der Entwicklung sind uns einige Ideen für zukünftige Features gekommen, die das System noch nützlicher und
-interaktiver machen würden:
+### 🎯 Zufriedenheit mit dem Ergebnis
 
-- **Like-Funktion für Kommentare**: So können nützliche oder hilfreiche Antworten hervorgehoben werden.
-- **Bearbeiten von Kommentaren**: Aktuell kann man Kommentare nicht mehr ändern – eine Edit-Funktion würde mehr
-  Flexibilität bieten.
-- **Autor:innen sichtbar machen**: Bei Kommentaren soll künftig sichtbar sein, wer den Kommentar geschrieben hat.
-- **Notenstatistiken & Diagramme**: Eine visuelle Darstellung des Notenverlaufs über mehrere Semester würde den
-  Fortschritt besser veranschaulichen.
-- **Tag-System im Community-Bereich**: Beiträge könnten nach Themen (Mathe, IT, Prüfungsvorbereitung, etc.) gefiltert
-  werden.
-- **Benachrichtigungen**: Erinnerungen bei nahenden Deadlines für ToDos wären eine hilfreiche Ergänzung.
+Wir sind sehr zufrieden und stolz auf unser Endergebnis.  
+Trotz begrenzter Zeit haben wir fast alle unsere Ziele erreicht – **nur zwei optionale Ziele fehlen** noch.  
+Wir finden es sehr beeindruckend, was man als Team in drei Wochen auf die Beine stellen kann.  
+Die App ist voll funktional und wir sind mehr als happy mit dem, was wir geschafft haben.
 
-Diese Erweiterungen würden die Plattform nicht nur funktionaler, sondern auch persönlicher und benutzerfreundlicher
-machen.
+---
+
+### 🚧 Was fehlte noch?
+
+Alle verpflichtenden Features sind umgesetzt – nur zwei **optionale Ziele** konnten wir aus Zeitgründen noch nicht fertigstellen:
+
+| Ziel-ID | Feature                                                                                                           | Status |
+|---------|-------------------------------------------------------------------------------------------------------------------|--------|
+| O-08    | Als Nutzer:in möchte ich private Nachrichten an andere Nutzer:innen senden können, um mich über Rezepte auszutauschen. | ❌     |
+| O-05    | Als Nutzer:in möchte ich ein Bild von meinem Kühlschrank machen, damit eine AI passende Rezepte vorschlägt.         | ❌     |
+
+Diese beiden Features möchten wir gerne in unserer Freizeit noch gemeinsam fertigstellen:
+
+- **Chatfunktion**: Damit man sich mit anderen Usern über Cravings und Rezepte austauschen oder Rezepte teilen kann.
+- **AI-Kühlschrankscanner**: Ein Feature, bei dem man seinen Kühlschrank scannt und die App anhand der vorhandenen Zutaten passende Rezeptvorschläge macht.
+
+Langfristig möchten wir unsere App veröffentlichen und mit diesen Funktionen noch weiter ausbauen.
+
+---
 
 ### 🤝 Zusammenarbeit im Team
 
-Die Zusammenarbeit im Team verlief genau wie erhofft – **sehr harmonisch, effizient und reibungslos**.  
+Die Zusammenarbeit im Team verlief genau wie erhofft! Sehr harmonisch, effizient und reibungslos.  
 Da wir uns auch ausserhalb des Projekts sehr gut verstehen, konnten wir auf einer vertrauensvollen Basis arbeiten, was
 sich stark positiv auf den Projektverlauf ausgewirkt hat.
 
-Wir haben früh entschieden, mit einem klaren **Git-Flow** zu arbeiten:  
-Jede von uns arbeitete in separaten Branches, wodurch **Merge-Konflikte vermieden** wurden und die Integration neuer
+Wir haben früh entschieden, mit einem klaren Git-Flow zu arbeiten:  
+Jede von uns arbeitete in separaten Branches, wodurch Mergekonflikte vermieden wurden und die Integration neuer
 Features sehr sauber erfolgen konnte.  
 Regelmässige Absprachen und gemeinsame Code-Reviews halfen uns, den Überblick zu behalten und sicherzustellen, dass alle
 Teile gut zusammenspielen.
