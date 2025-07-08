@@ -28,6 +28,27 @@ export const smartBorder = (borderWidth = 1, borderColor = '#000') => {
 };
 
 /**
+ * Smart border utility that keeps borders on both platforms but removes elevation on Android
+ * Use this for elements where you want to keep the visual border structure but avoid gray shadows
+ * @param {number} borderWidth - The border width
+ * @param {string} borderColor - The border color  
+ * @returns {object} Platform-specific border styles with no elevation
+ */
+export const smartBorderKeep = (borderWidth = 1, borderColor = '#000') => {
+  return createPlatformStyles(
+    {
+      borderWidth,
+      borderColor,
+    },
+    {
+      // Keep borders on Android but no elevation
+      borderWidth,
+      borderColor,
+    }
+  );
+};
+
+/**
  * Smart elevation/shadow utility
  * Uses shadows on iOS and elevation on Android (but with reduced elevation)
  * @param {object} shadowConfig - Shadow configuration for iOS
@@ -49,8 +70,8 @@ export const smartShadow = (
       elevation: 0, // Disable elevation on iOS since we use shadows
     },
     {
-      // Reduced elevation on Android, no shadow properties
-      elevation: Math.max(0, elevation - 1),
+      // Reduced elevation on Android, no shadow properties  
+      elevation: 0, // Remove elevation to avoid gray inner shadows
       shadowColor: 'transparent',
     }
   );
@@ -81,9 +102,9 @@ export const smartCard = (theme, customStyles = {}) => {
       shadowRadius: 4,
     },
     {
-      // Android: no border, minimal elevation
+      // Android: no border, no elevation to avoid gray inner shadows
       borderWidth: 0,
-      elevation: 1,
+      elevation: 0,
     }
   );
 
@@ -123,10 +144,10 @@ export const smartButton = (theme, isPrimary = false, customStyles = {}) => {
         shadowRadius: 4,
       },
       {
-        // Android: no border, subtle elevation
+        // Android: no border, no elevation to avoid gray inner shadows
         backgroundColor: theme.colors?.primary || '#0D6159',
         borderWidth: 0,
-        elevation: 2,
+        elevation: 0,
       }
     );
     
@@ -144,10 +165,10 @@ export const smartButton = (theme, isPrimary = false, customStyles = {}) => {
         borderColor: theme.colors?.border || '#E0E0E0',
       },
       {
-        // Android: no border, just background
+        // Android: no border, no elevation to avoid gray inner shadows
         backgroundColor: theme.colors?.surface || '#F8F9FA',
         borderWidth: 0,
-        elevation: 1,
+        elevation: 0,
       }
     );
     
@@ -293,6 +314,7 @@ export const smartGridItemTwoColumns = (customStyle = {}) => ({
 export default {
   createPlatformStyles,
   smartBorder,
+  smartBorderKeep,
   smartShadow,
   smartCard,
   smartButton,
