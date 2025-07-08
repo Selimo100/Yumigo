@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { CATEGORIES } from '../../utils/constants';
 import { useTheme } from '../../contexts/ThemeContext';

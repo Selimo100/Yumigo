@@ -9,7 +9,7 @@ import useTabBarHeight from "../../hooks/useTabBarHeight";
 import useCravingResults from "../../hooks/useCravingResults";
 import { COLORS } from '../../utils/constants';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { smartShadow } from '../../utils/platformStyles';
+import { smartShadow, smartDivider } from '../../utils/platformStyles';
 
 export default function CravingResults() {
     const { cravingResultsRecipes, isLoading } = useCravingResults();
@@ -67,6 +67,10 @@ export default function CravingResults() {
                     <Ionicons name="refresh" size={20} color={COLORS.primary} />
                 </TouchableOpacity>
             </View>
+
+            {/* Divider after header bar */}
+            <View style={styles.divider} />
+            
             <View style={styles.header}>
                 <Text style={styles.title}>Recommended for you</Text>
                 {cravingResultsRecipes.length > 0 && (
@@ -75,6 +79,9 @@ export default function CravingResults() {
                     </Text>
                 )}
             </View>
+
+            {/* Divider after header */}
+            <View style={styles.divider} />
 
             {/* Summary of selections */}
             <View style={styles.summaryContainer}>
@@ -85,14 +92,23 @@ export default function CravingResults() {
                 />
             </View>
 
+            {/* Divider after summary */}
+            <View style={styles.divider} />
+
             {cravingResultsRecipes.length > 0 ? (
                 <ScrollView
                     style={styles.feed}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.feedContent}
                 >
-                    {cravingResultsRecipes.map((recipe) => (
-                        <RecipeCard key={recipe.id} recipe={recipe} />
+                    {cravingResultsRecipes.map((recipe, index) => (
+                        <View key={recipe.id}>
+                            <RecipeCard recipe={recipe} />
+                            {/* Add divider after every 3rd recipe */}
+                            {index === 2 && cravingResultsRecipes.length > 3 && (
+                                <View style={styles.divider} />
+                            )}
+                        </View>
                     ))}
                 </ScrollView>
             ) : (
@@ -204,5 +220,11 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
     summaryContainer: {
         paddingHorizontal: 16,
         paddingTop: 8,
+    },
+    divider: {
+        ...smartDivider(theme, {
+            marginHorizontal: 16,
+            marginVertical: 12,
+        }),
     },
 });

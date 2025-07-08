@@ -218,6 +218,44 @@ export const smartInput = (theme, hasError = false, customStyles = {}) => {
 };
 
 /**
+ * Smart divider/separator line that looks good on both platforms
+ * Exact same style as used in CravingLayout headerBar for consistent appearance
+ * @param {object} theme - Theme object
+ * @param {object} customStyles - Additional custom styles  
+ * @returns {object} Platform-optimized divider styles
+ */
+export const smartDivider = (theme, customStyles = {}) => {
+  const baseStyles = {
+    height: 1,
+    width: '100%',
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors?.border || '#E0E0E0',
+    marginVertical: 12,
+    shadowColor: theme.colors?.shadow || '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  };
+
+  const platformStyles = createPlatformStyles(
+    {
+      // iOS: use shadows like CravingLayout
+      elevation: 0,
+    },
+    {
+      // Android: use elevation like CravingLayout but minimal
+      elevation: 1,
+    }
+  );
+
+  return {
+    ...baseStyles,
+    ...platformStyles,
+    ...customStyles,
+  };
+};
+
+/**
  * Android-specific style remover
  * Removes problematic style properties on Android
  * @param {object} styles - Original styles
@@ -319,6 +357,7 @@ export default {
   smartCard,
   smartButton,
   smartInput,
+  smartDivider,
   androidStyleCleanup,
   smartGrid,
   smartGridItem,

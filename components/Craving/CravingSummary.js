@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { COLORS, CATEGORIES, ALLERGENS, DIETARY } from '../../utils/constants';
 import { useTheme } from '../../contexts/ThemeContext';
-import { smartShadow } from '../../utils/platformStyles';
+import { smartShadow, smartDivider } from '../../utils/platformStyles';
 
 const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => {
     const { theme } = useTheme();
@@ -51,6 +51,10 @@ const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => 
             {/* Allergies und Preferences nebeneinander */}
             <View style={styles.compactRow}>
                 {renderSection('Allergies', getAllergyItems(), true, true)}
+                
+                {/* Vertical divider between allergies and preferences */}
+                <View style={styles.verticalDivider} />
+                
                 {renderSection('Preferences', getPreferenceItems(), true, true)}
             </View>
         </View>
@@ -85,12 +89,19 @@ const createStyles = (theme) => StyleSheet.create({
     },
     compactSection: {
         flex: 1,
-        marginRight: 8,
         marginBottom: 0,
     },
     compactRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+    },
+    verticalDivider: {
+        width: 1,
+        height: 40,
+        backgroundColor: theme.colors.border,
+        opacity: 0.3,
+        marginHorizontal: 8,
+        marginTop: 8,
     },
     sectionTitle: {
         fontSize: 11,
