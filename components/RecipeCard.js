@@ -10,7 +10,6 @@ import useAuth from '../lib/useAuth';
 import useFavorites from '../hooks/useFavorites';
 import {useRef, useState} from 'react';
 import {getUserRating, rateRecipe, toggleRecipeLike} from '../services/recipeService';
-import {notifyRecipeRating} from '../services/inAppNotificationService';
 import {RatingModal} from './RatingModal';
 import {smartShadow} from '../utils/platformStyles';
 
@@ -118,19 +117,12 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
             await rateRecipe(recipe.id, user.uid, rating);
             setUserRating(rating);
             setShowRatingModal(false);
-            // Wird ausgelöst bei Recipe-Bewertung
-            if (recipe.authorId && recipe.authorId !== user.uid) {
-                notifyRecipeRating(
-                    recipe.id, recipe.title,
-                    user.displayName || user.email?.split('@')[0] || 'Someone',
-                    rating,
-                    recipe.authorId
-                );
-            }
+            
             if (onRatingUpdate) {
                 onRatingUpdate(recipe.id);
             }
         } catch (error) {
+            console.error('Rating error:', error);
             Alert.alert("Error", "Could not save your rating.");
         }
     };
