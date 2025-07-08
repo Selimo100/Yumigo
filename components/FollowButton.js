@@ -5,7 +5,6 @@ import {ActivityIndicator, StyleSheet, Text, TouchableOpacity} from 'react-nativ
 import {Ionicons} from '@expo/vector-icons';
 import {useTheme} from '../contexts/ThemeContext';
 import {useFollow} from '../hooks/useFollow';
-import {notifyUserFollow} from '../services/inAppNotificationService';
 import {showToast} from '../utils/toast';
 import useAuth from '../lib/useAuth';
 
@@ -48,12 +47,7 @@ export default function FollowButton({
         success = await handleUnfollow(userId);
       } else {
         success = await handleFollow(userId);
-
-        // BENACHRICHTIGUNGS-SYSTEM: Informiere gefolgten User
-        // Wird ausgelöst wenn User einem anderen folgt
-        if (success && !previousStatus && user) {
-          notifyUserFollow(userId, user.displayName || user.email?.split('@')[0] || 'Someone', user.uid);
-        }
+        // Notification wird bereits im useFollow Hook behandelt
       }
 
       if (!success) {

@@ -153,17 +153,29 @@ export const getUserRecipes = async (userId) => {
     }
 };
 
+// Schutz vor gleichzeitigen Like-Operationen für das gleiche Rezept
+const activeLikeOperations = new Set();
+
 export const toggleRecipeLike = async (recipeId, userId) => {
+    const operationKey = `${recipeId}-${userId}`;
+    
+    // Verhindere gleichzeitige Like-Operationen für das gleiche Rezept/User-Paar
+    if (activeLikeOperations.has(operationKey)) {
+        return null; // Operation bereits im Gange
+    }
+    
+    activeLikeOperations.add(operationKey);
+    
     try {
         const likeDocRef = doc(db, 'recipes', recipeId, 'likes', userId);
         const likeDoc = await getDoc(likeDocRef);
 
         if (likeDoc.exists()) {
-
+            // Unlike
             await deleteDoc(likeDocRef);
             return false;
         } else {
-
+            // Like
             await setDoc(likeDocRef, {
                 userId,
                 timestamp: serverTimestamp()
@@ -176,7 +188,7 @@ export const toggleRecipeLike = async (recipeId, userId) => {
                     const recipeOwnerId = recipeData.authorId;
 
                     if (recipeOwnerId && recipeOwnerId !== userId) {
-
+                        // Nur bei Likes (nicht bei Unlikes) Notification senden
                         const userDoc = await getDoc(doc(db, 'users', userId));
                         const userData = userDoc.exists() ? userDoc.data() : {};
                         const userName = userData.username || userData.email?.split('@')[0] || 'Someone';
@@ -185,13 +197,16 @@ export const toggleRecipeLike = async (recipeId, userId) => {
                     }
                 }
             } catch (notificationError) {
-
+                // Fehlerbehandlung für Notification
             }
 
             return true;
         }
     } catch (error) {
         throw error;
+    } finally {
+        // Operation abgeschlossen, aus der Set entfernen
+        activeLikeOperations.delete(operationKey);
     }
 };
 

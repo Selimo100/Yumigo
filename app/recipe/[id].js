@@ -15,8 +15,9 @@ import {db} from '../../lib/firebaseconfig';
 import {formatDistanceToNow} from 'date-fns';
 import {useUserProfile} from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
-import {deleteRecipe, getUserRating, isRecipeOwner, rateRecipe} from '../../services/recipeService';
+import {deleteRecipe, getUserRating, isRecipeOwner, rateRecipe, toggleRecipeLike} from '../../services/recipeService';
 import {addShoppingListItem} from '../../services/userService';
+import {notifyRecipeComment} from '../../services/inAppNotificationService';
 import {showToast} from '../../utils/toast';
 import useAuth from '../../lib/useAuth';
 import {createPlatformStyles} from '../../utils/platformStyles';
@@ -175,14 +176,13 @@ export default function RecipeDetailScreen() {
       Alert.alert("Login Required", "You need to be logged in to like recipes.");
       return;
     }
-    const recipeLikeDocRef = doc(db, 'recipes', id, 'likes', currentUser.uid);
+
     try {
-      if (isLiked) {
-        await deleteDoc(recipeLikeDocRef);
-        setIsLiked(false);
-      } else {
-        await setDoc(recipeLikeDocRef, { timestamp: serverTimestamp() }); 
-        setIsLiked(true);
+      const newLikedState = await toggleRecipeLike(id, currentUser.uid);
+      
+      // Überprüfe, ob die Operation erfolgreich war (nicht null)
+      if (newLikedState !== null) {
+        setIsLiked(newLikedState);
       }
     } catch (error) {
       Alert.alert("Error", "Could not update like status.");
@@ -272,6 +272,7 @@ export default function RecipeDetailScreen() {
         createdAt: serverTimestamp(),
       };
       const docRef = await addDoc(collection(db, 'recipes', id, 'comments'), newCommentData);
+      
       const localComment = {
         id: docRef.id,
         user: newCommentData.authorName, 
@@ -281,7 +282,23 @@ export default function RecipeDetailScreen() {
         likes: 0,
         isLiked: false,
       };
+      
       setComments(prev => [localComment, ...prev]);
+
+      // Benachrichtige den Rezept-Autor über den neuen Kommentar
+      if (recipe && recipe.authorId && recipe.authorId !== currentUser.uid) {
+        try {
+          await notifyRecipeComment(
+            id,
+            recipe.title,
+            newCommentData.authorName,
+            commentText,
+            recipe.authorId
+          );
+        } catch (notificationError) {
+          // Fehlerbehandlung für Notification (sollte das Kommentieren nicht blockieren)
+        }
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to post comment.');
     }

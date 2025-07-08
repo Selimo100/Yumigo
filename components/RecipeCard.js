@@ -10,7 +10,7 @@ import useAuth from '../lib/useAuth';
 import useFavorites from '../hooks/useFavorites';
 import {useRef, useState} from 'react';
 import {getUserRating, rateRecipe, toggleRecipeLike} from '../services/recipeService';
-import {notifyRecipeLike, notifyRecipeRating} from '../services/inAppNotificationService';
+import {notifyRecipeRating} from '../services/inAppNotificationService';
 import {RatingModal} from './RatingModal';
 import {smartShadow} from '../utils/platformStyles';
 
@@ -86,17 +86,15 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
 
         try {
             const newLikedState = await toggleRecipeLike(recipe.id, user.uid);
-            setIsLiked(newLikedState);
-            setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+            
+            // Überprüfe, ob die Operation erfolgreich war (nicht null)
+            if (newLikedState !== null) {
+                setIsLiked(newLikedState);
+                setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
 
-            // BENACHRICHTIGUNGS-LOGIK: Informiere Autor über neuen Like
-            // Wird ausgelöst wenn User ein Rezept liked
-            if (newLikedState && recipe.authorId && recipe.authorId !== user.uid) {
-                notifyRecipeLike(recipe.id, recipe.title, user.displayName || user.email?.split('@')[0] || 'Someone', recipe.authorId);
-            }
-
-            if (onLikeUpdate) {
-                onLikeUpdate(recipe.id, newLikedState, newLikedState ? likesCount + 1 : likesCount - 1);
+                if (onLikeUpdate) {
+                    onLikeUpdate(recipe.id, newLikedState, newLikedState ? likesCount + 1 : likesCount - 1);
+                }
             }
         } catch (error) {
             Alert.alert("Error", "Could not update like status.");
