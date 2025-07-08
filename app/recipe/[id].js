@@ -20,7 +20,7 @@ import { notifyRecipeRating } from '../../services/inAppNotificationService';
 import { addShoppingListItem } from '../../services/userService';
 import { showToast } from '../../utils/toast';
 import useAuth from '../../lib/useAuth';
-import { smartShadow, smartButton, androidStyleCleanup } from '../../utils/platformStyles';
+import { smartShadow, smartButton, androidStyleCleanup, createPlatformStyles } from '../../utils/platformStyles';
 const formatTime = (timestamp) => {
   try {
     const date = timestamp?.toDate?.() || new Date(timestamp);
@@ -665,7 +665,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   headerActions: {
     flexDirection: 'row',
@@ -682,7 +685,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   shareButton: {
     padding: 8,
@@ -694,7 +700,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   imageContainer: {
     position: 'relative',
@@ -754,7 +763,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   timeContainer: {
     flexDirection: 'row',
@@ -796,7 +808,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   allergyHeader: {
     flexDirection: 'row',
@@ -903,7 +918,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   ratingSectionTitle: {
     fontSize: 18,
@@ -1005,7 +1023,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   stepHeader: {
     flexDirection: 'row',
