@@ -45,19 +45,15 @@ export default function RecipeForm({ onSuccess, onCancel }) {
     try {
       let imageUrl = null;
       
-      // Upload image if exists
       if (recipe.image) {
         const fileName = `recipe_${Date.now()}.jpg`;
         imageUrl = await uploadImage(recipe.image.uri, fileName);
       }
 
-      // Prepare recipe data
       const recipeData = {
         title: recipe.title.trim(),
         description: recipe.description.trim(),
-        // *** FIX APPLIED HERE: Use recipe.time directly ***
-        time: recipe.time, // TimePicker should already return "X min" or "X mins"
-        // **************************************************
+        time: recipe.time,
         categories: recipe.categories,
         allergens: recipe.allergens,
         dietary: recipe.dietary,
@@ -70,10 +66,8 @@ export default function RecipeForm({ onSuccess, onCancel }) {
         imageUrl,
       };
 
-      // Save to Firebase
       const recipeId = await saveRecipe(recipeData);
       
-      // Reset form and navigate first
       resetForm();
       onSuccess && onSuccess(recipeId);
     } catch (error) {
