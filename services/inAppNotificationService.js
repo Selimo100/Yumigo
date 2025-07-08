@@ -6,7 +6,6 @@ import {db} from '../lib/firebaseconfig';
 const activeNotifications = new Set();
 
 export const createInAppNotification = async (notificationData) => {
-    console.log('🚀 createInAppNotification called with:', notificationData);
     
     try {
         // Schlüssel für diese Notification
@@ -17,7 +16,6 @@ export const createInAppNotification = async (notificationData) => {
         const existingKey = Array.from(activeNotifications).find(key => key.startsWith(baseKey));
         
         if (existingKey) {
-            console.log('⚠️ Duplicate notification prevented:', baseKey);
             return null; // Notification bereits im Prozess
         }
         
@@ -30,12 +28,8 @@ export const createInAppNotification = async (notificationData) => {
             // NICHT type überschreiben! Behalte den originalen type (like, rating, follow, etc.)
         };
 
-        console.log('📝 Writing to Firebase:', notification);
-
         // Speichert in Firebase Collection 'notifications'
         const docRef = await addDoc(collection(db, 'notifications'), notification);
-        
-        console.log('✅ Successfully created notification with ID:', docRef.id);
         
         // Entferne den Schlüssel nach 2 Sekunden
         setTimeout(() => {
@@ -44,7 +38,6 @@ export const createInAppNotification = async (notificationData) => {
         
         return docRef.id;
     } catch (error) {
-        console.error('❌ createInAppNotification error:', error);
         
         // Entferne den Schlüssel bei Fehlern
         const keys = Array.from(activeNotifications).filter(key => 
