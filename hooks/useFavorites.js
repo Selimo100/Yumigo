@@ -1,49 +1,119 @@
-import { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// Use Favorites Hook - Verwaltung von Benutzer-Favoriten und deren Synchronisation
+import {useCallback, useEffect, useState} from 'react';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc
+} from 'firebase/firestore';
+import {db} from '../lib/firebaseconfig';
+import useAuth from '../lib/useAuth';
 
 const useFavorites = () => {
   const [favorites, setFavorites] = useState([]);
-
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
   useEffect(() => {
-    loadFavorites();
-  }, []);
-
-  const loadFavorites = async () => {
-    try {
-      const storedFavorites = await AsyncStorage.getItem('favorites');
-      if (storedFavorites) {
-        setFavorites(JSON.parse(storedFavorites));
+    if (!user?.uid) {
+      setFavorites([]);
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    const favoritesCollectionRef = collection(db, 'users', user.uid, 'favorites');
+    const favoritesQuery = query(favoritesCollectionRef, orderBy('timestamp', 'desc'));
+    const unsubscribe = onSnapshot(
+      favoritesQuery, 
+      async (snapshot) => {
+        try {
+          const favoriteRecipes = await Promise.all(
+            snapshot.docs.map(async (favoriteDoc) => {
+              const favoriteData = favoriteDoc.data();
+              const recipeRef = doc(db, 'recipes', favoriteDoc.id);
+              const recipeSnap = await getDoc(recipeRef);
+              if (recipeSnap.exists()) {
+                const recipeData = {
+                  id: recipeSnap.id,
+                  ...recipeSnap.data(),
+                  favoritedAt: favoriteData.timestamp
+                };
+                return recipeData;
+              } else {
+                return null;
+              }
+            })
+          );
+          const validFavorites = favoriteRecipes.filter(recipe => recipe !== null);
+          setFavorites(validFavorites);
+        } catch (error) {
+          if (error.code === 'permission-denied') {
+            setFavorites([]);
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      },
+      (error) => {
+        if (error.code === 'permission-denied') {
+          setFavorites([]);
+        }
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading favorites:', error);
+    );
+    return unsubscribe;
+  }, [user?.uid]);
+  const addFavorite = async (recipeId) => {
+    if (!user?.uid) {
+      throw new Error('User must be logged in to add favorites');
     }
-  };
-
-  const addFavorite = async (recipe) => {
     try {
-      const updatedFavorites = [...favorites, recipe];
-      setFavorites(updatedFavorites);
-      await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      const favoriteDocRef = doc(db, 'users', user.uid, 'favorites', recipeId);
+      await setDoc(favoriteDocRef, {
+        timestamp: serverTimestamp()
+      });
     } catch (error) {
-      console.error('Error saving favorite:', error);
+      if (error.code === 'permission-denied') {
+        throw new Error('Permission denied. Please check Firestore security rules for favorites.');
+      }
+      throw error;
     }
   };
-
   const removeFavorite = async (recipeId) => {
+    if (!user?.uid) {
+      throw new Error('User must be logged in to remove favorites');
+    }
     try {
-      const updatedFavorites = favorites.filter((fav) => fav.id !== recipeId);
-      setFavorites(updatedFavorites);
-      await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      const favoriteDocRef = doc(db, 'users', user.uid, 'favorites', recipeId);
+      await deleteDoc(favoriteDocRef);
     } catch (error) {
-      console.error('Error removing favorite:', error);
+      if (error.code === 'permission-denied') {
+        throw new Error('Permission denied. Please check Firestore security rules for favorites.');
+      }
+      throw error;
     }
   };
-
+  const isFavorite = useCallback((recipeId) => {
+    return favorites.some(favorite => favorite.id === recipeId);
+  }, [favorites]);
+  const toggleFavorite = async (recipeId) => {
+    if (isFavorite(recipeId)) {
+      await removeFavorite(recipeId);
+    } else {
+      await addFavorite(recipeId);
+    }
+  };
   return {
     favorites,
+    isLoading,
     addFavorite,
     removeFavorite,
+    isFavorite,
+    toggleFavorite,
   };
 };
-
 export default useFavorites;

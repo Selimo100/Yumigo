@@ -1,9 +1,15 @@
-import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
+// Tab Layout - Navigation für die Haupt-Tabs (Home, Craving, Favorites, Profile)
+import {Tabs} from 'expo-router';
+import {Ionicons} from '@expo/vector-icons';
+import {useTheme} from '../../contexts/ThemeContext';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export default function TabLayout() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  // Calculate the total height of the tab bar
+  const tabBarHeight = 60 + (insets.bottom > 0 ? insets.bottom : 8);
 
   return (
     <Tabs
@@ -12,20 +18,22 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: theme.colors.tabBarBackground,
           borderTopColor: theme.colors.border,
-          height: 80,
-          paddingBottom: 20,
-          paddingTop: 10,
+          height: tabBarHeight, 
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          paddingTop: 8,
+          position: 'absolute',
         },
-        tabBarActiveTintColor: theme.colors.tabBarActive,
+        tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.tabBarInactive,
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
+          marginBottom: insets.bottom > 0 ? 0 : 4,
         },
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (

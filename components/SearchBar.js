@@ -1,4 +1,5 @@
-import { TextInput, View, StyleSheet } from 'react-native';
+// Search Bar - Suchleiste für Rezept- und Inhaltssuche
+import {StyleSheet, TextInput, View} from 'react-native';
 
 export default function SearchBar({ placeholder, onSearch }) {
   return (
@@ -11,7 +12,6 @@ export default function SearchBar({ placeholder, onSearch }) {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     margin: 10,

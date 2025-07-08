@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+// Theme Context - Globale Theme-Verwaltung für Dark/Light Mode
+import {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = createContext();
@@ -25,7 +26,6 @@ export const ThemeProvider = ({ children }) => {
         setIsDarkMode(savedTheme === 'dark');
       }
     } catch (error) {
-      console.error('Error loading theme:', error);
     }
   };
 
@@ -35,7 +35,6 @@ export const ThemeProvider = ({ children }) => {
       setIsDarkMode(newTheme);
       await AsyncStorage.setItem('theme', newTheme ? 'dark' : 'light');
     } catch (error) {
-      console.error('Error saving theme:', error);
     }
   };
 
@@ -52,6 +51,19 @@ export const ThemeProvider = ({ children }) => {
       tabBarInactive: isDarkMode ? '#666666' : '#999999',
       button: isDarkMode ? '#333333' : '#E0E0E0',
       buttonText: isDarkMode ? '#FFFFFF' : '#000000',
+      error: '#FF6B6B',
+      
+      primary: '#0D6159', 
+      primaryLight: isDarkMode ? '#1A7A6E' : '#0D6159',
+      secondary: '#A5B68D', 
+      secondaryLight: isDarkMode ? '#8FA876' : '#B8C5A0',
+      accent: isDarkMode ? '#A5B68D' : '#0D6159',
+      accentBackground: isDarkMode ? 'rgba(165, 182, 141, 0.1)' : 'rgba(13, 97, 89, 0.05)',
+      
+      cardAccent: isDarkMode ? 'rgba(165, 182, 141, 0.08)' : 'rgba(13, 97, 89, 0.03)',
+      iconAccent: isDarkMode ? '#8FA876' : '#0D6159',
+      successAccent: '#4CAF50',
+      successBackground: isDarkMode ? 'rgba(76, 175, 80, 0.1)' : 'rgba(76, 175, 80, 0.05)',
     },
   };
 
