@@ -1,7 +1,6 @@
-// KOMPLEXE KOMPONENTE: Follow/Unfollow Button mit optimistischen Updates
-// Verwaltet Follow-Status, Benachrichtigungen und Error-Handling
+// Follow Button - Button zum Folgen/Entfolgen von Benutzern mit Status-Updates
 
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {ActivityIndicator, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useTheme} from '../contexts/ThemeContext';

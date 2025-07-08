@@ -1,3 +1,4 @@
+// Settings Styles - Zentrale Styles für alle Einstellungsbildschirme
 import {StyleSheet} from 'react-native';
 import {smartInput, smartShadow} from '../../utils/platformStyles';
 

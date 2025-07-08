@@ -1,4 +1,5 @@
-import React, {useState} from "react";
+// Register - Registrierungsbildschirm für neue Benutzer
+import {useState} from "react";
 import {
     Alert,
     Image,

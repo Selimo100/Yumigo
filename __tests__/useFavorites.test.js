@@ -1,4 +1,3 @@
-import React from 'react';
 
 describe('useFavorites Hook', () => {
   test('Placeholder test - Hook Logic', () => {

@@ -1,15 +1,15 @@
+// Craving Results - Anzeige der gefilterten Rezepte basierend auf Gelüsten und Präferenzen
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import RecipeCard from "../../components/RecipeCard";
 import CravingSummary from "../../components/Craving/CravingSummary";
-import {useCallback, useState} from "react";
 import {useTheme} from "../../contexts/ThemeContext";
 import useTabBarHeight from "../../hooks/useTabBarHeight";
 import useCravingResults from "../../hooks/useCravingResults";
-import { COLORS } from '../../utils/constants';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { smartShadow, smartDivider } from '../../utils/platformStyles';
+import {COLORS} from '../../utils/constants';
+import {useLocalSearchParams, useRouter} from 'expo-router';
+import {smartShadow} from '../../utils/platformStyles';
 
 export default function CravingResults() {
     const { cravingResultsRecipes, isLoading } = useCravingResults();
@@ -19,7 +19,6 @@ export default function CravingResults() {
     const router = useRouter();
     const params = useLocalSearchParams();
     
-    // Parse selections from params
     const cravings = params.cravings ? JSON.parse(params.cravings) : [];
     const allergies = params.allergies ? JSON.parse(params.allergies) : [];
     const preferences = params.preferences ? JSON.parse(params.preferences) : [];

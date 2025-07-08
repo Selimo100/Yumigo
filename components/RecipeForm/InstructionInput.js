@@ -1,4 +1,4 @@
-import React from 'react';
+// Instruction Input - Dynamische Eingabekomponente für Rezeptanweisungen
 import {StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useTheme} from '../../contexts/ThemeContext';

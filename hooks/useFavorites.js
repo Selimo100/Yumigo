@@ -1,18 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  deleteDoc, 
-  getDocs, 
+// Use Favorites Hook - Verwaltung von Benutzer-Favoriten und deren Synchronisation
+import {useCallback, useEffect, useState} from 'react';
+import {
+  collection,
+  deleteDoc,
+  doc,
   getDoc,
-  query,
+  onSnapshot,
   orderBy,
+  query,
   serverTimestamp,
-  onSnapshot
+  setDoc
 } from 'firebase/firestore';
-import { db } from '../lib/firebaseconfig';
+import {db} from '../lib/firebaseconfig';
 import useAuth from '../lib/useAuth';
+
 const useFavorites = () => {
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

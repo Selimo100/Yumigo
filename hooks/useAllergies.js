@@ -1,3 +1,4 @@
+// Use Allergies Hook - Hook zur Verwaltung von Allergie-Parametern aus der Navigation
 import {useLocalSearchParams} from 'expo-router';
 
 const useAllergies = () => {

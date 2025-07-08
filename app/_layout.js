@@ -1,3 +1,4 @@
+// Root Layout - Haupt-Layout der App mit Navigation und globalen Providern
 import {Stack} from 'expo-router';
 import {StatusBar} from 'expo-status-bar';
 import {ThemeProvider} from '../contexts/ThemeContext';

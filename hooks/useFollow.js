@@ -1,5 +1,4 @@
-// KOMPLEXER HOOK: Follow-System mit Cache-Management und optimistischen Updates
-// Verwaltet Following/Followers-Listen, Suchfunktionen und Live-Feed-Updates
+// Use Follow Hook - Hook für Follow-System mit Caching und Live-Updates
 
 import {useCallback, useEffect, useState} from 'react';
 import {

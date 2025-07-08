@@ -1,4 +1,4 @@
-import React from 'react';
+// Create Recipe - Formular für das Erstellen neuer Rezepte
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Ionicons} from '@expo/vector-icons';

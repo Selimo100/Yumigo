@@ -1,28 +1,30 @@
-import React, { useEffect, useState, useCallback } from 'react';
+// Profile - Benutzerprofil mit eigenen Rezepten und Profileinstellungen
+import {useCallback, useEffect, useState} from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Dimensions,
-  StatusBar,
-  Image,
   ActivityIndicator,
-  Share,
   Alert,
+  Dimensions,
+  Image,
+  ScrollView,
+  Share,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {Ionicons} from '@expo/vector-icons';
+import {useTheme} from '../../contexts/ThemeContext';
 import useAuth from "../../lib/useAuth";
-import { useUserProfile } from '../../hooks/useUserProfile';
-import { logout } from '../../services/authService';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
-import { useFollow } from '../../hooks/useFollow';
+import {useUserProfile} from '../../hooks/useUserProfile';
+import {logout} from '../../services/authService';
+import {useFocusEffect, useRouter} from 'expo-router';
+import {profileUpdateEmitter} from '../../utils/profileUpdateEmitter';
+import {useFollow} from '../../hooks/useFollow';
 import ShoppingListModal from '../../components/ShoppingListModal';
-import { useTabBarHeight } from '../../hooks/useTabBarHeight';
+import {useTabBarHeight} from '../../hooks/useTabBarHeight';
+
 const { width } = Dimensions.get('window');
 export default function ProfileScreen() {
   const { theme, isDarkMode } = useTheme();

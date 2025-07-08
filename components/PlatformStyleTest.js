@@ -1,8 +1,4 @@
-/**
- * Test component to demonstrate platform-specific styling improvements
- * This can be temporarily imported to see the difference between old and new styles
- */
-import React from 'react';
+// Platform Style Test - Testkomponente für plattformspezifische Styling-Verbesserungen
 import {Platform, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '../contexts/ThemeContext';

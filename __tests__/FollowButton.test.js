@@ -1,4 +1,3 @@
-import React from 'react';
 
 describe('FollowButton', () => {
   test('Placeholder test - Component existiert', () => {

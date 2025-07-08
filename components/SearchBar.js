@@ -1,3 +1,4 @@
+// Search Bar - Suchleiste für Rezept- und Inhaltssuche
 import {StyleSheet, TextInput, View} from 'react-native';
 
 export default function SearchBar({ placeholder, onSearch }) {

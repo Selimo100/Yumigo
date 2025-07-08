@@ -1,3 +1,4 @@
+// Comments Section - Sektion zur Anzeige aller Kommentare mit Like-Funktionalität
 import {StyleSheet, Text, View} from 'react-native';
 import {CommentItem} from './CommentComponents';
 

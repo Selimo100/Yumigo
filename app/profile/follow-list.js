@@ -1,4 +1,5 @@
-import React, {useCallback, useEffect, useState} from 'react';
+// Follow List - Übersicht der Follower und Following mit Suchfunktion
+import {useCallback, useEffect, useState} from 'react';
 import {ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View,} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Ionicons} from '@expo/vector-icons';
@@ -10,7 +11,7 @@ import UserCard from '../../components/UserCard';
 export default function FollowListScreen() {
   const { theme } = useTheme();
   const router = useRouter();
-  const { type = 'following' } = useLocalSearchParams(); // 'following' or 'followers'
+  const { type = 'following' } = useLocalSearchParams(); // 'following' oder 'followers'
   const {
     followingList,
     followersList,

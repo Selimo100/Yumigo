@@ -1,3 +1,4 @@
+// Profile Update Emitter - Event Emitter für Profil-Updates und Follow-Änderungen
 class ProfileUpdateEmitter {
     constructor() {
         this.listeners = [];

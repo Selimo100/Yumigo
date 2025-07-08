@@ -1,3 +1,4 @@
+// Babel Config - Babel-Konfiguration für JavaScript-Transpilation
 module.exports = function (api) {
   api.cache(true);
   return {

@@ -1,3 +1,4 @@
+// Settings - Benutzereinstellungen für Profil, Account und App-Präferenzen
 import {ActivityIndicator, Alert, LogBox, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {router, Stack} from 'expo-router';

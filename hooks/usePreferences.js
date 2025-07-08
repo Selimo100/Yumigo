@@ -1,3 +1,4 @@
+// Use Preferences Hook - Hook zur Verwaltung von Ernährungspräferenz-Parametern
 import {useLocalSearchParams} from 'expo-router';
 
 const usePreferences = () => {

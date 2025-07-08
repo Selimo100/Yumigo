@@ -1,21 +1,18 @@
-// SERVICE: Rezept-Verwaltung mit Firebase Integration
-// Komplexe CRUD-Operationen, Bildverwaltung und Engagement-Features
+// Recipe Service - CRUD-Operationen für Rezepte, Likes, Kommentare und Bildupload
 
 import {
+    collection,
+    deleteDoc,
     doc,
     getDoc,
-    updateDoc,
-    deleteDoc,
-    collection,
     getDocs,
-    serverTimestamp,
-    addDoc,
-    setDoc,
     query,
-    where,
-    writeBatch
+    serverTimestamp,
+    setDoc,
+    updateDoc,
+    where
 } from 'firebase/firestore';
-import {ref, uploadBytes, getDownloadURL, deleteObject} from 'firebase/storage';
+import {deleteObject, getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {db, storage} from '../lib/firebaseconfig';
 import {updateUserRecipeCount} from './userService';
 import {notifyRecipeLike} from './inAppNotificationService';

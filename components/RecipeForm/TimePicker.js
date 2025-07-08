@@ -1,4 +1,4 @@
-import React from 'react';
+// Time Picker - Komponente zur Eingabe von Koch- und Zubereitungszeiten
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useTheme} from '../../contexts/ThemeContext';

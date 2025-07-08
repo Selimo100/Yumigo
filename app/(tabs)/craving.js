@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+// Craving - Gelüste-Auswahl für personalisierte Rezeptempfehlungen
+import {useState} from 'react';
 import {Platform, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
 import {useTheme} from "../../contexts/ThemeContext";
 import {useRouter} from 'expo-router';

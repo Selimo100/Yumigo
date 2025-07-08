@@ -1,3 +1,4 @@
+// Rating Modal - Modal für Rezeptbewertungen mit Sterne-System
 import {Animated, Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {StarRating} from './Comment/CommentComponents';
 import {Ionicons} from '@expo/vector-icons';

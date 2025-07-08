@@ -1,4 +1,5 @@
-import React, {useCallback, useEffect, useState} from 'react';
+// User Profile - Detailansicht fremder Benutzerprofile mit Follow-Funktionalität
+import {useCallback, useEffect, useState} from 'react';
 import {ActivityIndicator, Image, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Ionicons} from '@expo/vector-icons';

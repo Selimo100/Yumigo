@@ -1,3 +1,4 @@
+// Constants - Zentrale Konstanten für Kategorien, Allergene und App-weite Konfiguration
 export const CATEGORIES = [
   { id: 'salty', label: 'Salty', color: '#4A90E2', icon: '🧂', slug: 'salty' },
   { id: 'sweet', label: 'Sweet', color: '#F5A623', icon: '🍯', slug: 'sweet' },

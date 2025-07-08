@@ -1,4 +1,4 @@
-import React from 'react';
+// Dietary Selector - Komponente zur Auswahl von Ernährungsformen (vegan, glutenfrei, etc.)
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {DIETARY} from '../../utils/constants';
 import {useTheme} from '../../contexts/ThemeContext';

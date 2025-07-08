@@ -1,4 +1,5 @@
-import {useState, useEffect} from 'react';
+// Use Settings Hook - Hook für Benutzereinstellungen und Profilverwaltung
+import {useEffect, useState} from 'react';
 import {auth} from '../lib/firebaseconfig';
 import {getUserProfile, updateUserProfile} from '../services/userService';
 

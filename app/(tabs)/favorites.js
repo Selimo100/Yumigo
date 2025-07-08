@@ -1,12 +1,13 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TextInput, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useState, useCallback, useEffect } from 'react';
+// Favorites - Übersicht der vom Benutzer favorisierten Rezepte
+import {ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {Ionicons} from '@expo/vector-icons';
+import {useCallback, useEffect, useState} from 'react';
 import RecipeCard from '../../components/RecipeCard';
-import { useTheme } from '../../contexts/ThemeContext';
+import {useTheme} from '../../contexts/ThemeContext';
 import useFavorites from '../../hooks/useFavorites';
-import { useTabBarHeight } from '../../hooks/useTabBarHeight';
-import { getRecipeLikesCount, getRecipeCommentsCount } from '../../services/recipeService';
+import {useTabBarHeight} from '../../hooks/useTabBarHeight';
+import {getRecipeCommentsCount, getRecipeLikesCount} from '../../services/recipeService';
 
 export default function FavoritesScreen() {
   const { theme } = useTheme();

@@ -1,3 +1,4 @@
+// Shopping List Modal - Modal zur Verwaltung und Bearbeitung von Einkaufslisten
 import React, {useState} from 'react';
 import {
   ActivityIndicator,

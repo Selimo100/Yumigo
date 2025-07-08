@@ -1,3 +1,4 @@
+// Validation - Validierungsfunktionen für Formulare und Benutzereingaben
 export const validateRecipe = (recipe) => {
   const errors = {};
   if (!recipe.title || recipe.title.trim().length < 3) {

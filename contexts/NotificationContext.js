@@ -1,3 +1,4 @@
+// Notification Context - Verwaltung von In-App-Benachrichtigungen und Push-Notifications
 import {createContext, useContext, useEffect, useState} from 'react';
 import {collection, doc, onSnapshot, query, updateDoc, where, writeBatch} from 'firebase/firestore';
 import {db} from '../lib/firebaseconfig';

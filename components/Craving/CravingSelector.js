@@ -1,7 +1,8 @@
+// Craving Selector - Interaktive Auswahl-Komponente für Gelüste mit Animationen
 import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, Animated, Platform } from 'react-native';
-import { COLORS } from '../../utils/constants';
-import { smartButton, smartShadow, smartBorderKeep, androidStyleCleanup } from '../../utils/platformStyles';
+import {Animated, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {COLORS} from '../../utils/constants';
+import {smartBorderKeep, smartShadow} from '../../utils/platformStyles';
 
 const CravingSelector = ({ 
     item, 

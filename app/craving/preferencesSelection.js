@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { DIETARY, COLORS } from '../../utils/constants';
+// Preferences Selection - Auswahl von Ernährungspräferenzen für Rezeptfilterung
+import {useState} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {useLocalSearchParams, useRouter} from 'expo-router';
+import {DIETARY, COLORS} from '../../utils/constants';
 import CravingLayout from '../../components/Craving/CravingLayout';
 import CravingSelector from '../../components/Craving/CravingSelector';
-import { useTheme } from '../../contexts/ThemeContext';
-import { smartShadow, smartButton, smartGrid, smartGridItem, smartGridPadding } from '../../utils/platformStyles';
+import {useTheme} from '../../contexts/ThemeContext';
+import {smartShadow, smartButton, smartGrid, smartGridItem, smartGridPadding} from '../../utils/platformStyles';
 
-// Add "None" option to dietary preferences
+// Füge "None" Option zu den Allergien hinzu
 const PREFERENCE_OPTIONS = [
     ...DIETARY,
-    { id: 'none', label: 'None', color: COLORS.success, icon: '✅' }
+    {id: 'none', label: 'None', color: COLORS.success, icon: '✅'}
 ];
 
 export default function PreferencesSelection() {
@@ -19,7 +20,7 @@ export default function PreferencesSelection() {
     const params = useLocalSearchParams();
     const cravings = params.cravings ? JSON.parse(params.cravings) : [];
     const allergies = params.allergies ? JSON.parse(params.allergies) : [];
-    const { theme } = useTheme();
+    const {theme} = useTheme();
     const styles = createStyles(theme);
 
     const togglePreference = (id) => {
@@ -34,10 +35,10 @@ export default function PreferencesSelection() {
     const handleNext = () => {
         router.push({
             pathname: '/craving/cravingResults',
-            params: { 
+            params: {
                 cravings: JSON.stringify(cravings),
                 allergies: JSON.stringify(allergies),
-                preferences: JSON.stringify(selectedPreferences) 
+                preferences: JSON.stringify(selectedPreferences)
             },
         });
     };
@@ -79,15 +80,15 @@ export default function PreferencesSelection() {
             <View style={styles.buttonsContainer}>
                 <TouchableOpacity
                     style={[
-                        styles.submitButton, 
-                        { backgroundColor: selectedPreferences.length === 0 ? theme.colors.disabled : COLORS.primary }
+                        styles.submitButton,
+                        {backgroundColor: selectedPreferences.length === 0 ? theme.colors.disabled : COLORS.primary}
                     ]}
                     onPress={handleNext}
                     disabled={selectedPreferences.length === 0}
                 >
                     <Text style={[
                         styles.submitButtonText,
-                        { color: selectedPreferences.length === 0 ? theme.colors.textSecondary : COLORS.white }
+                        {color: selectedPreferences.length === 0 ? theme.colors.textSecondary : COLORS.white}
                     ]}>
                         {selectedPreferences.length === 0 ? 'Please select at least one preference' : 'Find Recipes →'}
                     </Text>
@@ -98,7 +99,7 @@ export default function PreferencesSelection() {
 }
 
 const createStyles = (theme) => StyleSheet.create({
-    grid: { 
+    grid: {
         ...smartGrid(),
         ...smartGridPadding(),
     },
@@ -115,7 +116,7 @@ const createStyles = (theme) => StyleSheet.create({
         ...smartShadow(
             {
                 shadowColor: theme.colors.shadow,
-                shadowOffset: { width: 0, height: 2 },
+                shadowOffset: {width: 0, height: 2},
                 shadowOpacity: 0.1,
                 shadowRadius: 3,
             },
@@ -129,7 +130,7 @@ const createStyles = (theme) => StyleSheet.create({
         paddingHorizontal: 4,
     },
     submitButton: {
-        ...smartButton({ colors: { primary: COLORS.primary } }, true, {
+        ...smartButton({colors: {primary: COLORS.primary}}, true, {
             paddingVertical: 16,
             paddingHorizontal: 32,
             borderRadius: 12,

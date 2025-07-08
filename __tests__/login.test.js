@@ -1,4 +1,3 @@
-import React from 'react';
 
 describe('Login Screen', () => {
   test('Placeholder test - Screen existiert', () => {

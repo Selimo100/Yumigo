@@ -1,7 +1,4 @@
-/**
- * Zentrale Export-Datei für Platform-Styling Utilities
- * Ermöglicht einfache Imports wie: import { smartCard, smartButton } from '../utils/platformStyles'
- */
+// Platform Styles Index - Zentrale Export-Datei für plattformspezifische Styling-Utilities
 
 export {
     createPlatformStyles,

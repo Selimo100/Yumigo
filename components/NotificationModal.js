@@ -1,3 +1,4 @@
+// Notification Modal - Modal für die Anzeige und Verwaltung von Benachrichtigungen
 import React from 'react';
 import {ActivityIndicator, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';

@@ -1,4 +1,5 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
+// Theme Context - Globale Theme-Verwaltung für Dark/Light Mode
+import {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = createContext();

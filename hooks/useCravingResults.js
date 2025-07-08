@@ -1,3 +1,4 @@
+// Use Craving Results Hook - Hook für das Abrufen gefilterter Rezepte nach Gelüsten
 import {useEffect, useState} from 'react';
 import {collection, getDocs} from 'firebase/firestore';
 import {db} from '../lib/firebaseconfig';

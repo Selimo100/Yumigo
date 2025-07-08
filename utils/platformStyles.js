@@ -1,4 +1,5 @@
-import { Platform } from 'react-native';
+// Platform Styles - Plattformspezifische Styles für iOS und Android
+import {Platform} from 'react-native';
 
 /**
  * Utility function to create platform-specific styles

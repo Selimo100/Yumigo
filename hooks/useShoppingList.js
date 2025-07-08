@@ -1,13 +1,12 @@
-// HOOK: Einkaufslisten-Management mit lokaler State-Synchronisation
-// Verwaltet CRUD-Operationen und Error-Handling für Einkaufslisten
+// Use Shopping List Hook - Hook für Einkaufslisten-Management und lokale Synchronisation
 
-import {useState, useEffect, useCallback} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import useAuth from '../lib/useAuth';
 import {
-    getShoppingList,
     addShoppingListItem,
-    toggleShoppingListItem,
+    getShoppingList,
     removeShoppingListItem,
+    toggleShoppingListItem,
 } from '../services/userService';
 
 export const useShoppingList = () => {

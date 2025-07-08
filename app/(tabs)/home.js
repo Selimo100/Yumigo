@@ -1,23 +1,35 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator, TextInput, Image, Alert, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useState, useCallback } from 'react'; 
+// Home - Hauptbildschirm mit Rezeptliste und Such-/Filter-Funktionen
+import {
+    ActivityIndicator,
+    Image,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {Ionicons} from '@expo/vector-icons';
+import {useCallback, useState} from 'react';
 import RecipeCard from '../../components/RecipeCard';
 import RecipeForm from '../../components/RecipeForm/RecipeForm';
 import NotificationModal from '../../components/NotificationModal';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useNotifications } from '../../contexts/NotificationContext';
+import {useTheme} from '../../contexts/ThemeContext';
+import {useNotifications} from '../../contexts/NotificationContext';
 import useAuth from "../../lib/useAuth";
-import { Redirect } from 'expo-router'; 
-import { db } from '../../lib/firebaseconfig';
-import { getDocs, collection, doc, getDoc } from 'firebase/firestore';
-import { useFocusEffect } from '@react-navigation/native'; 
-import { useFollow } from '../../hooks/useFollow';
-import { useTabBarHeight } from '../../hooks/useTabBarHeight';
-import { recipeHasSeasonalIngredient } from '../../utils/seasonalUtils';
+import {Redirect} from 'expo-router';
+import {db} from '../../lib/firebaseconfig';
+import {collection, doc, getDoc, getDocs} from 'firebase/firestore';
+import {useFocusEffect} from '@react-navigation/native';
+import {useFollow} from '../../hooks/useFollow';
+import {useTabBarHeight} from '../../hooks/useTabBarHeight';
+import {recipeHasSeasonalIngredient} from '../../utils/seasonalUtils';
 import * as Location from 'expo-location';
 import ingredientsData from '../../utils/ingredients.json';
-import {smartShadow } from '../../utils/platformStyles';
+import {smartShadow} from '../../utils/platformStyles';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);

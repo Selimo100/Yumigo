@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+// Profile Section - Sektion zur Bearbeitung von Profildaten (Avatar, Bio, etc.)
+import {useState} from 'react';
 import {ActivityIndicator, Alert, Image, Text, TextInput, TouchableOpacity, View,} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';

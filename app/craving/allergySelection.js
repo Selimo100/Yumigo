@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ALLERGENS, COLORS } from '../../utils/constants';
+// Allergy Selection - Auswahl von Allergenen für personalisierte Rezeptempfehlungen
+import {useState} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {useLocalSearchParams, useRouter} from 'expo-router';
+import {ALLERGENS, COLORS} from '../../utils/constants';
 import CravingLayout from '../../components/Craving/CravingLayout';
 import CravingSelector from '../../components/Craving/CravingSelector';
-import { useTheme } from '../../contexts/ThemeContext';
-import { smartShadow, smartButton, smartGrid, smartGridItem, smartGridPadding } from '../../utils/platformStyles';
+import {useTheme} from '../../contexts/ThemeContext';
+import {smartButton, smartGrid, smartGridItem, smartGridPadding, smartShadow} from '../../utils/platformStyles';
 
-// Add "None" option to allergens
+// Füge "None" Option zu den Allergien hinzu
 const ALLERGY_OPTIONS = [
     ...ALLERGENS,
     { id: 'none', label: 'None', color: COLORS.success, icon: '✅' }

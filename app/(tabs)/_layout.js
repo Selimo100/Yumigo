@@ -1,3 +1,4 @@
+// Tab Layout - Navigation für die Haupt-Tabs (Home, Craving, Favorites, Profile)
 import {Tabs} from 'expo-router';
 import {Ionicons} from '@expo/vector-icons';
 import {useTheme} from '../../contexts/ThemeContext';

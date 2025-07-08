@@ -1,3 +1,4 @@
+// Seasonal Utils - Hilfsfunktionen zur Bestimmung saisonaler Zutaten
 import ingredientsData from '../utils/ingredients.json';
 
 export function isIngredientSeasonal(ingredientId, country, month) {

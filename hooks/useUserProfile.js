@@ -1,4 +1,5 @@
-import {useState, useEffect} from 'react';
+// Use User Profile Hook - Hook für Benutzerprofilverwaltung und Rezept-Synchronisation
+import {useEffect, useState} from 'react';
 import {auth} from '../lib/firebaseconfig';
 import {getUserProfile, getUserRecipes} from '../services/userService';
 import {onAuthStateChanged} from 'firebase/auth';

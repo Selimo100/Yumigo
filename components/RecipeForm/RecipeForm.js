@@ -1,4 +1,4 @@
-import React from 'react';
+// Recipe Form - Komplexes Formular für Rezepterstellung mit Bild-Upload und Validierung
 import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import {useRecipeForm} from '../../hooks/useRecipeForm';
 import {saveRecipe, uploadImage} from '../../lib/firebaseconfig';

@@ -1,4 +1,4 @@
-import React from 'react';
+// Craving Layout - Layout-Komponente für die Gelüste-Auswahlbildschirme
 import {SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {COLORS} from '../../utils/constants';

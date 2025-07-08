@@ -1,4 +1,4 @@
-import React from 'react';
+// Image Upload - Komponente für Bildauswahl und -upload mit Kamera/Galerie
 import {Alert, Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import {Ionicons} from '@expo/vector-icons';

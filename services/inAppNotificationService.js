@@ -1,4 +1,5 @@
-import {collection, addDoc, serverTimestamp} from 'firebase/firestore';
+// In-App Notification Service - Service für das Erstellen und Verwalten von In-App-Benachrichtigungen
+import {addDoc, collection, serverTimestamp} from 'firebase/firestore';
 import {db} from '../lib/firebaseconfig';
 
 export const createInAppNotification = async (notificationData) => {

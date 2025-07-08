@@ -1,4 +1,4 @@
-import React from 'react';
+// Allergen Selector - Komponente zur Auswahl von Allergenen im Rezeptformular
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {ALLERGENS} from '../../utils/constants';
 import {useTheme} from '../../contexts/ThemeContext';

@@ -1,5 +1,4 @@
-// KOMPLEXE KOMPONENTE: Rezeptkarte mit interaktiven Features
-// Verwaltet Likes, Ratings, Favoriten und Navigation in einem optimierten UI-Element
+// Recipe Card - Interaktive Rezeptkarte mit Likes, Favoriten und Bewertungen
 
 import {Alert, Animated, Image, Share, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';

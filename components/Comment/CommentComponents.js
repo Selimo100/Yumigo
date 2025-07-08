@@ -1,3 +1,4 @@
+// Comment Components - Wiederverwendbare Komponenten für Kommentarsystem (Star Rating, etc.)
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useRouter} from 'expo-router';

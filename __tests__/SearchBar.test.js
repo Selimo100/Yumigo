@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import SearchBar from '../components/SearchBar';
 
@@ -50,7 +49,8 @@ describe('SearchBar', () => {
     );
     
     const input = getByPlaceholderText('Test ohne Callback');
-
+    
+    expect(() => {
       fireEvent.changeText(input, 'test');
     }).not.toThrow();
   });

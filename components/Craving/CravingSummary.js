@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { COLORS, CATEGORIES, ALLERGENS, DIETARY } from '../../utils/constants';
-import { useTheme } from '../../contexts/ThemeContext';
-import { smartShadow, smartDivider } from '../../utils/platformStyles';
+// Craving Summary - Zusammenfassung der ausgewählten Gelüste und Filter
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ALLERGENS, CATEGORIES, COLORS, DIETARY} from '../../utils/constants';
+import {useTheme} from '../../contexts/ThemeContext';
+import {smartShadow} from '../../utils/platformStyles';
 
 const CravingSummary = ({ cravings = [], allergies = [], preferences = [] }) => {
     const { theme } = useTheme();

@@ -1,4 +1,4 @@
-import React from 'react';
+// Account Section - Sektion für Account-bezogene Einstellungen (Passwort, Löschen, etc.)
 import {Alert, Text, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 

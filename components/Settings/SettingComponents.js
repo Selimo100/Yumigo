@@ -1,4 +1,4 @@
-import React from 'react';
+// Setting Components - Wiederverwendbare Komponenten für Einstellungen (Toggle, Items)
 import {Switch, Text, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 

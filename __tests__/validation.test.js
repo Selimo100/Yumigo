@@ -1,3 +1,4 @@
+// Validation Test - Tests für Formular-Validierungsfunktionen
 import { validateRecipe } from '../utils/validation';
 
 describe('Validation Utils', () => {

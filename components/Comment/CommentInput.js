@@ -1,3 +1,4 @@
+// Comment Input - Eingabefeld für neue Kommentare mit Benutzer-Avatar
 import {Animated, Image, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useEffect, useRef, useState} from 'react';

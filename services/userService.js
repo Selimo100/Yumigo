@@ -1,17 +1,7 @@
+// User Service - Benutzerverwaltung, Profiloperationen und Follow-System
 import {auth, db, storage} from '../lib/firebaseconfig';
-import {
-    doc,
-    getDoc,
-    setDoc,
-    updateDoc,
-    serverTimestamp,
-    collection,
-    query,
-    where,
-    getDocs,
-    orderBy
-} from 'firebase/firestore';
-import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
+import {collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where} from 'firebase/firestore';
+import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 
 export const getUserProfile = async (userId) => {
     try {

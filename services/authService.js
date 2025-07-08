@@ -1,8 +1,9 @@
+// Auth Service - Authentifizierungsfunktionen für Login, Registrierung und Logout
 import {auth} from '../lib/firebaseconfig';
 import {
-    signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     sendEmailVerification,
+    signInWithEmailAndPassword,
     signOut,
     updateProfile
 } from 'firebase/auth';

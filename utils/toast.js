@@ -1,3 +1,4 @@
+// Toast - Utility-Funktionen für Toast-Benachrichtigungen
 export const showToast = (message, type = 'success') => {
 };
 

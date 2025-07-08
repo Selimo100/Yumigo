@@ -1,4 +1,5 @@
-import React, {useEffect, useState} from 'react';
+// Edit Recipe - Bearbeitungsbildschirm für bestehende Rezepte
+import {useEffect, useState} from 'react';
 import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Ionicons} from '@expo/vector-icons';
