@@ -2,7 +2,7 @@
 import { Alert } from 'react-native';
 
 export const showToast = (message, type = 'success') => {
-  const title = type === 'error' ? 'Fehler' : type === 'success' ? 'Erfolg' : 'Info';
+  const title = type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Info';
   Alert.alert(title, message);
 };
 

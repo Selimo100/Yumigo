@@ -4,10 +4,10 @@ import {Animated, Platform, StyleSheet, Text, TouchableOpacity, View} from 'reac
 import {COLORS} from '../../utils/constants';
 import {smartBorderKeep, smartShadow} from '../../utils/platformStyles';
 
-const CravingSelector = ({ 
-    item, 
-    isSelected, 
-    onPress, 
+const CravingSelector = ({
+    item,
+    isSelected,
+    onPress,
     style = {},
     useGridLayout = false // Neuer Prop für Grid-basierte Nutzung
 }) => {
@@ -29,11 +29,11 @@ const CravingSelector = ({
                     useGridLayout ? styles.gridButton : styles.button,
                     {
                         backgroundColor: isSelected ? COLORS.primary : COLORS.white,
-                        ...smartBorderKeep(2, COLORS.primary), // Keeps borders on both platforms but no elevation
+                        ...smartBorderKeep(2, COLORS.primary), // Beibehaltung der Grenzen auf beiden Plattformen, aber keine Anhebung
                         shadowColor: COLORS.primary,
                         shadowOpacity: isSelected ? 0.25 : 0.1,
                     },
-                    // Clean Android styles to remove elevation but keep borders
+                    // Android-Stile bereinigen, um Erhöhungen zu entfernen, aber Ränder beizubehalten
                     Platform.OS === 'android' ? { elevation: 0 } : {},
                     style
                 ]}
@@ -48,7 +48,7 @@ const CravingSelector = ({
                         {item.icon}
                     </Text>
                     <Text style={[
-                        styles.label, 
+                        styles.label,
                         { color: isSelected ? COLORS.white : COLORS.primary },
                         useGridLayout && styles.gridLabel
                     ]}>
