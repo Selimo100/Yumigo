@@ -15,7 +15,6 @@ export default function FollowButton({
   onFollowChange
 }) {
   const { theme } = useTheme();
-  const { user } = useAuth();
   const { handleFollow, handleUnfollow, checkFollowStatus, isCurrentUser } = useFollow();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

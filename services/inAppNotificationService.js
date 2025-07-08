@@ -2,15 +2,16 @@
 import {addDoc, collection, serverTimestamp} from 'firebase/firestore';
 import {db} from '../lib/firebaseconfig';
 
-// Schutz vor doppelten Notifications
+// keine doppelten Notifications
 const activeNotifications = new Set();
 
 export const createInAppNotification = async (notificationData) => {
+    
     try {
-        // Erstelle einen eindeutigen Schlüssel für diese Notification
+        // Schlüssel für diese Notification
         const notificationKey = `${notificationData.recipientId}-${notificationData.type}-${notificationData.recipeId || notificationData.metadata?.followerId || 'general'}-${Date.now()}`;
         
-        // Verhindere doppelte Notifications innerhalb von 1 Sekunde
+        // keine doppelten Notifications innerhalb von 1 Sekunde => spam schutz
         const baseKey = notificationKey.substring(0, notificationKey.lastIndexOf('-'));
         const existingKey = Array.from(activeNotifications).find(key => key.startsWith(baseKey));
         
@@ -24,7 +25,7 @@ export const createInAppNotification = async (notificationData) => {
             ...notificationData,
             createdAt: serverTimestamp(), // Firebase Server Timestamp
             read: false,
-            type: 'in-app'
+            // NICHT type überschreiben! Behalte den originalen type (like, rating, follow, etc.)
         };
 
         // Speichert in Firebase Collection 'notifications'
@@ -37,14 +38,15 @@ export const createInAppNotification = async (notificationData) => {
         
         return docRef.id;
     } catch (error) {
-        // Entferne den Schlüssel auch bei Fehlern
+        
+        // Entferne den Schlüssel bei Fehlern
         const keys = Array.from(activeNotifications).filter(key => 
             key.includes(notificationData.recipientId) && 
             key.includes(notificationData.type)
         );
         keys.forEach(key => activeNotifications.delete(key));
         
-        return null;
+        throw error; // Re-throw für bessere Debugging
     }
 };
 
@@ -90,27 +92,7 @@ export const notifyUserFollow = async (followedUserId, followerName, followerId)
     }
 };
 
-export const notifyRecipeRating = async (recipeId, recipeTitle, raterName, rating, recipeAuthorId) => {
-    if (!recipeAuthorId) return;
 
-    try {
-        await createInAppNotification({
-            recipientId: recipeAuthorId,
-            type: 'rating',
-            title: 'Recipe Rated! ⭐',
-            message: `${raterName} gave your recipe "${recipeTitle}" ${rating} star${rating !== 1 ? 's' : ''}`,
-            recipeId: recipeId,
-            actionUrl: `/recipe/${recipeId}`,
-            metadata: {
-                raterName,
-                recipeTitle,
-                rating
-            }
-        });
-    } catch (error) {
-
-    }
-};
 
 export const notifyRecipeComment = async (recipeId, recipeTitle, commenterName, commentText, recipeAuthorId) => {
     if (!recipeAuthorId) return;
@@ -130,6 +112,5 @@ export const notifyRecipeComment = async (recipeId, recipeTitle, commenterName, 
             }
         });
     } catch (error) {
-        // Fehlerbehandlung für Notification
     }
 };

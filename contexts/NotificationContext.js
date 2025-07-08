@@ -1,7 +1,7 @@
 // Notification Context - Verwaltung von In-App-Benachrichtigungen und Push-Notifications
-import {createContext, useContext, useEffect, useState} from 'react';
-import {collection, doc, onSnapshot, query, updateDoc, where, writeBatch} from 'firebase/firestore';
-import {db} from '../lib/firebaseconfig';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { collection, doc, onSnapshot, query, updateDoc, where, writeBatch } from 'firebase/firestore';
+import { db } from '../lib/firebaseconfig';
 import useAuth from '../lib/useAuth';
 
 const NotificationContext = createContext();
@@ -20,6 +20,7 @@ export const NotificationProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Wird ausgeführt wenn sich user?.uid ändert (Login/Logout)
   useEffect(() => {
     if (!user?.uid) {
       setNotifications([]);
@@ -27,50 +28,61 @@ export const NotificationProvider = ({ children }) => {
       return;
     }
 
+    // Loading State aktivieren während Daten geladen werden
     setIsLoading(true);
 
+    // Zeigt auf die 'notifications' Collection in Firebase
     const notificationsRef = collection(db, 'notifications');
 
-    // Query: Nur Notifications für aktuellen User
+    // Filtert Notifications: Nur die für den aktuellen User bestimmten
     const q = query(
       notificationsRef,
-      where('recipientId', '==', user.uid) // Filter nach Empfänger
+      where('recipientId', '==', user.uid) // recipientId muss user.uid entsprechen
     );
 
-    // Real-time Listener
+    // onSnapshot = Firebase's Real-time Listener
+    // Reagiert automatisch auf Änderungen in der Firestore Collection
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notificationsList = [];
-      let unreadCounter = 0;
+      const notificationsList = []; // temp Array für alle Notifications
+      let unreadCounter = 0; // ungelesene Notifications
 
+      // snapshot.docs = Array aller Dokumente die der Query entsprechen
       snapshot.docs.forEach(doc => {
+        // doc.id = Firestore Document ID
+        // doc.data() = Alle Felder des Dokuments als Objekt
         const data = { id: doc.id, ...doc.data() };
         notificationsList.push(data);
 
+        // Prüft ob Notification als ungelesen markiert ist
         if (!data.read) {
-          unreadCounter++; // Zählt ungelesene
+          unreadCounter++;
         }
       });
 
-      // Sortierung: Neueste zuerst
+      // Sortiert nach createdAt Timestamp (Firestore Timestamp)
       notificationsList.sort((a, b) => {
         const dateA = a.createdAt?.toDate?.() || new Date(0);
         const dateB = b.createdAt?.toDate?.() || new Date(0);
         return dateB - dateA;
       });
 
-      setNotifications(notificationsList);
-      setUnreadCount(unreadCounter);
-      setIsLoading(false);
+      // updates
+      setNotifications(notificationsList); // Alle Notifications
+      setUnreadCount(unreadCounter); // Badge-Zähler
+      setIsLoading(false); // Loading beenden
     }, (error) => {
+      console.error('Notification listener error:', error);
       setIsLoading(false);
     });
 
-    return () => unsubscribe(); // Cleanup
+    return () => {
+      unsubscribe();
+    };
   }, [user?.uid]);
 
   const markAsRead = async (notificationId) => {
     try {
-      // Optimistic Update (UI sofort aktualisieren)
+      // UI aktualisieren live
       setNotifications(prevNotifications =>
         prevNotifications.map(notification =>
           notification.id === notificationId
@@ -104,7 +116,7 @@ export const NotificationProvider = ({ children }) => {
         }))
       );
       setUnreadCount(0);
-      // Batch-Write für Performance
+      // Batch-Write für Performance => mehrere Schreibvorgänge zu einem einzigen Request kombiniert.
       const batch = writeBatch(db);
 
       unreadNotifications.forEach(notification => {
@@ -112,7 +124,7 @@ export const NotificationProvider = ({ children }) => {
         batch.update(notificationRef, { read: true });
       });
 
-    await batch.commit(); // Alle Updates in einem Batch
+      await batch.commit(); // Alle Updates in einem Batch
       return true;
     } catch (error) {
 
