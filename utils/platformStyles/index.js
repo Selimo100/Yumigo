@@ -3,17 +3,19 @@
 export {
     createPlatformStyles,
     smartBorder,
+    smartBorderKeep,
     smartShadow,
     smartCard,
     smartButton,
     smartInput,
+    smartDivider,
     androidStyleCleanup,
     smartGrid,
     smartGridItem,
     smartGridPadding,
     smartGridTwoColumns,
     smartGridItemTwoColumns,
-} from '../platformStyles';
+} from './platformStyles';
 
 // Re-export für bequeme Verwendung
-export * from '../platformStyles';
+export * from './platformStyles';
