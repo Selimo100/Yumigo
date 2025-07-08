@@ -17,7 +17,7 @@ import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 import { recipeHasSeasonalIngredient } from '../../utils/seasonalUtils';
 import * as Location from 'expo-location';
 import ingredientsData from '../../utils/ingredients.json';
-import { smartInput, smartButton, smartCard, smartShadow } from '../../utils/platformStyles';
+import {smartShadow } from '../../utils/platformStyles';
 
 export default function HomeScreen() {
     const [recipeList, setRecipeList] = useState([]);
@@ -123,6 +123,11 @@ export default function HomeScreen() {
                     const ratingsSnapshot = await getDocs(ratingsCollectionRef);
                     const reviewsCount = ratingsSnapshot.size;
                     
+                    // NEU: Kommentare zählen
+                    const commentsCollectionRef = collection(db, 'recipes', docSnapshot.id, 'comments');
+                    const commentsSnapshot = await getDocs(commentsCollectionRef);
+                    const commentsCount = commentsSnapshot.size;
+                    
                     let averageRating = recipeData.rating || 0;
                     if (reviewsCount > 0 && !recipeData.rating) {
                         let totalRating = 0;
@@ -137,7 +142,8 @@ export default function HomeScreen() {
                         likesCount, 
                         isLikedByCurrentUser,
                         rating: averageRating,
-                        reviews: reviewsCount
+                        reviews: reviewsCount,
+                        commentsCount // <-- Kommentaranzahl wird jetzt mitgegeben
                     };
                 })
             );

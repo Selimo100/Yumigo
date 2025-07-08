@@ -1,0 +1,75 @@
+{
+  "users": {
+    "user123": {
+      "email": "john@example.com",
+      "displayName": "John Doe",
+      "profilePicture": "https://storage.googleapis.com/...",
+      "bio": "Food lover and chef",
+      "createdAt": "2025-07-07T10:00:00Z",
+      "followers": [],
+      "following": []
+    }
+  },
+
+  "recipes": {
+    "recipe456": {
+      "title": "Spaghetti Carbonara",
+      "description": "Classic Italian pasta dish",
+      "authorId": "user123",
+      "ingredients": ["pasta", "eggs", "bacon"],
+      "instructions": ["Step 1", "Step 2"],
+      "imageUrl": "https://storage.googleapis.com/...",
+      "tags": ["pasta", "italian"],
+      "difficulty": "medium",
+      "cookingTime": 30,
+      "createdAt": "2025-07-07T10:00:00Z",
+      "likes": ["user789"],
+      "ratings": {
+        "user789": 5
+      }
+    }
+  },
+
+  "notifications": {
+    "notif789": {
+      "recipientId": "user123",
+      "type": "like",
+      "title": "Recipe Liked! ❤️",
+      "message": "Jane liked your recipe 'Spaghetti Carbonara'",
+      "recipeId": "recipe456",
+      "actionUrl": "/recipe/recipe456",
+      "read": false,
+      "createdAt": "2025-07-07T10:00:00Z",
+      "metadata": {
+        "likerName": "Jane",
+        "recipeTitle": "Spaghetti Carbonara"
+      }
+    },
+    "notif790": {
+      "recipientId": "user123",
+      "type": "follow",
+      "title": "New Follower! 👥",
+      "message": "Mike started following you",
+      "actionUrl": "/profile/user-profile?userId=user555",
+      "read": false,
+      "createdAt": "2025-07-07T09:30:00Z"
+    }
+  },
+
+  "follows": {
+    "follow001": {
+      "followerId": "user789",
+      "followingId": "user123",
+      "createdAt": "2025-07-07T10:00:00Z"
+    }
+  },
+
+  "comments": {
+    "comment001": {
+      "recipeId": "recipe456",
+      "authorId": "user789",
+      "content": "Amazing recipe!",
+      "createdAt": "2025-07-07T10:00:00Z"
+    }
+  }
+}

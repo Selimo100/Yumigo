@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-  StyleSheet,
   ActivityIndicator,
   Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
-import { useShoppingList } from '../hooks/useShoppingList';
-import { showToast } from '../utils/toast';
+import {Ionicons} from '@expo/vector-icons';
+import {useTheme} from '../contexts/ThemeContext';
+import {useShoppingList} from '../hooks/useShoppingList';
+import {showToast} from '../utils/toast';
+
 export const ShoppingListModal = ({ visible, onClose }) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);

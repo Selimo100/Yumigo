@@ -1,4 +1,5 @@
-import { TextInput, View, StyleSheet } from 'react-native';
+import {StyleSheet, TextInput, View} from 'react-native';
+
 export default function SearchBar({ placeholder, onSearch }) {
   return (
     <View style={styles.container}>

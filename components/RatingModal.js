@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Animated } from 'react-native';
-import { StarRating } from './Comment/CommentComponents';
-import { Ionicons } from '@expo/vector-icons';
-import { useState, useRef, useEffect } from 'react';
+import {Animated, Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StarRating} from './Comment/CommentComponents';
+import {Ionicons} from '@expo/vector-icons';
+import {useEffect, useRef, useState} from 'react';
+
 export const RatingModal = ({ visible, onClose, onRating, userRating, recipeTitle, theme }) => {
   const [selectedRating, setSelectedRating] = useState(userRating);
   const scaleAnim = useRef(new Animated.Value(0)).current;

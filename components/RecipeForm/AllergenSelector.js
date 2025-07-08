@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { ALLERGENS } from '../../utils/constants';
-import { useTheme } from '../../contexts/ThemeContext';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {ALLERGENS} from '../../utils/constants';
+import {useTheme} from '../../contexts/ThemeContext';
 
 export default function AllergenSelector({ selectedAllergens, onToggleAllergen }) {
   const { theme } = useTheme();

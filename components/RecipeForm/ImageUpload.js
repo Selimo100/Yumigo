@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, TouchableOpacity, Image, Text, StyleSheet, Alert } from 'react-native';
+import {Alert, Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
+import {Ionicons} from '@expo/vector-icons';
+import {useTheme} from '../../contexts/ThemeContext';
 
 export default function ImageUpload({ image, onImageSelect, error }) {
   const { theme } = useTheme();

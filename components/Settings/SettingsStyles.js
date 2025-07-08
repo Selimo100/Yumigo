@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { smartInput, smartButton, smartCard, smartShadow } from '../../utils/platformStyles';
+import {StyleSheet} from 'react-native';
+import {smartInput, smartShadow} from '../../utils/platformStyles';
 
 export const createStyles = (theme) => StyleSheet.create({
   container: {
@@ -20,6 +20,8 @@ export const createStyles = (theme) => StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: theme.colors.accentBackground,
+    fontSize: 16,
+    fontWeight: '600',
   },
   saveButtonText: {
     fontSize: 16,
@@ -159,10 +161,6 @@ export const createStyles = (theme) => StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 16,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,

@@ -1,4 +1,5 @@
-import { useLocalSearchParams } from 'expo-router';
+import {useLocalSearchParams} from 'expo-router';
+
 const usePreferences = () => {
     const { preferences } = useLocalSearchParams();
     if (!preferences) return []; 

@@ -25,7 +25,7 @@ import ShoppingListModal from '../../components/ShoppingListModal';
 import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 const { width } = Dimensions.get('window');
 export default function ProfileScreen() {
-  const { theme, toggleTheme, isDarkMode } = useTheme();
+  const { theme, isDarkMode } = useTheme();
   const tabBarHeight = useTabBarHeight();
   const styles = createStyles(theme, tabBarHeight);
   const { user } = useAuth();

@@ -2,21 +2,22 @@ import {
     Alert,
     Image,
     KeyboardAvoidingView,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
-    Platform,
 } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { login, register, sendVerificationEmail, logout } from '../../services/authService';
-import { useRouter } from "expo-router";
-import { validateEmail, validatePassword } from '../../utils/validation';
-import { smartInput, smartButton } from '../../utils/platformStyles';
+import {SafeAreaView} from "react-native-safe-area-context";
+import {useState} from 'react';
+import {useTheme} from '../../contexts/ThemeContext';
+import {login, logout, register, sendVerificationEmail} from '../../services/authService';
+import {useRouter} from "expo-router";
+import {validateEmail, validatePassword} from '../../utils/validation';
+import {smartButton, smartInput} from '../../utils/platformStyles';
+
 export default function Login() {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');

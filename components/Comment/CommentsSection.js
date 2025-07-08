@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { CommentItem } from './CommentComponents';
+import {StyleSheet, Text, View} from 'react-native';
+import {CommentItem} from './CommentComponents';
 
 export const CommentsSection = ({ comments, onCommentLike, theme, commentsRef }) => {
   const styles = StyleSheet.create({

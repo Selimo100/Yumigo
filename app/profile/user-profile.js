@@ -1,23 +1,14 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  StatusBar,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { getUserProfile, getUserRecipes, syncUserRecipeCount } from '../../services/userService';
+import React, {useCallback, useEffect, useState} from 'react';
+import {ActivityIndicator, Image, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {Ionicons} from '@expo/vector-icons';
+import {useTheme} from '../../contexts/ThemeContext';
+import {useFocusEffect, useLocalSearchParams, useRouter} from 'expo-router';
+import {getUserProfile, getUserRecipes, syncUserRecipeCount} from '../../services/userService';
 import FollowButton from '../../components/FollowButton';
 import RecipeCard from '../../components/RecipeCard';
 import useAuth from '../../lib/useAuth';
-import { profileUpdateEmitter } from '../../utils/profileUpdateEmitter';
+import {profileUpdateEmitter} from '../../utils/profileUpdateEmitter';
 
 export default function UserProfileScreen() {
   const { theme, isDarkMode } = useTheme();

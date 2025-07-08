@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../lib/firebaseconfig';
-import { useLocalSearchParams } from 'expo-router';
+import {useEffect, useState} from 'react';
+import {collection, getDocs} from 'firebase/firestore';
+import {db} from '../lib/firebaseconfig';
+import {useLocalSearchParams} from 'expo-router';
+
 const useCravingResults = () => {
     const [cravingResultsRecipes, setCravingResultsRecipes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

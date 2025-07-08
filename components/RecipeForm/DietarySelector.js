@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { DIETARY } from '../../utils/constants';
-import { useTheme } from '../../contexts/ThemeContext';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {DIETARY} from '../../utils/constants';
+import {useTheme} from '../../contexts/ThemeContext';
 
 export default function DietarySelector({ selectedDietary, onToggleDietary }) {
   const { theme } = useTheme();

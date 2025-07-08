@@ -1,19 +1,19 @@
 // KOMPLEXE KOMPONENTE: Rezeptkarte mit interaktiven Features
 // Verwaltet Likes, Ratings, Favoriten und Navigation in einem optimierten UI-Element
 
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Animated, Share } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useTheme } from '../contexts/ThemeContext';
-import { ALLERGENS, CATEGORIES } from '../utils/constants';
+import {Alert, Animated, Image, Share, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Ionicons} from '@expo/vector-icons';
+import {router} from 'expo-router';
+import {useTheme} from '../contexts/ThemeContext';
+import {ALLERGENS, CATEGORIES} from '../utils/constants';
 import FollowButton from './FollowButton';
 import useAuth from '../lib/useAuth';
 import useFavorites from '../hooks/useFavorites';
-import { useState, useRef } from 'react';
-import { toggleRecipeLike, rateRecipe, getUserRating } from '../services/recipeService';
-import { notifyRecipeLike, notifyRecipeRating } from '../services/inAppNotificationService';
-import { RatingModal } from './RatingModal';
-import { smartCard, smartShadow } from '../utils/platformStyles';
+import {useRef, useState} from 'react';
+import {getUserRating, rateRecipe, toggleRecipeLike} from '../services/recipeService';
+import {notifyRecipeLike, notifyRecipeRating} from '../services/inAppNotificationService';
+import {RatingModal} from './RatingModal';
+import {smartShadow} from '../utils/platformStyles';
 
 // PERFORMANCE-KRITISCH: Allergen-Konfiguration wird einmalig berechnet
 const allergyConfig = ALLERGENS.reduce((acc, allergen) => {
@@ -46,7 +46,10 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
     const [userRating, setUserRating] = useState(0);
     const likeAnimation = useRef(new Animated.Value(1)).current;
     const isRecipeFavorite = isFavorite(recipe.id);
-    const commentCount = typeof recipe.commentsCount === 'number' ? recipe.commentsCount : 0;
+    // Korrigiert: Unterstützt sowohl commentsCount als auch commentCount
+    const commentCount = typeof recipe.commentsCount === 'number'
+        ? recipe.commentsCount
+        : (typeof recipe.commentCount === 'number' ? recipe.commentCount : 0);
     const handlePress = () => {
         router.push(`/recipe/${recipe.id}`);
     };
@@ -88,6 +91,7 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
             setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
 
             // BENACHRICHTIGUNGS-LOGIK: Informiere Autor über neuen Like
+            // Wird ausgelöst wenn User ein Rezept liked
             if (newLikedState && recipe.authorId && recipe.authorId !== user.uid) {
                 notifyRecipeLike(recipe.id, recipe.title, user.displayName || user.email?.split('@')[0] || 'Someone', recipe.authorId);
             }
@@ -117,8 +121,14 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
             await rateRecipe(recipe.id, user.uid, rating);
             setUserRating(rating);
             setShowRatingModal(false);
+            // Wird ausgelöst bei Recipe-Bewertung
             if (recipe.authorId && recipe.authorId !== user.uid) {
-                notifyRecipeRating(recipe.id, recipe.title, user.displayName || user.email?.split('@')[0] || 'Someone', rating, recipe.authorId);
+                notifyRecipeRating(
+                    recipe.id, recipe.title,
+                    user.displayName || user.email?.split('@')[0] || 'Someone',
+                    rating,
+                    recipe.authorId
+                );
             }
             if (onRatingUpdate) {
                 onRatingUpdate(recipe.id);
@@ -174,7 +184,7 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                             } catch (error) {
                                 if (error.code === 'permission-denied' || error.message.includes('Permission denied')) {
                                     Alert.alert(
-                                        "Setup Required", 
+                                        "Setup Required",
                                         "Favorites feature requires Firestore rules setup. Check UPDATE_FIRESTORE_RULES.md in your project."
                                     );
                                 } else {
@@ -183,10 +193,10 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                             }
                         }}
                     >
-                        <Ionicons 
-                            name={isRecipeFavorite ? "bookmark" : "bookmark-outline"} 
-                            size={20} 
-                            color={isRecipeFavorite ? theme.colors.primary : theme.colors.textSecondary} 
+                        <Ionicons
+                            name={isRecipeFavorite ? "bookmark" : "bookmark-outline"}
+                            size={20}
+                            color={isRecipeFavorite ? theme.colors.primary : theme.colors.textSecondary}
                         />
                     </TouchableOpacity>
                 </View>
@@ -227,10 +237,10 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                         <Text style={styles.author}>by {recipe.authorName}</Text>
                     </TouchableOpacity>
                     <View style={styles.engagement}>
-                        {}
-                        <TouchableOpacity 
-                            style={[styles.likeButton, isLiking && styles.likeButtonDisabled]} 
-                            onPress={handleLikePress} 
+                        { }
+                        <TouchableOpacity
+                            style={[styles.likeButton, isLiking && styles.likeButtonDisabled]}
+                            onPress={handleLikePress}
                             disabled={isLiking}
                         >
                             <Animated.View style={{ transform: [{ scale: likeAnimation }] }}>
@@ -246,23 +256,23 @@ export default function RecipeCard({ recipe, onLikeUpdate, onRatingUpdate }) {
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.commentButton} onPress={handleCommentPress}>
                             <Ionicons name="chatbubble-outline" size={18} color={theme.colors.textSecondary} />
-                            {commentCount > 0 && <Text style={[styles.commentCount, { color: theme.colors.textSecondary }]}>{commentCount}</Text>}
+                            <Text style={[styles.commentCount, { color: theme.colors.textSecondary }]}>{commentCount}</Text>
                         </TouchableOpacity>
-                        {}
+                        { }
                         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
                             <Ionicons name="share-outline" size={18} color={theme.colors.textSecondary} />
                         </TouchableOpacity>
-                        {}
+                        { }
                         {recipe.authorId && recipe.authorId !== user?.uid && (
-                            <FollowButton 
-                                userId={recipe.authorId} 
+                            <FollowButton
+                                userId={recipe.authorId}
                                 size="small"
                             />
                         )}
                     </View>
                 </View>
             </View>
-            {}
+            { }
             <RatingModal
                 visible={showRatingModal}
                 onClose={() => setShowRatingModal(false)}
@@ -297,7 +307,7 @@ const createStyles = (theme) => StyleSheet.create({
     image: {
         width: '100%',
         height: 200,
-        backgroundColor: theme.colors.button, 
+        backgroundColor: theme.colors.button,
     },
     topTags: {
         position: 'absolute',
@@ -423,12 +433,12 @@ const createStyles = (theme) => StyleSheet.create({
     engagement: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 15,
+        gap: 8, // Weniger Abstand für kompakteres Layout
     },
     likeButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 2, // Weniger Abstand zwischen Icon und Zahl
         padding: 4,
         opacity: 1,
     },
@@ -439,17 +449,19 @@ const createStyles = (theme) => StyleSheet.create({
         fontSize: 12,
         color: theme.colors.text,
         fontWeight: '500',
+        marginLeft: 2, // Leichter Abstand zum Icon
     },
     commentButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 2, // Weniger Abstand zwischen Icon und Zahl
         padding: 4,
     },
     commentCount: {
         fontSize: 12,
         color: theme.colors.text,
         fontWeight: '500',
+        marginLeft: 2, // Leichter Abstand zum Icon
     },
     shareButton: {
         flexDirection: 'row',

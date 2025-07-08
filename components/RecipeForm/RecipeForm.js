@@ -1,17 +1,7 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  ScrollView, 
-  Alert,
-  ActivityIndicator,
-  Platform
-} from 'react-native';
-import { useRecipeForm } from '../../hooks/useRecipeForm';
-import { uploadImage, saveRecipe } from '../../lib/firebaseconfig';
+import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {useRecipeForm} from '../../hooks/useRecipeForm';
+import {saveRecipe, uploadImage} from '../../lib/firebaseconfig';
 import ImageUpload from './ImageUpload';
 import CategorySelector from './CategorySelector';
 import AllergenSelector from './AllergenSelector';
@@ -19,8 +9,8 @@ import DietarySelector from './DietarySelector';
 import IngredientInput from './IngredientInput';
 import InstructionInput from './InstructionInput';
 import TimePicker from './TimePicker';
-import { useTheme } from '../../contexts/ThemeContext';
-import { smartInput, smartButton } from '../../utils/platformStyles';
+import {useTheme} from '../../contexts/ThemeContext';
+import {smartButton, smartInput} from '../../utils/platformStyles';
 
 export default function RecipeForm({ onSuccess, onCancel }) {
   const { theme } = useTheme();
