@@ -9,7 +9,7 @@ import useTabBarHeight from "../../hooks/useTabBarHeight";
 import useCravingResults from "../../hooks/useCravingResults";
 import { COLORS } from '../../utils/constants';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { smartShadow } from '../../utils/platformStyles';
+import { smartShadow, smartDivider } from '../../utils/platformStyles';
 
 export default function CravingResults() {
     const { cravingResultsRecipes, isLoading } = useCravingResults();
@@ -55,6 +55,7 @@ export default function CravingResults() {
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* Fixed Header */}
             <View style={styles.headerBar}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
@@ -67,43 +68,52 @@ export default function CravingResults() {
                     <Ionicons name="refresh" size={20} color={COLORS.primary} />
                 </TouchableOpacity>
             </View>
-            <View style={styles.header}>
-                <Text style={styles.title}>Recommended for you</Text>
-                {cravingResultsRecipes.length > 0 && (
-                    <Text style={styles.subtitle}>
-                        {cravingResultsRecipes.length} recipe{cravingResultsRecipes.length !== 1 ? 's' : ''} found
-                    </Text>
-                )}
-            </View>
 
-            {/* Summary of selections */}
-            <View style={styles.summaryContainer}>
-                <CravingSummary 
-                    cravings={cravings}
-                    allergies={allergies}
-                    preferences={preferences}
-                />
-            </View>
-
-            {cravingResultsRecipes.length > 0 ? (
-                <ScrollView
-                    style={styles.feed}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.feedContent}
-                >
-                    {cravingResultsRecipes.map((recipe) => (
-                        <RecipeCard key={recipe.id} recipe={recipe} />
-                    ))}
-                </ScrollView>
-            ) : (
-                <View style={styles.emptyState}>
-                    <Ionicons name="heart-outline" size={80} color={COLORS.primary} />
-                    <Text style={styles.emptyText}>No recipes found</Text>
-                    <Text style={styles.emptySubtext}>
-                        Try adjusting your craving or preferences
-                    </Text>
+            <ScrollView
+                style={styles.scrollContainer}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+            >
+                {/* Title Section */}
+                <View style={styles.titleSection}>
+                    <Text style={styles.title}>Recommended for you</Text>
+                    {cravingResultsRecipes.length > 0 && (
+                        <Text style={styles.subtitle}>
+                            {cravingResultsRecipes.length} recipe{cravingResultsRecipes.length !== 1 ? 's' : ''} found
+                        </Text>
+                    )}
                 </View>
-            )}
+
+                {/* Summary Section */}
+                <View style={styles.summarySection}>
+                    <CravingSummary 
+                        cravings={cravings}
+                        allergies={allergies}
+                        preferences={preferences}
+                    />
+                </View>
+
+                {/* Results Section */}
+                <View style={styles.resultsSection}>
+                    {cravingResultsRecipes.length > 0 ? (
+                        <View style={styles.recipesContainer}>
+                            {cravingResultsRecipes.map((recipe, index) => (
+                                <View key={recipe.id} style={styles.recipeWrapper}>
+                                    <RecipeCard recipe={recipe} />
+                                </View>
+                            ))}
+                        </View>
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Ionicons name="heart-outline" size={80} color={COLORS.primary} />
+                            <Text style={styles.emptyText}>No recipes found</Text>
+                            <Text style={styles.emptySubtext}>
+                                Try adjusting your craving or preferences
+                            </Text>
+                        </View>
+                    )}
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -120,14 +130,16 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 16,
         backgroundColor: theme.colors.cardBackground,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.border,
         ...smartShadow(
             {
                 shadowColor: theme.colors.shadow,
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
             },
-            1
+            2
         ),
     },
     backButton: {
@@ -137,56 +149,70 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         padding: 8,
     },
     headerTitle: {
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 18,
+        fontWeight: '700',
         color: COLORS.primary,
+        letterSpacing: 0.5,
     },
-    header: {
+    scrollContainer: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: tabBarHeight + 20,
+    },
+    titleSection: {
         paddingHorizontal: 20,
-        paddingVertical: 20,
-        backgroundColor: theme.colors.cardBackground,
-        ...smartShadow(
-            {
-                shadowColor: theme.colors.shadow,
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-            },
-            1
-        ),
+        paddingVertical: 24,
+        backgroundColor: theme.colors.background,
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         color: theme.colors.text,
+        marginBottom: 4,
+        textAlign: 'center',
     },
     subtitle: {
-        fontSize: 14,
-        marginTop: 4,
-        color: theme.colors.textSecondary,
+        fontSize: 16,
+        color: theme.colors.primary,
+        textAlign: 'center',
+        fontWeight: '600',
+    },
+    summarySection: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: theme.colors.background,
+    },
+    resultsSection: {
+        flex: 1,
+        paddingTop: 16,
+        backgroundColor: theme.colors.background,
+    },
+    recipesContainer: {
+        paddingHorizontal: 8,
+    },
+    recipeWrapper: {
+        marginBottom: 12,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 12,
+        gap: 16,
+        paddingHorizontal: 40,
     },
     loadingText: {
-        fontSize: 16,
+        fontSize: 18,
         color: theme.colors.textSecondary,
-    },
-    feed: {
-        flex: 1,
-        paddingTop: 10,
-    },
-    feedContent: {
-        paddingBottom: tabBarHeight,
+        textAlign: 'center',
+        fontWeight: '500',
     },
     emptyState: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 40,
+        paddingVertical: 60,
     },
     emptyText: {
         fontSize: 24,
@@ -194,15 +220,12 @@ const createStyles = (theme, tabBarHeight) => StyleSheet.create({
         color: theme.colors.text,
         marginTop: 20,
         marginBottom: 10,
+        textAlign: 'center',
     },
     emptySubtext: {
         fontSize: 16,
         color: theme.colors.textSecondary,
         textAlign: 'center',
         lineHeight: 24,
-    },
-    summaryContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 8,
     },
 });

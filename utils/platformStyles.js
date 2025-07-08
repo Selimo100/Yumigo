@@ -1,11 +1,11 @@
-import {Platform} from 'react-native';
+import { Platform } from 'react-native';
 
 /**
  * Utility function to create platform-specific styles
  * This helps remove ugly borders on Android while keeping them on iOS
  */
 export const createPlatformStyles = (iosStyles = {}, androidStyles = {}) => {
-    return Platform.OS === 'ios' ? iosStyles : androidStyles;
+  return Platform.OS === 'ios' ? iosStyles : androidStyles;
 };
 
 /**
@@ -15,16 +15,37 @@ export const createPlatformStyles = (iosStyles = {}, androidStyles = {}) => {
  * @returns {object} Platform-specific border styles
  */
 export const smartBorder = (borderWidth = 1, borderColor = '#000') => {
-    return createPlatformStyles(
-        {
-            borderWidth,
-            borderColor,
-        },
-        {
-            // No borders on Android
-            borderWidth: 0,
-        }
-    );
+  return createPlatformStyles(
+    {
+      borderWidth,
+      borderColor,
+    },
+    {
+      // No borders on Android
+      borderWidth: 0,
+    }
+  );
+};
+
+/**
+ * Smart border utility that keeps borders on both platforms but removes elevation on Android
+ * Use this for elements where you want to keep the visual border structure but avoid gray shadows
+ * @param {number} borderWidth - The border width
+ * @param {string} borderColor - The border color  
+ * @returns {object} Platform-specific border styles with no elevation
+ */
+export const smartBorderKeep = (borderWidth = 1, borderColor = '#000') => {
+  return createPlatformStyles(
+    {
+      borderWidth,
+      borderColor,
+    },
+    {
+      // Keep borders on Android but no elevation
+      borderWidth,
+      borderColor,
+    }
+  );
 };
 
 /**
@@ -35,25 +56,25 @@ export const smartBorder = (borderWidth = 1, borderColor = '#000') => {
  * @returns {object} Platform-specific shadow/elevation styles
  */
 export const smartShadow = (
-    shadowConfig = {
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-    },
-    elevation = 2
+  shadowConfig = {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  elevation = 2
 ) => {
-    return createPlatformStyles(
-        {
-            ...shadowConfig,
-            elevation: 0, // Disable elevation on iOS since we use shadows
-        },
-        {
-            // Reduced elevation on Android, no shadow properties
-            elevation: Math.max(0, elevation - 1),
-            shadowColor: 'transparent',
-        }
-    );
+  return createPlatformStyles(
+    {
+      ...shadowConfig,
+      elevation: 0, // Disable elevation on iOS since we use shadows
+    },
+    {
+      // Reduced elevation on Android, no shadow properties  
+      elevation: 0, // Remove elevation to avoid gray inner shadows
+      shadowColor: 'transparent',
+    }
+  );
 };
 
 /**
@@ -63,35 +84,35 @@ export const smartShadow = (
  * @returns {object} Platform-optimized card styles
  */
 export const smartCard = (theme, customStyles = {}) => {
-    const baseStyles = {
-        backgroundColor: theme.colors.surface,
-        borderRadius: 12,
-        padding: 16,
-        marginVertical: 4,
-    };
+  const baseStyles = {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 4,
+  };
 
-    const platformStyles = createPlatformStyles(
-        {
-            // iOS: subtle border and shadow
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-            shadowColor: theme.colors.primary,
-            shadowOffset: {width: 0, height: 2},
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-        },
-        {
-            // Android: no border, minimal elevation
-            borderWidth: 0,
-            elevation: 1,
-        }
-    );
+  const platformStyles = createPlatformStyles(
+    {
+      // iOS: subtle border and shadow
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    {
+      // Android: no border, no elevation to avoid gray inner shadows
+      borderWidth: 0,
+      elevation: 0,
+    }
+  );
 
-    return {
-        ...baseStyles,
-        ...platformStyles,
-        ...customStyles,
-    };
+  return {
+    ...baseStyles,
+    ...platformStyles,
+    ...customStyles,
+  };
 };
 
 /**
@@ -102,61 +123,61 @@ export const smartCard = (theme, customStyles = {}) => {
  * @returns {object} Platform-optimized button styles
  */
 export const smartButton = (theme, isPrimary = false, customStyles = {}) => {
-    const baseStyles = {
-        paddingVertical: 12,
-        paddingHorizontal: 24,
-        borderRadius: 24,
-        alignItems: 'center',
-        justifyContent: 'center',
+  const baseStyles = {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+
+  if (isPrimary) {
+    const primaryStyles = createPlatformStyles(
+      {
+        // iOS: border and shadow for primary buttons
+        backgroundColor: theme.colors?.primary || '#0D6159',
+        borderWidth: 1,
+        borderColor: theme.colors?.primary || '#0D6159',
+        shadowColor: theme.colors?.primary || '#0D6159',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+      },
+      {
+        // Android: no border, no elevation to avoid gray inner shadows
+        backgroundColor: theme.colors?.primary || '#0D6159',
+        borderWidth: 0,
+        elevation: 0,
+      }
+    );
+    
+    return {
+      ...baseStyles,
+      ...primaryStyles,
+      ...customStyles,
     };
-
-    if (isPrimary) {
-        const primaryStyles = createPlatformStyles(
-            {
-                // iOS: border and shadow for primary buttons
-                backgroundColor: theme.colors?.primary || '#0D6159',
-                borderWidth: 1,
-                borderColor: theme.colors?.primary || '#0D6159',
-                shadowColor: theme.colors?.primary || '#0D6159',
-                shadowOffset: {width: 0, height: 2},
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-            },
-            {
-                // Android: no border, subtle elevation
-                backgroundColor: theme.colors?.primary || '#0D6159',
-                borderWidth: 0,
-                elevation: 2,
-            }
-        );
-
-        return {
-            ...baseStyles,
-            ...primaryStyles,
-            ...customStyles,
-        };
-    } else {
-        const secondaryStyles = createPlatformStyles(
-            {
-                // iOS: border for secondary buttons
-                backgroundColor: theme.colors?.surface || '#F8F9FA',
-                borderWidth: 1,
-                borderColor: theme.colors?.border || '#E0E0E0',
-            },
-            {
-                // Android: no border, just background
-                backgroundColor: theme.colors?.surface || '#F8F9FA',
-                borderWidth: 0,
-                elevation: 1,
-            }
-        );
-
-        return {
-            ...baseStyles,
-            ...secondaryStyles,
-            ...customStyles,
-        };
-    }
+  } else {
+    const secondaryStyles = createPlatformStyles(
+      {
+        // iOS: border for secondary buttons
+        backgroundColor: theme.colors?.surface || '#F8F9FA',
+        borderWidth: 1,
+        borderColor: theme.colors?.border || '#E0E0E0',
+      },
+      {
+        // Android: no border, no elevation to avoid gray inner shadows
+        backgroundColor: theme.colors?.surface || '#F8F9FA',
+        borderWidth: 0,
+        elevation: 0,
+      }
+    );
+    
+    return {
+      ...baseStyles,
+      ...secondaryStyles,
+      ...customStyles,
+    };
+  }
 };
 
 /**
@@ -167,33 +188,71 @@ export const smartButton = (theme, isPrimary = false, customStyles = {}) => {
  * @returns {object} Platform-optimized input styles
  */
 export const smartInput = (theme, hasError = false, customStyles = {}) => {
-    const baseStyles = {
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        fontSize: 16,
-        borderRadius: 8,
-        backgroundColor: theme.colors.surface,
-        color: theme.colors.text,
-    };
+  const baseStyles = {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
+    borderRadius: 8,
+    backgroundColor: theme.colors.surface,
+    color: theme.colors.text,
+  };
 
-    const platformStyles = createPlatformStyles(
-        {
-            // iOS: subtle border
-            borderWidth: 1,
-            borderColor: hasError ? '#DC3545' : theme.colors.border,
-        },
-        {
-            // Android: no border, just background
-            borderWidth: 0,
-            backgroundColor: hasError ? '#DC354508' : theme.colors.surface,
-        }
-    );
+  const platformStyles = createPlatformStyles(
+    {
+      // iOS: subtle border
+      borderWidth: 1,
+      borderColor: hasError ? '#DC3545' : theme.colors.border,
+    },
+    {
+      // Android: no border, just background
+      borderWidth: 0,
+      backgroundColor: hasError ? '#DC354508' : theme.colors.surface,
+    }
+  );
 
-    return {
-        ...baseStyles,
-        ...platformStyles,
-        ...customStyles,
-    };
+  return {
+    ...baseStyles,
+    ...platformStyles,
+    ...customStyles,
+  };
+};
+
+/**
+ * Smart divider/separator line that looks good on both platforms
+ * Exact same style as used in CravingLayout headerBar for consistent appearance
+ * @param {object} theme - Theme object
+ * @param {object} customStyles - Additional custom styles  
+ * @returns {object} Platform-optimized divider styles
+ */
+export const smartDivider = (theme, customStyles = {}) => {
+  const baseStyles = {
+    height: 1,
+    width: '100%',
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors?.border || '#E0E0E0',
+    marginVertical: 12,
+    shadowColor: theme.colors?.shadow || '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  };
+
+  const platformStyles = createPlatformStyles(
+    {
+      // iOS: use shadows like CravingLayout
+      elevation: 0,
+    },
+    {
+      // Android: use elevation like CravingLayout but minimal
+      elevation: 1,
+    }
+  );
+
+  return {
+    ...baseStyles,
+    ...platformStyles,
+    ...customStyles,
+  };
 };
 
 /**
@@ -203,30 +262,30 @@ export const smartInput = (theme, hasError = false, customStyles = {}) => {
  * @returns {object} Cleaned styles for Android
  */
 export const androidStyleCleanup = (styles) => {
-    if (Platform.OS !== 'android') {
-        return styles;
-    }
+  if (Platform.OS !== 'android') {
+    return styles;
+  }
 
-    const cleanedStyles = {...styles};
-
-    // Remove border properties that cause ugly frames on Android
-    delete cleanedStyles.borderWidth;
-    delete cleanedStyles.borderColor;
-    delete cleanedStyles.borderTopWidth;
-    delete cleanedStyles.borderBottomWidth;
-    delete cleanedStyles.borderLeftWidth;
-    delete cleanedStyles.borderRightWidth;
-    delete cleanedStyles.borderTopColor;
-    delete cleanedStyles.borderBottomColor;
-    delete cleanedStyles.borderLeftColor;
-    delete cleanedStyles.borderRightColor;
-
-    // Reduce elevation if too high
-    if (cleanedStyles.elevation && cleanedStyles.elevation > 3) {
-        cleanedStyles.elevation = Math.min(2, cleanedStyles.elevation);
-    }
-
-    return cleanedStyles;
+  const cleanedStyles = { ...styles };
+  
+  // Remove border properties that cause ugly frames on Android
+  delete cleanedStyles.borderWidth;
+  delete cleanedStyles.borderColor;
+  delete cleanedStyles.borderTopWidth;
+  delete cleanedStyles.borderBottomWidth;
+  delete cleanedStyles.borderLeftWidth;
+  delete cleanedStyles.borderRightWidth;
+  delete cleanedStyles.borderTopColor;
+  delete cleanedStyles.borderBottomColor;
+  delete cleanedStyles.borderLeftColor;
+  delete cleanedStyles.borderRightColor;
+  
+  // Reduce elevation if too high
+  if (cleanedStyles.elevation && cleanedStyles.elevation > 3) {
+    cleanedStyles.elevation = Math.min(2, cleanedStyles.elevation);
+  }
+  
+  return cleanedStyles;
 };
 
 /**
@@ -291,16 +350,18 @@ export const smartGridItemTwoColumns = (customStyle = {}) => ({
 });
 
 export default {
-    createPlatformStyles,
-    smartBorder,
-    smartShadow,
-    smartCard,
-    smartButton,
-    smartInput,
-    androidStyleCleanup,
-    smartGrid,
-    smartGridItem,
-    smartGridPadding,
-    smartGridTwoColumns,
-    smartGridItemTwoColumns,
+  createPlatformStyles,
+  smartBorder,
+  smartBorderKeep,
+  smartShadow,
+  smartCard,
+  smartButton,
+  smartInput,
+  smartDivider,
+  androidStyleCleanup,
+  smartGrid,
+  smartGridItem,
+  smartGridPadding,
+  smartGridTwoColumns,
+  smartGridItemTwoColumns,
 };

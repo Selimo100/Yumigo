@@ -1,7 +1,7 @@
 import React from 'react';
-import {Animated, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {COLORS} from '../../utils/constants';
-import {androidStyleCleanup, smartBorder, smartShadow} from '../../utils/platformStyles';
+import { TouchableOpacity, View, Text, StyleSheet, Animated, Platform } from 'react-native';
+import { COLORS } from '../../utils/constants';
+import { smartButton, smartShadow, smartBorderKeep, androidStyleCleanup } from '../../utils/platformStyles';
 
 const CravingSelector = ({ 
     item, 
@@ -28,12 +28,13 @@ const CravingSelector = ({
                     useGridLayout ? styles.gridButton : styles.button,
                     {
                         backgroundColor: isSelected ? COLORS.primary : COLORS.white,
-                        ...smartBorder(2, COLORS.primary), // Zeigt Border nur auf iOS
+                        ...smartBorderKeep(2, COLORS.primary), // Keeps borders on both platforms but no elevation
                         shadowColor: COLORS.primary,
                         shadowOpacity: isSelected ? 0.25 : 0.1,
                     },
-                    // Nur Android-spezifische Border-Cleanup
-                    Platform.OS === 'android' ? androidStyleCleanup(style) : style
+                    // Clean Android styles to remove elevation but keep borders
+                    Platform.OS === 'android' ? { elevation: 0 } : {},
+                    style
                 ]}
                 onPress={onPress}
                 activeOpacity={0.8}

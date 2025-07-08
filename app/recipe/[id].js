@@ -1,24 +1,26 @@
-import {Alert, Image, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {Ionicons} from '@expo/vector-icons';
-import {router, useFocusEffect, useLocalSearchParams} from 'expo-router';
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {useTheme} from '../../contexts/ThemeContext';
-import {StarRating} from '../../components/Comment/CommentComponents';
-import {CommentInput} from '../../components/Comment/CommentInput';
-import {CommentsSection} from '../../components/Comment/CommentsSection';
-import {RatingModal} from '../../components/RatingModal';
-import {ALLERGENS, CATEGORIES} from '../../utils/constants';
-import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, serverTimestamp, setDoc} from 'firebase/firestore';
-import {db} from '../../lib/firebaseconfig';
-import {formatDistanceToNow} from 'date-fns';
-import {useUserProfile} from '../../hooks/useUserProfile';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Share, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
+import { StarRating } from '../../components/Comment/CommentComponents';
+import { CommentInput } from '../../components/Comment/CommentInput';
+import { CommentsSection } from '../../components/Comment/CommentsSection';
+import { RatingModal } from '../../components/RatingModal';
+import { ALLERGENS, CATEGORIES } from '../../utils/constants';
+import { doc, getDoc, collection, getDocs, addDoc, deleteDoc, setDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebaseconfig';
+import { formatDistanceToNow } from 'date-fns';
+import { serverTimestamp } from 'firebase/firestore';
+import { useUserProfile } from '../../hooks/useUserProfile';
 import useFavorites from '../../hooks/useFavorites';
-import {deleteRecipe, getUserRating, isRecipeOwner, rateRecipe} from '../../services/recipeService';
-import {addShoppingListItem} from '../../services/userService';
-import {showToast} from '../../utils/toast';
+import { deleteRecipe, isRecipeOwner, rateRecipe, getUserRating } from '../../services/recipeService';
+import { notifyRecipeRating } from '../../services/inAppNotificationService';
+import { addShoppingListItem } from '../../services/userService';
+import { showToast } from '../../utils/toast';
 import useAuth from '../../lib/useAuth';
-
+import { smartShadow, smartButton, androidStyleCleanup, createPlatformStyles } from '../../utils/platformStyles';
 const formatTime = (timestamp) => {
   try {
     const date = timestamp?.toDate?.() || new Date(timestamp);
@@ -663,7 +665,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   headerActions: {
     flexDirection: 'row',
@@ -680,7 +685,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   shareButton: {
     padding: 8,
@@ -692,7 +700,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   imageContainer: {
     position: 'relative',
@@ -752,7 +763,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   timeContainer: {
     flexDirection: 'row',
@@ -794,7 +808,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   allergyHeader: {
     flexDirection: 'row',
@@ -901,7 +918,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   ratingSectionTitle: {
     fontSize: 18,
@@ -1003,7 +1023,10 @@ const createStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    ...createPlatformStyles(
+      { elevation: 0 }, // iOS: no elevation
+      { elevation: 0 } // Android: no elevation
+    ),
   },
   stepHeader: {
     flexDirection: 'row',
