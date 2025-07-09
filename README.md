@@ -28,7 +28,7 @@
    - [UI Komponenten Tests](#93--ui-komponenten-tests)
    - [Utilities & Constants Tests](#94--utilities-&-constants-tests)
    - [Hooks & Features Tests](#95--hooks-&-features-tests)
-10. [Fazit](#9--fazit)
+10. [Fazit](#10--fazit)
 
 ---
 
@@ -145,15 +145,15 @@ Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um un
 
 ### 💡 Optionale User Stories
 
-| **ID** | **Beschreibung**                                                                                                                                     | **Erreicht?** |
-|--------|------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| O-01   | Als Nutzer:in möchte ich meine Lieblingsrezepte bewerten können.                                                                                     | ✅             |
-| O-02   | Als Nutzer:in möchte ich Rezepte mit Freunden teilen können.                                                                                         | ✅             |
+| **ID** | **Beschreibung**                                                                                                                                    | **Erreicht?** |
+|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| O-01   | Als Nutzer:in möchte ich meine Lieblingsrezepte bewerten können.                                                                                    | ✅             |
+| O-02   | Als Nutzer:in möchte ich Rezepte mit Freunden teilen können.                                                                                        | ✅             |
 | O-03   | Als Nutzer:in möchte ich eine Einkaufsliste aus einem Rezept erstellen können, um meinen nächsten Einkauf optional planen zu können.                | ✅             |
 | O-04   | Als Nutzer:in möchte ich meinen Standort teilen, damit mir saisonale Rezepte aus meiner Region angezeigt werden.                                    | ✅ & ❌          |
 | O-05   | Als Nutzer:in möchte ich ein Bild von meinem Kühlschrank oder meinen Vorräten fotografieren können, damit eine AI passende Rezepte vorschlägt.     | ❌             |
-| O-06   | Als Nutzer:in möchte ich mein Profil über einen Share-Button (z. B. über WhatsApp oder Instagram) teilen können.                                     | ✅             |
-| O-07   | Als Nutzer:in möchte ich direkt in der Yumigo-App meine Rezepte über einen Chat teilen können.                                                       | ✅             |
+| O-06   | Als Nutzer:in möchte ich mein Profil über einen Share-Button (z.B. über WhatsApp oder Instagram) teilen können.                                     | ✅             |
+| O-07   | Als Nutzer:in möchte ich direkt in der Yumigo-App meine Rezepte über einen Chat teilen können.                                                      | ✅             |
 | O-08   | Als Nutzer:in möchte ich private Nachrichten an andere Nutzer:innen senden können, um mich über Rezepte und Cravings austauschen zu können.         | ❌             |
 
 
@@ -505,20 +505,20 @@ login.test.js
 
 ### ✅ Was lief gut?
 
-- Unser gesamtes Projekt lief sehr gut – wir hatten eine klare Struktur, eine effiziente Zeiteinteilung und eine gute Kommunikation im Team.
+- Unser gesamtes Projekt lief sehr gut, wir hatten eine klare Struktur, eine effiziente Zeiteinteilung und eine gute Kommunikation im Team.
 - Die Aufteilung in React-Komponenten half dabei, schneller und strukturierter zu arbeiten.
 - Die Verbindung von Firebase (Backend) mit dem Frontend funktionierte nach der Einrichtung reibungslos.
 - Das Projekt war sauber aufgebaut, was allen im Team half, den Überblick zu behalten.
-- Wir arbeiteten mit einem klaren Git-Flow auf separaten Branches – dadurch konnten viele Mergekonflikte vermieden werden.
+- Wir arbeiteten mit einem klaren Git-Flow auf separaten Branches, dadurch konnten viele Mergekonflikte vermieden werden.
 
 ---
 
 ### ❌ Herausforderungen
 
-- Die Implementierung von Login und Registrierung war anfangs schwierig – die Konfigurationen von Firebase haben nicht direkt funktioniert, was viel Zeit gekostet hat.
-- Das Styling auf Android war teilweise deutlich anders als auf iOS – hier mussten wir vieles doppelt anpassen.
-- Der Craving-Algorithmus war technisch anspruchsvoll: Wir brauchten lange, bis wir ein gutes System fanden, das die Rezepte sinnvoll nach Lust und Geschmack filtert.
-- Es war nicht immer jede Person anwesend – durch Überstundenabbau, Resturlaub oder Krankheit fehlte manchmal jemand, was die Planung etwas erschwert hat.
+- Die Implementierung von Login und Registrierung war anfangs schwierig, die Konfigurationen von Firebase haben nicht direkt funktioniert, was viel Zeit gekostet hat.
+- Das Styling auf Android war teilweise deutlich anders als auf iOS, hier mussten wir vieles doppelt anpassen.
+- Der Craving Algorithmus war technisch anspruchsvoll: Wir brauchten lange, bis wir ein gutes System fanden, das die Rezepte sinnvoll nach Lust und Geschmack filtert.
+- Es war nicht immer jede Person anwesend, durch Überstundenabbau, Resturlaub oder Krankheit fehlte manchmal jemand, was die Planung etwas erschwert hat.
 
 ---
 
@@ -537,7 +537,7 @@ login.test.js
 ### 🎯 Zufriedenheit mit dem Ergebnis
 
 Wir sind sehr zufrieden und stolz auf unser Endergebnis.  
-Trotz begrenzter Zeit haben wir fast alle unsere Ziele erreicht – **nur zwei optionale Ziele fehlen** noch.  
+Trotz begrenzter Zeit haben wir fast alle unsere Ziele erreicht, nur zwei optionale Ziele fehlen noch.  
 Wir finden es sehr beeindruckend, was man als Team in drei Wochen auf die Beine stellen kann.  
 Die App ist voll funktional und wir sind mehr als happy mit dem, was wir geschafft haben.
 
@@ -545,7 +545,7 @@ Die App ist voll funktional und wir sind mehr als happy mit dem, was wir geschaf
 
 ### 🚧 Was fehlte noch?
 
-Alle verpflichtenden Features sind umgesetzt – nur zwei **optionale Ziele** konnten wir aus Zeitgründen noch nicht fertigstellen:
+Alle verpflichtenden Features sind umgesetzt, nur zwei optionale Ziele konnten wir aus Zeitgründen noch nicht fertigstellen:
 
 | Ziel-ID | Feature                                                                                                           | Status |
 |---------|-------------------------------------------------------------------------------------------------------------------|--------|
@@ -566,14 +566,6 @@ Langfristig möchten wir unsere App veröffentlichen und mit diesen Funktionen n
 Die Zusammenarbeit im Team verlief genau wie erhofft! Sehr harmonisch, effizient und reibungslos.  
 Da wir uns auch ausserhalb des Projekts sehr gut verstehen, konnten wir auf einer vertrauensvollen Basis arbeiten, was
 sich stark positiv auf den Projektverlauf ausgewirkt hat.
-
-Wir haben früh entschieden, mit einem klaren Git-Flow zu arbeiten:  
-Jede von uns arbeitete in separaten Branches, wodurch Mergekonflikte vermieden wurden und die Integration neuer
-Features sehr sauber erfolgen konnte.  
-Regelmässige Absprachen und gemeinsame Code-Reviews halfen uns, den Überblick zu behalten und sicherzustellen, dass alle
-Teile gut zusammenspielen.
-
-Insgesamt hat uns diese Arbeitsweise nicht nur produktiv gemacht, sondern auch viel Freude bereitet.
 
 ---
 
