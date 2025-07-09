@@ -377,21 +377,7 @@ authService.test.js
 - Password-Stärke-Validierung
 
 ___
-
-authHelpers.test.js
-
-#### Was getestet wird:
-- requireAuth(), Überprüfung ob User eingeloggt ist
-- showAuthError(), Anzeige von Auth-Fehlern
-- Alert-Funktionalität für Login-Anforderungen
-
-#### Test-Abdeckung:
-- Rückgabe true bei eingeloggtem User
-- Alert-Anzeige und false-Rückgabe bei nicht eingeloggtem User
-- Standardtexte für verschiedene Aktionen
-- Errorlogging in Console
-
---- 
+___
 
 ## 9.2 📝 Rezeptmanagement Tests
 recipeService.test.js
