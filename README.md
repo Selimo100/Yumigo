@@ -1,22 +1,8 @@
-# was alles anpassen? 
-
-- benutzung der app -> 4. Rezept Browser -> name von feature wo man rezepte filtern kann
-- api dokumentation anpassen auf unsere vorallem endpunkte! 
-- Projektstruktur alles nur als beispiel von knowledgehub! 
--  Testfälle anschauen und überarbeiten wenn nötig
-- testergebniusse anpasse und durchführen nur als beispiel dort von knowledgehub
-- abschnitt autimatisierte test löschen wenn wir keine erstellt haben sonst so lassen! 
-- gui design anpassen ganzer abschnitt nur als beispiel
-- fazit ganzer abschnitt anpassen nur als beispiel hier von knowledgehub
-- geht alles im inhaltsverzeichniss? braucht es alles? ist es aktuell? 
-
----
-
 # <img src="/assets/Logo.png" alt="Logo" width="25">  Hungry on the go? - Yumigo <img src="/assets/Logo.png" alt="Logo" width="25">
 
 ---
 ## Dokumentation
-### 8. Juli 2025 | Projektteam: Serra-Naz Akin, Selina Mogicato, Timea Portmann
+### 9. Juli 2025 | Projektteam: Serra-Naz Akin, Selina Mogicato, Timea Portmann
 
 ---
 
@@ -25,20 +11,24 @@
 1. [Einleitung](#1--einleitung)
 2. [Abstract](#2--abstract)
 3. [Benutzung der App](#3--benutzung-der-app)
-4. [Funktionen](#4--funktionen)
-5. [API-Dokumentation](#5--api-dokumentation)
-6. [Projektstruktur](#6--projektstruktur)
-  - [Frontend im Detail](#61--frontend-im-detail)
-  - [Backend im Detail](#62--backend-im-detail)
-7. [Anforderungsanalyse](#7--anforderungsanalyse)
-  - [User Stories](#71--user-stories)
-  - [Testfälle](#72--testfälle)
-  - [Testergebnisse](#73--testergebnisse)
-  - [Automatisierte Tests](#74--automatisierte-tests)
-8. [GUI Design](#8--gui-design)
-  - [Allgemein](#81--allgemein)
-  - [Design-Richtlinien](#82--design-richtlinien-optional)
-9. [Fazit](#9--fazit)
+4. [User Stories](#4--user-stories)
+5. [Mockups](#5--mockups)
+   - [App Icon](#51--app-icon)
+   - [Homescreen und Rezeptedetailseite](#52--homescreen-und-rezeptedetailseite)
+   - [Craving und Cravingresultsseite](#53--craving-und-cravingresultsseite)
+   - [Createform](#54--createform)
+   - [Profilescreen](#55--profilescreen)
+   - [Favoritesscreen](#56--favoritesscreen)
+6. [Technische Realisierung](#6--technische-realisierung)
+7. [Testing](#7--testing)
+8. [Testprotokoll](#8--testprotokoll)
+9. [Übersicht unseren automatisierten Tests](#9--übersicht-unseren-automatisierten-tests)
+   - [Authentifizierung Tests](#91--authentifizierung-tests)
+   - [Rezeptmanagement Tests](#92--rezeptmanagement-tests)
+   - [UI Komponenten Tests](#93--ui-komponenten-tests)
+   - [Utilities & Constants Tests](#94--utilities-&-constants-tests)
+   - [Hooks & Features Tests](#95--hooks-&-features-tests)
+10. [Fazit](#10--fazit)
 
 ---
 
@@ -116,277 +106,10 @@ Nach dem Öffnen der Yumigo-App startet der Nutzer auf einer Login- oder Registr
 7. Auf der **Profile** Seite kann sieht man seine Follower und seinen Gefolgten, man sieht alle seine eigenen erstellten Rezepte.
 8. Die Nutzeroberfläche lässt sich per Einstellung zwischen **Dark- und Lightmode** wechseln.
 
-💡 Ein JWT wird im Hintergrund verwaltet – dadurch bleiben Benutzer auch nach einem Seitenreload eingeloggt.
+💡 Ein JWT wird im Hintergrund verwaltet, dadurch bleiben Benutzer auch nach einem Seitenreload eingeloggt.
 
 ---
-
-# 4. ⚙️ Funktionen
-
---- 
-
-
-# 5. 📡 API-Dokumentation
-
-Die REST-API des Backends wurde mit Firebase erstellt und folgt den üblichen Konventionen von HTTP-Verben (GET, POST,
-PUT, DELETE).
-
-### 🧯 Fehlerbehandlung
-
-**Typische Fehlermeldungen:**
-
-- 401 Unauthorized – Kein oder ungültiges Token
-- 403 Forbidden – Zugriff auf fremde Ressourcen
-- 404 Not Found – Objekt existiert nicht
-- 400 Bad Request – Validierungsfehler bei Formulardaten
-
-### 🔐 Authentifizierung
-
-- POST /api/auth/login  
-  → Gibt ein JWT zurück, das im Header verwendet wird
-
-- POST /api/auth/register  
-  → Registrierung eines neuen Benutzers
-
-### 📘 Notenverwaltung
-
-- GET /api/grades  
-  → Gibt alle Noten des eingeloggten Benutzers zurück
-
-- POST /api/grades
-  → Neue Note hinzufügen
-
-### ✅ ToDos
-
-- GET /api/todos
-  → Gibt alle offenen ToDos zurück
-
-- POST /api/todos
-  → Neues ToDo erstellen
-
-- PUT /api/todos/{id}
-  → Status ändern (erledigt / offen)
-
-### 💬 Beiträge & Kommentare
-
-- GET /api/posts
-  → Beiträge abrufen
-
-- POST /api/posts
-  → Neuen Beitrag erstellen
-
-- POST /api/comments
-  → Kommentar zu Beitrag speichern
-
-### 🛡 Header mit JWT
-
-Alle geschützten Routen erfordern:
-→ Authorization: Bearer <TOKEN>
-
----
-
-# 6. 📂 Projektstruktur
-
-## 6.1 🖥️ Frontend im Detail
-
-Das Frontend von *KnowledgeHub* wurde mit **React.js** umgesetzt. Als Build-Tool kam **Vite** zum Einsatz, was eine
-schnelle Entwicklungs- und Ladezeit ermöglichte. Für das Styling wurde **Bootstrap 5** verwendet, ergänzt durch ein
-eigenes Farbschema in theme.css, das auch den Light-/Darkmode unterstützt.
-
-### 🔧 Technologien
-
-- **React.js (mit Vite)**
-- **Bootstrap 5**
-- **Custom Theme (Dark/Light)**
-- **React Router (Pages & Routing)**
-- **LocalStorage** zur Speicherung des JWT & Theme
-
-### 📁 Projektstruktur (Frontend)
-
-```
-📦 src/
-├── components/         # Wiederverwendbare UI-Komponenten
-│   ├── auth/           # Login, Registrierung, Buttons
-│   ├── community/      # Beiträge und Kommentare
-│   ├── grademanager/   # Notenstruktur & Anzeige
-│   ├── layout/         # Navbar, Footer etc.
-│   ├── sticky-notes/   # Zusatzmodul Sticky Notes
-│   └── todos/          # Aufgabenmanagement
-├── context/            # Globale States (ThemeContext)
-├── layouts/            # Hauptlayout mit Routing-Outlet
-├── lib/                # API-Aufrufe, Authentifizierung, Logik
-├── pages/              # Routen für jede Hauptansicht
-├── main.jsx            # Einstiegspunkt
-├── router.jsx          # Routenstruktur (React Router)
-└── theme.css           # Light/Dark Theme Farben
-```
-
-### 🔄 Routing / Navigation
-
-Die App nutzt **React Router** zur Navigation. Es gibt folgende Haupt-Routen:
-
-- /auth/login – Login-Seite
-- /auth/register – Registrierung
-- /dashboard – Übersicht über alle Module
-- /grademanager/* – Schulnotenverwaltung
-- /todos – Aufgabenverwaltung
-- /community – Beiträge & Kommentare
-
-Private Routen sind durch eine ProtectedRoute-Komponente geschützt, die prüft, ob ein gültiger JWT vorhanden ist.
-
-### 🌗 Theme (Light-/Darkmode)
-
-Der ThemeContext erlaubt die Umschaltung zwischen Light- und Darkmode. Die gewählte Einstellung wird lokal im
-localStorage gespeichert und beim Seitenladen angewendet.
-
-**Verwendete Farben:**
-
-- #3B82F6 für Akzente (z.B Buttons, Links)
-- #0F172A für Darkmode-Hintergrund
-- Neutrale Grautöne für Texte und Rahmen
-
-### 🧩 Komponentenstruktur
-
-Die Komponenten wurden thematisch gruppiert und folgen einem konsistenten Aufbau. Props werden zur Datenweitergabe
-genutzt.
-
-**Beispiele:**
-
-- GradeForm.jsx – Formular zum Eingeben neuer Noten
-- SubjectCard.jsx – Darstellung eines Fachs mit zugehörigen Noten
-- PostForm.jsx – Beitrag im Community-Bereich erstellen
-- CommentForm.jsx – Kommentare schreiben
-- TodoItem.jsx – Einzelne Aufgabe inkl. Statusumschaltung
-
---- 
-
-## 6.2 ⚙️ Backend im Detail
-
-Das Backend der Anwendung wurde mit **Spring Boot (Java)** entwickelt. Es stellt eine REST-API bereit, die vom Frontend
-über HTTP angesprochen wird. Die Daten werden in einer **MySQL-Datenbank** gespeichert, die beim Start der App über
-Flyway-Migrationen initialisiert wird.
-
-### 🔐 Sicherheit
-
-Für Authentifizierung und Autorisierung wurde **Spring Security** mit **JWT (JSON Web Tokens)** integriert.  
-Benutzer müssen sich registrieren und erhalten beim Login ein gültiges Token, das bei allen Folgeanfragen im Header
-mitgeschickt wird.
-
-Nur authentifizierte Benutzer können auf geschützte Ressourcen zugreifen, und jeder User kann nur seine eigenen Daten
-bearbeiten (z. B. ToDos, Noten, etc.).
-
-### 🧱 Backend-Struktur (Auszug aus src/main/java/...)
-
-```
-📦 src/
-├── main/
-│   └── java/
-│       └── org.example/
-│           ├── bootstrap/
-│           │   └── DataBootstrap.java
-│           ├── community/
-│           │   ├── comment/
-│           │   │   ├── Comment.java, CommentController.java
-│           │   │   ├── CommentService.java, CommentMapper.java
-│           │   │   ├── CommentRepository.java
-│           │   │   └── CommentRequestDTO / ResponseDTO
-│           │   └── post/
-│           │       ├── Post.java, PostController.java, PostService.java
-│           │       ├── PostMapper.java, PostRepository.java
-│           │       └── PostRequestDTO / ResponseDTO
-│           ├── configuration/
-│           │   ├── AppConfiguration.java, WebConfiguration.java
-│           │   ├── JWTConfiguration.java, OpenAPIConfiguration.java
-│           ├── gradebook/
-│           │   ├── grade/
-│           │   │   ├── Grade.java, GradeController.java, GradeService.java
-│           │   │   ├── GradeMapper.java, GradeRepository.java
-│           │   │   └── GradeRequestDTO / ResponseDTO
-│           │   ├── school/
-│           │   │   ├── School.java, SchoolController.java, SchoolService.java
-│           │   │   ├── SchoolMapper.java, SchoolRepository.java
-│           │   │   └── SchoolRequestDTO / ResponseDTO / DetailDTO
-│           │   ├── semester/
-│           │   │   ├── Semester.java, SemesterController.java, SemesterService.java
-│           │   │   ├── SemesterMapper.java, SemesterRepository.java
-│           │   │   └── SemesterRequestDTO / ResponseDTO / DetailDTO
-│           │   └── subject/
-│           │       ├── Subject.java, SubjectController.java, SubjectService.java
-│           │       ├── SubjectMapper.java, SubjectRepository.java
-│           │       └── SubjectRequestDTO / ResponseDTO / DetailsDTO
-│           ├── sticky_notes/
-│           │   ├── StickyNote.java, StickyNoteController.java, StickyNoteService.java
-│           │   ├── StickyNoteMapper.java, StickyNoteRepository.java
-│           │   └── StickyNoteRequestDTO / ResponseDTO
-│           ├── todoAdvanced/
-│           │   ├── folder/
-│           │   │   ├── Folder.java, FolderController.java, FolderService.java
-│           │   │   ├── FolderMapper.java, FolderRepository.java
-│           │   │   └── FolderRequestDTO / ResponseDTO / DetailDTO
-│           │   ├── list/
-│           │   │   ├── TodoList.java, TodoListController.java, TodoListService.java
-│           │   │   ├── TodoListMapper.java, TodoListRepository.java
-│           │   │   └── TodoListRequestDTO / ResponseDTO / DetailDTO
-│           │   └── todo/
-│           │       ├── Todo.java, ToDoController.java, ToDoService.java
-│           │       ├── TodoMapper.java, TodoRepository.java
-│           │       └── ToDoRequestDTO / ResponseDTO
-│           ├── user/
-│           │   ├── Person.java, PersonController.java, PersonService.java
-│           │   ├── PersonMapper.java, PersonRepository.java
-│           │   ├── PersonAuthenticationToken.java, PersonConverter.java
-│           │   └── PersonRequestDTO / ResponseDTO / SignInDTO / TokenResponseDTO
-│           ├── App.java
-│           └── FailedValidationException.java
-├── resources/
-│   ├── db.migration/
-│   │   ├── V1__schema.sql
-│   │   ├── V2.0–V7.0__migration_steps.sql
-│   └── application.properties
-```
-
-### 📄 Datenbank & Migration
-
-Die Datenbankstruktur wurde über **Flyway SQL-Skripte** erstellt und erweitert.  
-Alle Migrationen befinden sich im Verzeichnis resources/db.migration/.
-
-Beispiele für Migrationsdateien:
-
-- V1__schema.sql
-- V2.0__initial_data.sql
-- V3.0__add_foreign_keys.sql  
-  ... bis V7.0
-
-### 🔄 API-Endpunkte (Auszug)
-
-Die API folgt einem **RESTful Design**. Die meisten Pfade sind nach dem Schema aufgebaut:
-
-- /api/auth
-- /api/grades
-- /api/todos
-- /api/posts
-- /api/comments
-
-Die Endpunkte nutzen HTTP-Methoden wie GET, POST, PUT, DELETE`
-
-### 🔧 DTOs, Mapper und Services
-
-Die Business-Logik ist klar getrennt in:
-
-- **Controller:** REST-Schnittstelle
-- **Service:** Logikschicht
-- **Repository:** Datenbankzugriffe (JPA)
-- **Mapper:** DTO ↔ Entity Konvertierung
-
-Beispielhafte DTOs:
-
-- GradeRequestDTO, GradeResponseDTO
-- PersonSignInDTO, TokenResponseDTO
-
---- 
-
-# 7. 🔍 Anforderungsanalyse
-
-## 7.1 📌 User Stories
+# 4. 🎯️ User Stories
 
 Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um unsere Anforderungen im Auge zu behalten.
 
@@ -422,21 +145,128 @@ Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um un
 
 ### 💡 Optionale User Stories
 
-| **ID** | **Beschreibung**                                                                                                                                     | **Erreicht?** |
-|--------|------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| O-01   | Als Nutzer:in möchte ich meine Lieblingsrezepte bewerten können.                                                                                     | ❌             |
-| O-02   | Als Nutzer:in möchte ich Rezepte mit Freunden teilen können.                                                                                         | ❌             |
-| O-03   | Als Nutzer:in möchte ich eine Einkaufsliste aus einem Rezept erstellen können, um meinen nächsten Einkauf optional planen zu können.                | ❌             |
-| O-04   | Als Nutzer:in möchte ich meinen Standort teilen, damit mir saisonale Rezepte aus meiner Region angezeigt werden.                                    | ❌             |
+| **ID** | **Beschreibung**                                                                                                                                    | **Erreicht?** |
+|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| O-01   | Als Nutzer:in möchte ich meine Lieblingsrezepte bewerten können.                                                                                    | ✅             |
+| O-02   | Als Nutzer:in möchte ich Rezepte mit Freunden teilen können.                                                                                        | ✅             |
+| O-03   | Als Nutzer:in möchte ich eine Einkaufsliste aus einem Rezept erstellen können, um meinen nächsten Einkauf optional planen zu können.                | ✅             |
+| O-04   | Als Nutzer:in möchte ich meinen Standort teilen, damit mir saisonale Rezepte aus meiner Region angezeigt werden.                                    | ✅ & ❌          |
 | O-05   | Als Nutzer:in möchte ich ein Bild von meinem Kühlschrank oder meinen Vorräten fotografieren können, damit eine AI passende Rezepte vorschlägt.     | ❌             |
-| O-06   | Als Nutzer:in möchte ich mein Profil über einen Share-Button (z. B. über WhatsApp oder Instagram) teilen können.                                     | ❌             |
-| O-07   | Als Nutzer:in möchte ich direkt in der Yumigo-App meine Rezepte über einen Chat teilen können.                                                       | ❌             |
+| O-06   | Als Nutzer:in möchte ich mein Profil über einen Share-Button (z.B. über WhatsApp oder Instagram) teilen können.                                     | ✅             |
+| O-07   | Als Nutzer:in möchte ich direkt in der Yumigo-App meine Rezepte über einen Chat teilen können.                                                      | ✅             |
 | O-08   | Als Nutzer:in möchte ich private Nachrichten an andere Nutzer:innen senden können, um mich über Rezepte und Cravings austauschen zu können.         | ❌             |
 
 
 ---
 
-## 7.2 📌 Testfälle
+# 5. 🎨 Mockups
+
+## 5.1 App Icon
+Unser Logo besteht aus einer Zunge für unsere Rezepte App und einem Y für Yumigo.
+
+![appIconMockup.png](assets/appIconMockup.png)
+
+---
+## 5.2 Homescreen und Rezeptedetailseite
+Oben links im Header haben wir unser Logo platziert und oben rechts einen Add-Butto, wo man ein neues Rezept hinzufügen kann. Ebenfals haben wir oben rechts eine Glocke für die Notifications gemacht. 
+
+Unter dem Header kommt eine Searchbar, um nach Rezepten zu suchen und zu filtern. 
+Unterhalb von der Searchbar kommen alle Rezepte angezeigt. 
+
+Ganz unten haben wir unsere Bottomnavigation mit den Tabs Home, Craving, Favorite und Profile. Wenn man auf ein einzelnes Rezept klickt kommt man auf die Rezeptedetailseite. 
+
+Auf der Rezeptedetailseite sieht man alle Zutaten, eine Beschreibung des Gerichtes, die Vorbereitungsschritte. Ebenfalls hat man die Möglichkeit das Rezept zu Liken, zu speichern unter seinen Favoriten und man kann das Rezept mir Freunden direkt in einem Chat, wie Whatsapp, sharen. 
+
+![Homescreen Mockup.png](assets/Homescreen%20Mockup.png)
+
+---
+
+## 5.3 Craving und Cravingresultsseite
+
+Auf dem Cravingscreen kann der Nutzer auswählen, worauf er aktuell Appetit hat. Zur Auswahl stehen sechs Geschmacksrichtungen: Salty, Sweet, Sour, Spicy, Cold und Hot. Jede Kategorie ist als eigene Kachel mit einem passenden Emoji dargestellt. Sobald man eine dieser Kategorien antippt, wird man zum Cravingdetailscreen weitergeleitet.
+
+Der Cravingdetailscreen zeigt passende Rezepte zur gewählten Kategorie an, in diesem Beispiel „Salty Recipes“. Zuoberst befindet sich ein Titel mit einer kurzen Beschreibung. Darunter werden die Rezeptvorschläge in einer Liste angezeigt, jeweils mit Titel, Bewertungssternen, einem Bild und einer Followoption.
+
+Ganz unten befindet sich wieder unsere Bottom Navigation Bar, mit den vier Tabs: Home, Craving, Favorite und Profile, über die man jederzeit zwischen den Hauptbereichen der App wechseln kann.
+
+![Craving Mockup .png](assets/Craving%20Mockup%20.png)
+
+---
+
+## 5.4 Createform
+Auf dem Createrecipescreen kann der Nutzer ein neues Rezept anlegen. Zuoberst gibt es die Möglichkeit, ein Foto hochzuladen. Darunter befinden sich Eingabefelder für den Rezepttitel, eine Beschreibung und die Kategorie (Salty, Sweet, Spicy, ect.).
+
+Scrollt man weiter nach unten, können Zutaten mit Menge und Einheit hinzugefügt werden. Ausserdem gibt es ein Feld für die Zubereitungsschritte. Unten am Screen befindet sich ein Button, um das Rezept zu veröffentlichen.
+
+Auch hier ist die Bottom Navigation Bar mit den Tabs Home, Craving, Favorite und Profile jederzeit sichtbar.
+
+![Createform Mockup.png](assets/Createform%20Mockup.png)
+
+
+---
+## 5.5 Profilescreen
+
+Auf dem Profilescreen sieht man alle Infos zum eigenen Nutzerkonto. Oben werden Profilbild, Username, Follower- und Following-Anzahl sowie die Anzahl der eigenen Rezepte angezeigt. Darunter gibt es eine kurze Beschreibung.
+
+Man hat die Möglichkeit, das Profil zu bearbeiten oder den Link zum Profil zu teilen. Unter dem Bereich „Your Recipes“ werden alle eigenen Rezepte als Karten aufgelistet.
+
+Unten befindet sich die Bottom Navigation Bar mit den Tabs Home, Craving, Favorites und Profile.
+
+![ProfileScreen Mockup.png](assets/ProfileScreen%20Mockup.png)
+
+--- 
+## 5.6 Favoritesscreen
+Im Favoritesscreen werden alle gespeicherten Lieblingsrezepte angezeigt. Oben gibt es eine Searchbar, um nach Favoriten zu suchen oder nach Kategorien wie Sweet, Salty oder Spicy zu filtern.
+
+Darunter sind die Favoriten als Liste dargestellt. Jedes Rezept zeigt Titel, Bild, Bewertung, Icons zum Speichern, Liken oder Teilen und einen Follow-Button für den Rezept-Ersteller.
+
+Ganz unten ist wie immer die Bottom Navigation Bar mit den Tabs Home, Craving, Favorites und Profile.
+
+![Favorite Mockup.png](assets/Favorite%20Mockup.png)
+
+---
+
+# 6. ⚙️ Technische Realisierung
+
+## Komponentenübersicht
+### Frontend (React Native):
+
+Screens: Die App ist in verschiedene Screens unterteilt (Home, Craving, Favorites, Profile, etc.), die jeweils als eigene Komponenten im app-Verzeichnis liegen.
+Komponenten: Wiederverwendbare Komponenten wie RecipeCard, SearchBar, FollowButton und Modals befinden sich im components Ordner.
+Hooks & Contexts: Eigene React Hooks (useFavorites, useFollow, etc.) und Contexts (ThemeContext, NotificationContext) sorgen für State Management und globale Zustände.
+Navigation: Die Navigation erfolgt über das Expo Router System und React Navigation.
+
+
+### Backend (Firebase):
+
+Firestore: Speicherung aller Rezepte, Userdaten, Likes, Kommentare, etc.
+Authentication: Nutzerverwaltung und Authentifizierung via Firebase Auth.
+Push Notifications: Versand von Benachrichtigungen über Firebase.
+
+### Utilities:
+
+Saisonale Zutaten: Im Verzeichnis ingredients.json sind alle Zutaten mit Saisondaten für verschiedene Länder hinterlegt. Die Logik zur Filterung nach saisonalen Zutaten ist in seasonalUtils.js implementiert.
+Personalisierung: Die Feed Ranking Logik berücksichtigt Nutzerpräferenzen, Engagement und Saisonalität.
+
+## Datenfluss & Abläufe
+
+### Rezept-Feed:
+
+Rezepte werden aus Firestore geladen und lokal im State gespeichert.
+Die Feed-Logik (home.js) filtert und sortiert Rezepte nach Engagement, Aktualität, Trending, Saisonalität und Nutzerpräferenzen.
+Ein Pull-to-Refresh Mechanismus sorgt für aktuelle Daten ohne App-Neustart.
+### Saisonfilter:
+
+Nutzer können Rezepte nach saisonalen Zutaten filtern. Die App erkennt dabei auch Pluralformen von Zutaten.
+Die aktuelle Saison wird dynamisch anhand des Monats und des Nutzerstandorts bestimmt.
+Personalisierung:
+
+Der Feed wird für jeden Nutzer individuell gewichtet: Likes, gespeicherte Zutaten, bevorzugte Küchen und Ernährungsweisen fliessen in das Ranking ein.
+Ein Algorithmus mit anpassbaren Gewichtungen sorgt für eine dynamische, personalisierte Reihenfolge der Rezepte.
+
+---
+
+# 7. 📌 Testing
 
 ### Testfall: Craving eingeben
 
@@ -452,7 +282,7 @@ Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um un
 |-------------------|---------------------------------------------------------------------------------------------------------|
 | **Anforderungen** | R-01 (Rezeptverwaltung)                                                                                 |
 | **Ablauf**        | Nutzer:in erstellt ein Rezept „Gemüsesuppe“, bearbeitet die Zutatenliste und löscht das Rezept wieder. |
-| **Erwartet**      | Rezept wird erfolgreich gespeichert, Änderungen übernommen und anschließend gelöscht.                   |
+| **Erwartet**      | Rezept wird erfolgreich gespeichert, Änderungen übernommen und anschliessend gelöscht.                   |
 
 ### Testfall: Rezepte nach Kategorien durchsuchen
 
@@ -465,175 +295,263 @@ Zu Beginn unseres Projektes haben wir sogenannte User Stories geschrieben, um un
 ### Testfall: Saisonfilter aktivieren
 
 | **ID**            | T-C03                                                                                  |
-|-------------------|-----------------------------------------------------------------------------------------|
+|-------------------|----------------------------------------------------------------------------------------|
 | **Anforderungen** | C-03 (Saisonale Zutaten filtern)                                                       |
-| **Ablauf**        | Nutzer:in aktiviert den Saisonfilter für den Monat Juni.                               |
-| **Erwartet**      | Nur Rezepte mit saisonal verfügbaren Zutaten (z. B. Spargel, Erdbeeren) werden gezeigt. |
+| **Ablauf**        | Nutzer:in aktiviert den Saisonfilter.                                                  |
+| **Erwartet**      | Nur Rezepte mit saisonal verfügbaren Zutaten (z.B. Spargel, Erdbeeren) werden gezeigt. |
 
 ### Testfall: Rezeptdetailseite aufrufen
 
-| **ID**            | T-C04                                                                    |
-|-------------------|---------------------------------------------------------------------------|
-| **Anforderungen** | C-04 (Rezeptdetails anzeigen)                                             |
-| **Ablauf**        | Nutzer:in klickt auf das Rezept „Ofenkartoffeln mit Quark“.              |
-| **Erwartet**      | Detailansicht mit Zutatenliste, Bildern und Zubereitung wird angezeigt.  |
+| **ID**            | T-C04                                                                   |
+|-------------------|-------------------------------------------------------------------------|
+| **Anforderungen** | C-04 (Rezeptdetails anzeigen)                                           |
+| **Ablauf**        | Nutzer:in klickt auf das Rezept „Garlic Parmesan Popcorn“.              |
+| **Erwartet**      | Detailansicht mit Zutatenliste, Bildern und Zubereitung wird angezeigt. |
 
 ### Testfall: Rezept favorisieren
 
-| **ID**            | T-R02                                                                       |
-|-------------------|------------------------------------------------------------------------------|
-| **Anforderungen** | R-02 (Rezepte favorisieren)                                                  |
-| **Ablauf**        | Nutzer:in klickt auf das Herzsymbol beim Rezept „Kichererbsen-Curry“.       |
-| **Erwartet**      | Rezept wird als Favorit gespeichert und ist im Profil unter Favoriten sichtbar. |
+| **ID**            | T-R02                                                                                                  |
+|-------------------|--------------------------------------------------------------------------------------------------------|
+| **Anforderungen** | R-02 (Rezepte favorisieren)                                                                            |
+| **Ablauf**        | Nutzer:in klickt auf das Speichernsymbol beim Rezept „Garlic Parmesan Popcorn“.                        |
+| **Erwartet**      | Rezept „Garlic Parmesan Popcorn“ wird als Favorit gespeichert und ist auf der Favoritenseite sichtbar. |
 
 ### Testfall: Person folgen
 
-| **ID**            | T-P01                                                    |
-|-------------------|-----------------------------------------------------------|
-| **Anforderungen** | P-01 (Personen folgen)                                    |
-| **Ablauf**        | Nutzer:in klickt im Profil von „@kochliebe“ auf „Folgen“. |
-| **Erwartet**      | @kochliebe wird in der „Gefolgt“-Liste des Nutzers angezeigt. |
+| **ID**            | T-P01                                                              |
+|-------------------|--------------------------------------------------------------------|
+| **Anforderungen** | P-01 (Personen folgen)                                             |
+| **Ablauf**        | Nutzer:in klickt im Profil von „Florin Furter“ auf „Follow“.       |
+| **Erwartet**      | Florin Furter wird in der „Following“ Liste des Nutzers angezeigt. |
 
 ### Testfall: Profil & eigene Rezepte anzeigen
 
-| **ID**            | T-P02                                                                        |
-|-------------------|-------------------------------------------------------------------------------|
-| **Anforderungen** | P-02 (Eigenes Profil einsehen)                                                |
-| **Ablauf**        | Nutzer:in öffnet den Reiter „Mein Profil“ in der Navigationsleiste.           |
-| **Erwartet**      | Alle hochgeladenen Rezepte und gespeicherten Favoriten sind dort sichtbar.    |
+| **ID**            | T-P02                                                       |
+|-------------------|-------------------------------------------------------------|
+| **Anforderungen** | P-02 (Eigenes Profil einsehen)                              |
+| **Ablauf**        | Nutzer:in öffnet den Tab „Profil“ in der Navigationsleiste. |
+| **Erwartet**      | Alle eigenen hochgeladenen Rezepte sind dort sichtbar.      |
 
 
 ---
 
-## 7.3 📌 Testergebnisse
+# 8. 📑 Testprotokoll
 
 | **ID** | **Erfolgreich** | **Wer?** | **Datum und Uhrzeit** |
-|--------|-----------------|----------|-----------------------|
-| T-01   | ✅               | Rasim    | 14.04.2025, 16:00 Uhr |
-| T-02   | ✅               | Lysandro | 14.04.2025, 15:00 Uhr |
-| T-03   | ✅               | Serra    | 14.04.2025, 14:10 Uhr |
-| T-04   | ✅               | Serra    | 14.04.2025, 14:10 Uhr |
-| T-05   | ✅               | Rasim    | 14.04.2025, 16:00 Uhr |
-| T-06   | ✅               | Lysandro | 14.04.2025, 15:00 Uhr |
-| T-07   | ✅               | Rasim    | 14.04.2025, 16:00 Uhr |
-| T-08   | ✅               | Mateo    | 15.04.2025, 9:30 Uhr  |
-| T-09   | ✅               | Mateo    | 14.04.2025, 9:30 Uhr  |
-| T-10   | ✅               | Rasim    | 14.04.2025, 16:00 Uhr |
-| T-11   | ✅ ❌             | Rasim    | 14.04.2025, 16:00 Uhr |
-
-**Bemerkung T-11:**  
-Die Datei wird erfolgreich hochgeladen und ist für *den Uploader* sichtbar.  
-Allerdings können andere Benutzer aktuell nicht auf die hochgeladene Datei zugreifen.  
-Um dies zu ermöglichen, wäre ein serverseitiger Datei-Host notwendig – dieses Thema werden wir voraussichtlich demnächst
-gemeinsam mit Ivan besprechen.
+|--------|---------------|----------|-----------------------|
+| T-C01  | ✅             | Florent  | 30.6.2025, 14:03 Uhr  |
+| T-R01   | ✅             | León     | 30.6.2025, 14:10 Uhr  |
+|T-C02  | ✅             | Lysandro | 30.6.2025, 14:18 Uhr  |
+| T-C03  | ✅             | Mateo    | 30.6.2025, 14:35 Uhr  |
+| T-C04   | ✅             | Florent  | 30.6.2025, 15:07 Uhr  |
+| T-R02   | ✅             | Lysandro | 30.6.2025, 15:33 Uhr  |
+| T-P01  | ✅             | León     | 30.6.2025, 15:45 Uhr  |
+| T-P02    | ✅             | Mäx      | 01.7.2025, 9:30 Uhr   |
 
 
 ---
-## 7.4 📌 Automatisierte Tests
+# 9. 📌 Übersicht unseren automatisierten Tests
 
-Sowohl im Frontend als auch im Backend wurden Tests geschrieben:
+Wir haben eine umfassende Test-Suite entwickelt, die verschiedene Aspekte der Yumigo-App abdeckt. Hier ist eine detaillierte Übersicht:
 
-- **Frontend**: Wir haben mit **Vitest** Unit-Tests für einzelne Komponenten und Funktionen erstellt, um die Funktionalität sicherzustellen und frühzeitig Fehler zu erkennen.
-- **Backend**: Auch im Backend wurden **Unit-Tests** geschrieben, um die Logik der einzelnen Module zuverlässig zu überprüfen.
+Die Tests können laufengelassen werden, wenn man in der Konsole **npm test** eingibt und Enter drückt. 
 
-Diese Tests helfen dabei, die Stabilität der Anwendung zu gewährleisten und spätere Änderungen abzusichern.
+## 9.1 🔐 Authentifizierung Tests
+___
+authService.test.js
+
+#### Was getestet wird:
+
+- Login-Funktionalität mit Firebase Auth
+- Benutzerregistrierung und Email-Verifizierung
+- Logout-Prozess
+- Password-Validierung (starke vs. schwache Passwörter)
+- Email-Format-Validierung
+- Fehlerbehandlung für verschiedene Auth-Szenarien
+
+#### Test-Abdeckung:
+- Erfolgreicher Login mit gültigen Credentials
+- Fehlerbehandlung bei ungültigen Credentials
+- Registrierung neuer Benutzer
+- Behandlung bereits existierender E-Mails
+- Password-Stärke-Validierung
+
+___
+___
+
+## 9.2 📝 Rezeptmanagement Tests
+recipeService.test.js
+
+### Was getestet wird:
+- Firebase Firestoreintegration für Rezepte
+- getRecipe(), Abrufen einzelner Rezepte
+- Datenvalidierung für Rezept-Strukturen
+- Fehlerbehandlung bei Firebaseoperationen
+
+### Test-Abdeckung:
+- Erfolgreiches Laden existierender Rezepte
+- Rückgabe null für nicht existierende Rezepte
+- Firebaseerrorhandling
+- Validierung der Rezeptdatenstruktur
+- Zeitbereichvalidierung (1-15 Minuten)
+- Zutatenarrayvalidierung
+
+---
+
+validation.test.js
+
+### Was getestet wird:
+- validateRecipe(), Umfassende Rezeptvalidierung
+- Validierung aller Rezeptfelder (Titel, Beschreibung, Zeit, etc.)
+- Edge Cases und Performancetests
+
+### Test-Abdeckung:
+- Gültige Rezepte werden akzeptiert
+- Titellängevalidierung (mindestens 3 Zeichen)
+- Beschreibungslängevalidierung
+- Kochzeitbereich (1-15 Minuten)
+- Kategorienarray (nicht leer)
+- Zutatenstruktur mit Menge und Name
+- Anweisungenarray
+- Sonderzeichenbehandlung
+- Performance bei grossen Arrays
+- Null/Undefined Behandlung
 
 --- 
 
-# 8. 🎨 GUI Design
+# 9.3 🎨 UI Komponenten Tests
+SearchBar.test.js
 
-## 8.1 🎨 Allgemein
+### Was getestet wird:
+- Renderverhalten der Suchleiste
+- Texteingabe und onSearch-Callback
+- Placeholderanzeige
+- Focus/Blur Verhalten
 
-Beim Design von unserem Projekt haben wir Bootstrap verwendet, da Selina dies schon genutzt hat und man mit Bootstrap
-schnell und effektiv Seiten erstellen kann.
+### Test-Abdeckung:
+- Korrekte Render mit Placeholder
+- onSearch-Callback bei Texteingabe
+- Styling Eigenschaften
+- Leere Eingaben
+- Funktion ohne onSearch-Callback
+- Sonderzeichen Verarbeitung
 
-Wichtig waren uns:
+___
 
-- Responsive Design
-- Light-/Darkmode
-- Übersichtliches Dashboard
-- Klare Strukturierung der Inhalte (Noten, Aufgaben, Community)
+RecipeCard.test.js & FollowButton.test.js
 
-## 8.2 🎨 Design-Richtlinien
+### Was getestet wird:
+- Basis Komponenten Existenz
+- Einfache UI-Logic Tests
 
-- **Hauptfarben:**
-  - Blau: #3B82F6 (Buttons, Highlights)
-  - Dunkelblau: #0F172A (Darkmode-Hintergrund)
+### Test-Abdeckung:
+- Komponenten Definition
+- Basis Funktionalität (Toggle-Logic für FollowButton)
 
-- **Typografie:**
-  - Schriftart: 'Segoe UI', sans-serif
+--- 
 
-- **Komponenten:**
-  - Bootstrap Cards, Buttons, Modals
-  - Responsive Grids
+# 9.4 🔧 Utilities & Constants Tests
+constants.test.js
 
-- **User Experience:**
-  - Fokus auf Klarheit & Lesbarkeit
-  - Minimalistisches Layout
+### Was getestet wird:
+- App Konstanten (Kategorien, Allergene, Ernährungsformen)
+- Datenstruktur Validierung
+- Farbcode Validierung
+
+### Test-Abdeckung:
+- CATEGORIES: Vollständigkeit, Eindeutigkeit, Hex Farben
+- ALLERGENS: Wichtige Allergene, Datenstruktur
+- DIETARY: Ernährungsformenvalidierung
+- COLORS: Primärfarben, Hexcodevalidierung
+
+--- 
+
+# 9.5 📱 Hooks & Features Tests
+useFavorites.test.js
+
+### Was getestet wird:
+- Favoritenmanagementlogic
+- Arrayoperationen für Favoriten
+
+### Test-Abdeckung:
+- Hinzufügen/Entfernen von Favoriten
+- Favoritenstatusüberprüfung
+- Arraymanagement
+
+---
+login.test.js
+
+### Was getestet wird:
+- Loginscreenbasisfunktionalität
+- Stringvalidierung für Email/Password
 
 ---
 
-# 9. 🏁 Fazit
+# 10. 🏁 Fazit
 
 ### ✅ Was lief gut?
 
-- Die Strukturierung des Projekts in Module half beim schnellen Fortschritt.
-- Authentifizierung mit JWT funktionierte nach kurzer Einarbeitung gut.
-- React-Komponentenstruktur machte die Wiederverwendung effizient.
-- Die Trennung von Frontend und Backend war sauber, wodurch die Teamarbeit flüssig ablief.
+- Unser gesamtes Projekt lief sehr gut, wir hatten eine klare Struktur, eine effiziente Zeiteinteilung und eine gute Kommunikation im Team.
+- Die Aufteilung in React-Komponenten half dabei, schneller und strukturierter zu arbeiten.
+- Die Verbindung von Firebase (Backend) mit dem Frontend funktionierte nach der Einrichtung reibungslos.
+- Das Projekt war sauber aufgebaut, was allen im Team half, den Überblick zu behalten.
+- Wir arbeiteten mit einem klaren Git-Flow auf separaten Branches, dadurch konnten viele Mergekonflikte vermieden werden.
+
+---
 
 ### ❌ Herausforderungen
 
-- Beim Einrichten der Datenbank gab es kleinere Verbindungsprobleme, deshalb haben wir danach mit Flyway gearbeitet, um
-  uns die Arbeit zu erleichtern.
-- Die Umsetzung der To-dos inklusive Ordnerstruktur war technisch herausfordernd, da viele Datenabhängigkeiten und
-  verschachtelte Strukturen berücksichtigt werden mussten.
-- Auch die Strukturierung der gesamten App und die Aufteilung in sinnvolle Module (Frontend wie Backend) erforderte zu
-  Beginn viel Planung und Abstimmung.
-- Das Loginsystem hätte Selina weniger Zeit gekostet, wenn wir es von Anfang an gemacht hätten.
-- Frontend und Backend parallel entwickelt – aber Schnittstellenabstimmung war herausfordernd:
-  Selina hat das Frontend und Timea das Backend gleichzeitig umgesetzt. Obwohl diese parallele Entwicklung effizient schien, stellte sich das anschliessende Zusammenführen als aufwändig heraus. Viele API-Endpunkte mussten im Frontend manuell angepasst werden, weil sie zunächst nicht exakt auf die Backend-Logik abgestimmt waren.
+- Die Implementierung von Login und Registrierung war anfangs schwierig, die Konfigurationen von Firebase haben nicht direkt funktioniert, was viel Zeit gekostet hat.
+- Das Styling auf Android war teilweise deutlich anders als auf iOS, hier mussten wir vieles doppelt anpassen.
+- Der Craving Algorithmus war technisch anspruchsvoll: Wir brauchten lange, bis wir ein gutes System fanden, das die Rezepte sinnvoll nach Lust und Geschmack filtert.
+- Es war nicht immer jede Person anwesend, durch Überstundenabbau, Resturlaub oder Krankheit fehlte manchmal jemand, was die Planung etwas erschwert hat.
 
+---
 
 ### 💡 Was haben wir gelernt?
 
-- Sicherheit mit Spring Security praktisch umzusetzen
-- REST-API Design und React-Kommunikation im Detail
-- Umgang mit komplexen Datenstrukturen (z.B. verschachtelte Entitäten bei Schule → Semester → Fach → Noten)
-- Kollaboratives Arbeiten mit GitFlow und allgemein Git(regelmässige Commits, saubere Branches, Merge-Konflikte vermeiden)
-- Frontend und Backend sollten in kleineren, aufeinander abgestimmten Schritten entwickelt werden – idealerweise jeweils basierend auf zuvor definierten oder getesteten Schnittstellen. So kann die Integration deutlich reibungsloser und effizienter erfolgen. Eine kontinuierliche und frühzeitige Abstimmung bei der API-Planung ist entscheidend für eine erfolgreiche Fullstack-Entwicklung.
+- Aufgaben flexibel im Team zu übernehmen, wenn jemand kurzfristig fehlt.
+- Bessere Kommunikation im Team und wie man Ideen gemeinsam sinnvoll vereint.
+- Programmieren mit React Native und die praktische Nutzung von Firebase als Backend.
+- Bilder speichern und hochladen mit Firebase Storage.
+- Arbeiten unter Zeitdruck und dennoch strukturiert bleiben.
+- Mockups zuerst durchdenken und als Grundlage für die Entwicklung verwenden.
+- Wie man Features sinnvoll aufteilt und realistisch plant.
 
-### 🚀 Zukunftsideen und Erweiterungspotential
+---
 
-Während der Entwicklung sind uns einige Ideen für zukünftige Features gekommen, die das System noch nützlicher und
-interaktiver machen würden:
+### 🎯 Zufriedenheit mit dem Ergebnis
 
-- **Like-Funktion für Kommentare**: So können nützliche oder hilfreiche Antworten hervorgehoben werden.
-- **Bearbeiten von Kommentaren**: Aktuell kann man Kommentare nicht mehr ändern – eine Edit-Funktion würde mehr
-  Flexibilität bieten.
-- **Autor:innen sichtbar machen**: Bei Kommentaren soll künftig sichtbar sein, wer den Kommentar geschrieben hat.
-- **Notenstatistiken & Diagramme**: Eine visuelle Darstellung des Notenverlaufs über mehrere Semester würde den
-  Fortschritt besser veranschaulichen.
-- **Tag-System im Community-Bereich**: Beiträge könnten nach Themen (Mathe, IT, Prüfungsvorbereitung, etc.) gefiltert
-  werden.
-- **Benachrichtigungen**: Erinnerungen bei nahenden Deadlines für ToDos wären eine hilfreiche Ergänzung.
+Wir sind sehr zufrieden und stolz auf unser Endergebnis.  
+Trotz begrenzter Zeit haben wir fast alle unsere Ziele erreicht, nur zwei optionale Ziele fehlen noch.  
+Wir finden es sehr beeindruckend, was man als Team in drei Wochen auf die Beine stellen kann.  
+Die App ist voll funktional und wir sind mehr als happy mit dem, was wir geschafft haben.
 
-Diese Erweiterungen würden die Plattform nicht nur funktionaler, sondern auch persönlicher und benutzerfreundlicher
-machen.
+---
+
+### 🚧 Was fehlte noch?
+
+Alle verpflichtenden Features sind umgesetzt, nur zwei optionale Ziele konnten wir aus Zeitgründen noch nicht fertigstellen:
+
+| Ziel-ID | Feature                                                                                                           | Status |
+|---------|-------------------------------------------------------------------------------------------------------------------|--------|
+| O-08    | Als Nutzer:in möchte ich private Nachrichten an andere Nutzer:innen senden können, um mich über Rezepte auszutauschen. | ❌     |
+| O-05    | Als Nutzer:in möchte ich ein Bild von meinem Kühlschrank machen, damit eine AI passende Rezepte vorschlägt.         | ❌     |
+
+Diese beiden Features möchten wir gerne in unserer Freizeit noch gemeinsam fertigstellen:
+
+- **Chatfunktion**: Damit man sich mit anderen Usern über Cravings und Rezepte austauschen oder Rezepte teilen kann.
+- **AI-Kühlschrankscanner**: Ein Feature, bei dem man seinen Kühlschrank scannt und die App anhand der vorhandenen Zutaten passende Rezeptvorschläge macht.
+
+Langfristig möchten wir unsere App veröffentlichen und mit diesen Funktionen noch weiter ausbauen.
+
+---
 
 ### 🤝 Zusammenarbeit im Team
 
-Die Zusammenarbeit im Team verlief genau wie erhofft – **sehr harmonisch, effizient und reibungslos**.  
+Die Zusammenarbeit im Team verlief genau wie erhofft! Sehr harmonisch, effizient und reibungslos.  
 Da wir uns auch ausserhalb des Projekts sehr gut verstehen, konnten wir auf einer vertrauensvollen Basis arbeiten, was
 sich stark positiv auf den Projektverlauf ausgewirkt hat.
-
-Wir haben früh entschieden, mit einem klaren **Git-Flow** zu arbeiten:  
-Jede von uns arbeitete in separaten Branches, wodurch **Merge-Konflikte vermieden** wurden und die Integration neuer
-Features sehr sauber erfolgen konnte.  
-Regelmässige Absprachen und gemeinsame Code-Reviews halfen uns, den Überblick zu behalten und sicherzustellen, dass alle
-Teile gut zusammenspielen.
-
-Insgesamt hat uns diese Arbeitsweise nicht nur produktiv gemacht, sondern auch viel Freude bereitet.
 
 ---
 
